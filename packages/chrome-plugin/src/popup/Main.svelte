@@ -3,6 +3,7 @@ import { faThumbsDown, faThumbsUp } from '@fortawesome/free-solid-svg-icons';
 import { Button } from 'components';
 import Fa from 'svelte-fa';
 import generateGreeting from '../generateGreeting';
+import { HARPER_PERSONAL } from '../personal';
 import ProtocolClient from '../ProtocolClient';
 
 let { onReviewDomain }: { onReviewDomain: (works: boolean, domain: string) => void } = $props();
@@ -155,14 +156,14 @@ function daysSince(date: Date): number {
             </div>
         </section>
 
-        {#if !isFirefox && installDate != null && daysSince(installDate) > 14 && hasBeenReviewed === false}
+        {#if !HARPER_PERSONAL && !isFirefox && installDate != null && daysSince(installDate) > 14 && hasBeenReviewed === false}
             <section class="flex shrink-0 flex-row items-center justify-between gap-3 bg-primary px-5 py-3 text-black">
                 <div class="text-sm font-semibold leading-snug">
                     Enjoying Harper? A quick review helps a lot.
                 </div>
                 <Button on:click={openReviewPage}>Review</Button>
             </section>
-        {:else}
+        {:else if !HARPER_PERSONAL}
             <!-- Review Section pinned at bottom -->
             <section
                 class="flex shrink-0 flex-row items-center justify-between gap-3 border-t border-gray-100 px-5 py-3 dark:border-slate-800 dark:bg-slate-900/50"

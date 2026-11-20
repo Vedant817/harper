@@ -6,6 +6,7 @@ import { fly } from 'svelte/transition';
 import Fa from 'svelte-fa';
 import logo from '/logo.png';
 import detectBrowserEngine from '../detectBrowserEngine';
+import { HARPER_PERSONAL } from '../personal';
 import { main, type PopupState } from '../PopupState';
 import DomainReview from './DomainReview.svelte';
 import Main from './Main.svelte';
@@ -33,7 +34,9 @@ onMount(async () => {
 
 $effect(() => {
 	chrome.storage.local.get({ popupState: { page: 'onboarding' } }).then((result) => {
-		popupState = result.popupState;
+		const stored = result.popupState as PopupState;
+		popupState =
+			HARPER_PERSONAL && stored.page === 'domain-review' ? main() : stored;
 	});
 });
 
