@@ -197,7 +197,7 @@ export default class TextFieldRange {
 		// Release this handle; keep the shared mirror for reuse unless the field is gone.
 		this.arena.refs = Math.max(0, this.arena.refs - 1);
 		// If the field is no longer in the document, clean up the arena.
-		if (!document.contains(this.field)) {
+		if (!this.field.isConnected) {
 			try {
 				this.arena.mirror.parentNode?.removeChild(this.arena.mirror);
 			} catch {}

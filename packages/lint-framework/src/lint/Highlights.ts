@@ -188,7 +188,8 @@ export default class Highlights {
 	/** Remove the render boxes for sources that aren't attached any longer. */
 	private pruneDetachedSources() {
 		for (const [source, box] of this.renderBoxes.entries()) {
-			if (!document.contains(source)) {
+			// document.contains is false inside an open shadow root. isConnected is not.
+			if (!source.isConnected) {
 				box.remove();
 				this.renderBoxes.delete(source);
 			}

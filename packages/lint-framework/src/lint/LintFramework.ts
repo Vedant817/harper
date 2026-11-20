@@ -6,6 +6,7 @@ import { isHeading, isVisible } from './domUtils';
 import { getCaretPosition, getCMRoot } from './editorUtils';
 import { getGoogleDocsLintWindows, MAX_LINT_TEXT_LENGTH } from './googleDocsLintWindows';
 import Highlights from './Highlights';
+import { lintResultDisposition, lintShouldFlushFollowUp } from './lintRequestGate';
 import PopupHandler from './PopupHandler';
 import { remapLintToCurrentSource } from './spanMapping';
 import type { UnpackedLint, UnpackedLintGroups } from './unpackLint';
@@ -46,6 +47,8 @@ export default class LintFramework {
 	private lintRequest: Promise<unknown> | null = null;
 	/** One newer pass is enough. It runs after the in-flight pass, with the latest text. */
 	private lintFollowUp = false;
+	/** Immediate refreshes waiting on the in-flight pass. Their result replaces this one. */
+	private lintWaiters = 0;
 	private renderRequested = false;
 	private lintDelayTimer: number | null = null;
 	private lastInputAt = 0;
@@ -148,11 +151,15 @@ export default class LintFramework {
 
 			// An immediate refresh must run after the current request. Running them concurrently
 			// allows an older result to finish last and redraw a lint that was just ignored.
+			this.lintWaiters += 1;
 			try {
 				await this.lintRequest;
 			} catch {
 				// Still attempt the explicitly requested refresh after a failed background request.
+			} finally {
+				this.lintWaiters -= 1;
 			}
+			this.lintFollowUp = false;
 			await this.requestLintUpdate(true);
 			return;
 		}
@@ -160,7 +167,8 @@ export default class LintFramework {
 		if (this.targets.size !== 0) {
 			const request = Promise.all(
 				this.onScreenTargets().map(async (target) => {
-					if (!document.contains(target)) {
+					// document.contains is false for a node inside an open shadow root.
+					if (!target.isConnected) {
 						this.targets.delete(target);
 						return { target: null as HTMLElement | null, lints: {} };
 					}
@@ -226,9 +234,12 @@ export default class LintFramework {
 			);
 
 			this.lintRequest = request;
-			let lintResults: Awaited<typeof request>;
+			let lintResults: Awaited<typeof request> | null = null;
+			let failed = false;
 			try {
 				lintResults = await request;
+			} catch {
+				failed = true;
 			} finally {
 				if (this.lintRequest === request) {
 					this.lintRequest = null;
@@ -240,10 +251,14 @@ export default class LintFramework {
 				return;
 			}
 
-			this.lastLints = lintResults.filter((r) => r.target != null) as any;
-			this.requestRender();
+			const followUp = this.lintFollowUp;
+			const waiting = this.lintWaiters > 0;
+			if (lintResults != null && lintResultDisposition({ failed, followUp, waiting }) === 'paint') {
+				this.lastLints = lintResults.filter((r) => r.target != null) as any;
+				this.requestRender();
+			}
 
-			if (this.lintFollowUp) {
+			if (lintShouldFlushFollowUp({ followUp, waiting })) {
 				this.lintFollowUp = false;
 				void this.requestLintUpdate();
 			}
