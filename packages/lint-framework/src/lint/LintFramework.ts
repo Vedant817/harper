@@ -50,6 +50,8 @@ export default class LintFramework {
 	private targets: Set<Node>;
 	private scrollableAncestors: Set<HTMLElement>;
 	private lintRequest: Promise<unknown> | null = null;
+	/** One newer pass is enough. It runs after the in-flight pass, with the latest text. */
+	private lintFollowUp = false;
 	private renderRequested = false;
 	private lintDelayTimer: number | null = null;
 	private lastInputAt = 0;
@@ -154,6 +156,7 @@ export default class LintFramework {
 
 		if (this.lintRequest != null) {
 			if (!immediate) {
+				this.lintFollowUp = true;
 				return;
 			}
 
@@ -237,13 +240,27 @@ export default class LintFramework {
 			);
 
 			this.lintRequest = request;
-			const lintResults = await request.finally(() => {
+			let lintResults: Awaited<typeof request>;
+			try {
+				lintResults = await request;
+			} finally {
 				if (this.lintRequest === request) {
 					this.lintRequest = null;
 				}
-			});
+			}
+
+			// A newer request owns the screen. Painting this one would restore a dismissed lint.
+			if (this.lintRequest != null) {
+				return;
+			}
+
 			this.lastLints = lintResults.filter((r) => r.target != null) as any;
 			this.requestRender();
+
+			if (this.lintFollowUp) {
+				this.lintFollowUp = false;
+				void this.requestLintUpdate();
+			}
 		}
 	}
 
@@ -323,7 +340,7 @@ export default class LintFramework {
 		}
 
 		const observer = new MutationObserver(this.updateEventCallback);
-		const config = { subtree: true, characterData: true };
+		const config = { subtree: true, characterData: true, childList: true };
 
 		if ((target as any).tagName == undefined) {
 			observer.observe((target as any).parentElement!, config);

@@ -9,6 +9,7 @@ import {
 import isSubstack from '../isSubstack';
 import isWordPress from '../isWordPress';
 import ProtocolClient from '../ProtocolClient';
+import { editorHostFromNode, isEditorHost, querySelectorAllDeep } from './editorHost';
 import { createGoogleDocsBridgeSync, isGoogleDocsPage } from './googleDocs';
 
 if (isWordPress() || isSubstack()) {
@@ -104,19 +105,21 @@ function scan() {
 		return;
 	}
 
-	document.querySelectorAll<HTMLTextAreaElement>('textarea').forEach((element) => {
+	querySelectorAllDeep<HTMLTextAreaElement>(document, 'textarea').forEach((element) => {
 		maybeAddTextareaTarget(element, true);
 	});
 
-	document
-		.querySelectorAll<HTMLInputElement>('input[type="text"][spellcheck="true"]')
-		.forEach((element) => {
-			if (element.disabled || element.readOnly) {
-				return;
-			}
+	querySelectorAllDeep<HTMLInputElement>(document, 'input').forEach((element) => {
+		if (!isEditorHost(element)) {
+			return;
+		}
 
-			fw.addTarget(element);
-		});
+		if (!isVisible(element)) {
+			return;
+		}
+
+		fw.addTarget(element);
+	});
 
 	document
 		.querySelectorAll('[data-testid="gutenberg-editor"], .block-editor-iframe__body')
@@ -164,31 +167,17 @@ function scan() {
 			fw.addTarget(element);
 		});
 
-	document.querySelectorAll('[contenteditable="true"],[contenteditable]').forEach((element) => {
+	querySelectorAllDeep<HTMLElement>(
+		document,
+		'[contenteditable="true"],[contenteditable="plaintext-only"],[contenteditable=""]',
+	).forEach((element) => {
 		if (element.classList.contains('cm-content') && element.closest('.cm-editor') != null) {
 			return;
 		}
 
-		const isLexicalEditor = element.getAttribute('data-lexical-editor') === 'true';
-		// Slack's message compose box (Quill-based) sets spellcheck="false" and provides its own
-		// spelling/autocomplete UI, but otherwise behaves like a normal rich-text contenteditable
-		// editor, so treat it the same way we treat Lexical editors: don't skip it purely because
-		// spellcheck is disabled.
-		const isQuillEditor = element.classList.contains('ql-editor');
-		// Allow Gmail and Outlook compose fields even when they disable browser spellcheck.
-		const isWebmail =
-			window.location.hostname === 'mail.google.com' ||
-			window.location.hostname === 'outlook.live.com';
-
-		if (
-			element.matches('[role="combobox"]') ||
-			element.getAttribute('data-enable-grammarly') === 'false' ||
-			(element.getAttribute('spellcheck') === 'false' &&
-				!isWebmail &&
-				!isLexicalEditor &&
-				!isQuillEditor &&
-				element.getAttribute('data-language') !== 'markdown')
-		) {
+		// spellcheck="false" is how LinkedIn and other composers avoid a second underline.
+		// A combobox is skipped only when it is not itself an editing host.
+		if (!isEditorHost(element)) {
 			return;
 		}
 
@@ -213,11 +202,12 @@ function scan() {
 		const seenBlockContainers = new Set<Element>();
 
 		for (const leaf of leafs) {
-			if (leaf.parentElement?.closest('[contenteditable="false"],[disabled],[readonly]') != null) {
+			if (lockedInsideHost(leaf, element)) {
 				continue;
 			}
 
-			const blockContainer = getClosestBlockAncestor(leaf, element);
+			// Flex and grid composers have no `display: block` ancestor. Lint the host itself.
+			const blockContainer = getClosestBlockAncestor(leaf, element) ?? element;
 
 			if (!blockContainer || seenBlockContainers.has(blockContainer)) {
 				continue;
@@ -232,25 +222,83 @@ function scan() {
 			fw.addTarget(blockContainer);
 		}
 	});
+
+	if (document.body) {
+		watchOpenShadows(document.body);
+	}
+}
+
+const observedRoots = new WeakSet<Node>();
+
+function observeMutations(root: Node) {
+	if (observedRoots.has(root)) {
+		return;
+	}
+
+	observedRoots.add(root);
+	new MutationObserver(() => {
+		scan();
+	}).observe(root, { childList: true, subtree: true });
+}
+
+function watchOpenShadows(parent: ParentNode) {
+	parent.querySelectorAll<Element>('*').forEach((element) => {
+		if (!element.shadowRoot) {
+			return;
+		}
+
+		observeMutations(element.shadowRoot);
+		watchOpenShadows(element.shadowRoot);
+	});
 }
 
 scan();
-new MutationObserver(scan).observe(document.body, {
-	childList: true,
-	subtree: true,
-});
+if (document.body) {
+	observeMutations(document.body);
+	watchOpenShadows(document.body);
+}
+
+function lockedInsideHost(leaf: Node, host: Element): boolean {
+	let current = leaf.parentElement;
+
+	while (current && current !== host) {
+		if (current.matches('[contenteditable="false"],[disabled],[readonly]')) {
+			return true;
+		}
+
+		current = current.parentElement;
+	}
+
+	return false;
+}
+
+/** An editor that already has focus must be linted even though its focus event already fired. */
+function lintFocusedEditor(node: EventTarget | null, requireVisible: boolean) {
+	const host = editorHostFromNode(node instanceof Node ? node : null);
+	if (!host) {
+		return;
+	}
+
+	if (host instanceof HTMLTextAreaElement) {
+		maybeAddTextareaTarget(host, requireVisible);
+		return;
+	}
+
+	if (requireVisible && !isVisible(host)) {
+		return;
+	}
+
+	fw.addTarget(host);
+}
 
 document.addEventListener(
 	'focusin',
 	(event) => {
-		const target = event.target;
-		if (!(target instanceof HTMLTextAreaElement)) {
-			return;
-		}
-
-		maybeAddTextareaTarget(target, false);
+		lintFocusedEditor(event.target, false);
 	},
 	{ capture: true },
 );
+
+lintFocusedEditor(document.activeElement, false);
 
 setTimeout(scan, 1000);
