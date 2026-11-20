@@ -19,8 +19,14 @@ export default defineConfig(({ mode }) => {
 	console.log(`Building for ${browser}`);
 
 	const production = mode === 'production';
+	const personal = env.HARPER_PERSONAL === '1';
+
+	console.log(`Personal build: ${personal}`);
 
 	return {
+		define: {
+			__HARPER_PERSONAL__: JSON.stringify(personal),
+		},
 		build: {
 			minify: false,
 			outDir: 'build',

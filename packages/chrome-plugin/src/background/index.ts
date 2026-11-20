@@ -6,7 +6,14 @@ import {
 	unpackWeirpackBytes,
 } from 'harper.js';
 import { type UnpackedLintGroups, unpackLint } from 'lint-framework';
+import {
+	domainEnableWrite,
+	domainStorageKeys,
+	resolveDomainEnabled,
+	storedDomainStatus,
+} from '../domainPolicy';
 import type { PopupState } from '../PopupState';
+import { HARPER_PERSONAL } from '../personal';
 import {
 	ActivationKey,
 	type AddToUserDictionaryRequest,
@@ -178,11 +185,8 @@ const defaultEnabledDomains = [
 	'studio.novlr.org',
 	'app.dabblewriter.com',
 ] as const;
-const defaultEnabledDomainSet = new Set<string>(defaultEnabledDomains);
 
-let linterReady = getDialect()
-	.then(setDialect)
-	.catch((err) => console.error('Failed to initialize linter:', err));
+let linterReady: Promise<void> | null = null;
 setInstalledOnIfMissing();
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
@@ -195,19 +199,34 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 		return change != null && change.oldValue !== undefined && change.newValue === undefined;
 	});
 
-	if (resetLinter) {
-		linterReady = linterReady
+	if (resetLinter && linterReady != null) {
+		const previous = linterReady;
+		linterReady = previous
 			.then(async () => {
 				await initializeLinter(await getDialect());
 				linterHasPersistedState = false;
 			})
-			.catch((err) => console.error('Failed to reset linter:', err));
+			.catch((err) => {
+				console.error('Failed to reset linter:', err);
+			});
 	}
 });
 
-/** Await this function to "wait" for the linter to boot up. */
-async function ensureLinterReady() {
-	await linterReady;
+/**
+ * Builds the grammar engine on the first call. An empty keepalive must not call this.
+ * A failed build is forgotten so the next real lint can try again.
+ */
+function ensureLinterReady(): Promise<void> {
+	if (linterReady == null) {
+		linterReady = getDialect()
+			.then((dialect) => initializeLinter(dialect))
+			.catch((err) => {
+				linterReady = null;
+				throw err;
+			});
+	}
+
+	return linterReady;
 }
 
 async function enableDefaultDomains() {
@@ -310,13 +329,13 @@ async function handleLint(
 	req: LintRequest,
 	sender?: chrome.runtime.MessageSender,
 ): Promise<LintResponse> {
-	await ensureLinterReady();
-	await resetLinterIfPersistedStateWasCleared();
-
-	// Keep the content-script keepalive ping cheap; empty requests should not hit inheritance or linting.
+	// Empty text, including the content-script keepalive, must not compile WASM.
 	if (req.text.length === 0) {
 		return { kind: 'lints', lints: {} };
 	}
+
+	await ensureLinterReady();
+	await resetLinterIfPersistedStateWasCleared();
 
 	if (!(await shouldLintForRequest(req, sender))) {
 		return { kind: 'lints', lints: {} };
@@ -775,7 +794,14 @@ async function initializeLinter(dialect: Dialect) {
 async function setDialect(dialect: Dialect) {
 	linterHasPersistedState = true;
 	await chrome.storage.local.set({ dialect });
-	await initializeLinter(dialect);
+	if (linterReady != null) {
+		await linterReady.catch(() => undefined);
+	}
+	linterReady = initializeLinter(dialect).catch((err) => {
+		linterReady = null;
+		throw err;
+	});
+	await linterReady;
 }
 
 async function setDelay(delay: number) {
@@ -792,48 +818,31 @@ async function getDelay(): Promise<number> {
 
 /** Format the key to be used in local storage to store domain status. */
 function formatDomainKey(domain: string): string {
-	return `domainStatus ${domain}`;
-}
-
-function getDomainLookupCandidates(domain: string): string[] {
-	const withoutWww = domain.replace(/^www\./, '');
-	return withoutWww === domain ? [domain] : [domain, withoutWww];
+	return domainStorageKeys(domain).canonical;
 }
 
 /**
  * Looks up a domain-specific enable/disable setting in local storage.
- * The lookup is normalized through `getDomainLookupCandidates` so we can try
- * both the exact hostname and a `www.`-stripped variant when sites are stored
- * under either form. Returns `undefined` when no stored override exists.
+ * A pause stored on either the canonical host or the legacy `www` key wins.
+ * Returns `undefined` when no stored override exists.
  */
 async function getStoredDomainStatus(domain: string): Promise<boolean | undefined> {
-	const candidates = getDomainLookupCandidates(domain);
-	const response = await chrome.storage.local.get(candidates.map(formatDomainKey));
-
-	for (const candidate of candidates) {
-		const value = response[formatDomainKey(candidate)];
-		if (typeof value === 'boolean') {
-			return value;
-		}
-	}
-
-	return undefined;
+	const keys = domainStorageKeys(domain);
+	const response = await chrome.storage.local.get([keys.canonical, keys.legacyWww]);
+	return storedDomainStatus(domain, response);
 }
 
 /** Check if Harper has been enabled for a given domain. */
 async function enabledForDomain(domain: string): Promise<boolean> {
-	const stored = await getStoredDomainStatus(domain);
-	if (stored !== undefined) {
-		return stored;
-	}
-
-	if (
-		getDomainLookupCandidates(domain).some((candidate) => defaultEnabledDomainSet.has(candidate))
-	) {
-		return true;
-	}
-
-	return await enabledByDefault();
+	const keys = domainStorageKeys(domain);
+	const stored = await chrome.storage.local.get([keys.canonical, keys.legacyWww, 'defaultEnable']);
+	return resolveDomainEnabled({
+		host: domain,
+		stored,
+		defaultHosts: defaultEnabledDomains,
+		defaultEnable: stored.defaultEnable,
+		personal: HARPER_PERSONAL,
+	});
 }
 
 /** Set whether Harper is enabled for a given domain.
@@ -841,15 +850,14 @@ async function enabledForDomain(domain: string): Promise<boolean> {
  * @param overrideValue dictates whether this should override a previous setting.
  * */
 async function setDomainEnable(domain: string, status: boolean, overrideValue = true) {
-	let shouldSet = !(await isDomainSet(domain));
-
-	if (overrideValue) {
-		shouldSet = true;
+	const already = await getStoredDomainStatus(domain);
+	if (!overrideValue && already !== undefined) {
+		return;
 	}
 
-	if (shouldSet) {
-		await chrome.storage.local.set({ [formatDomainKey(domain)]: status });
-	}
+	const write = domainEnableWrite(domain, status);
+	await chrome.storage.local.set(write.set);
+	await chrome.storage.local.remove(write.remove);
 }
 
 /** Set whether Harper is enabled by default. */
@@ -859,8 +867,12 @@ async function setDefaultEnable(status: boolean) {
 
 /** Check if Harper has been enabled by default. */
 async function enabledByDefault(): Promise<boolean> {
-	const req = await chrome.storage.local.get({ defaultEnable: false });
-	return req.defaultEnable;
+	const req = await chrome.storage.local.get('defaultEnable');
+	if (typeof req.defaultEnable === 'boolean') {
+		return req.defaultEnable;
+	}
+
+	return HARPER_PERSONAL;
 }
 
 /** Check whether Harper's state has been set for a given domain. */
