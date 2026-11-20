@@ -42,12 +42,12 @@ function rule(source: string): string {
 
 const commaSplice = rule(`
 expr headVerb <VERB, (![know, mean, guess, suppose, understand, think, said, says, told, asked])>
-expr tailVerb <VERB, (![know, mean, guess, suppose, understand, think, hope, believe, recall, remember, assume, assumed, thought, thinks])>
+expr tailVerb <VERB, (![know, mean, guess, suppose, understand, think, hope, believe, recall, remember, assume, assumed, thought, thinks, suspect, imagine, fear, feared, reckon, figure, gather, presume])>
 expr head (^PRON @headVerb)
 expr splice [${arms('@head', ', I @tailVerb', 24)}]
 expr main <@splice, (, I @tailVerb), (, )>
 let message "This comma joins two sentences. Use a period or a semicolon."
-let description "Flags a comma splice that starts the sentence and continues with I. Speech such as I said, and parentheticals such as I hope, I thought, and I assume, are left alone. The suggestion replaces only the comma, so the following word must already be I."
+let description "Flags a comma splice that starts the sentence and continues with I. Speech such as I said, and parentheticals such as I hope, I thought, I assume, I suspect, and I imagine, are left alone. The suggestion replaces only the comma, so the following word must already be I."
 let kind "Punctuation"
 let becomes [". ", "; "]
 let strategy "Exact"
@@ -69,17 +69,28 @@ allows "I said, I sent it."
 allows "I sent the file, I thought, on Tuesday."
 allows "I sent the file, I assume, yesterday."
 allows "I sent the note, I assume, before she left."
+allows "I sent the file, I suspect, on Tuesday."
+allows "I sent the file, I imagine, on Tuesday."
+allows "I sent the file, I fear, on Tuesday."
+allows "I sent the file, I feared, yesterday."
+allows "I sent the file, I reckon, on Tuesday."
+allows "I sent the file, I figure, on Tuesday."
+allows "I sent the file, I gather, on Tuesday."
+allows "I sent the file, I presume, on Tuesday."
 `);
+
+const directQuestionStop =
+	"![is, isn't, wasn't, aren't, was, were, wants, wanted, needs, remains, depends, matters, seems, deserves]";
 
 const directQuestion = rule(`
 expr doYou (Do you VERB)
 expr howDo (How do you !do)
 expr whatTime [(What time is), (What time)]
 expr q [(Can you), (Could you), (Would you), (Did you), @doYou, (Does this), (Is there), (Are you), (Are there), (Have you), (When can), (Where is), (Why is), (Who is), (How are), @howDo, (How can)]
-expr questions [${repeated('^@q', "![is, isn't, wasn't, was, were, wants, wanted]", '.', 24)}, ${repeated('^@whatTime', "![is, isn't, wasn't, was, were, wants, wanted]", '.', 24)}]
+expr questions [${repeated('^@q', directQuestionStop, '.', 24)}, ${repeated('^@whatTime', directQuestionStop, '.', 24)}]
 expr main <@questions, (.)>
 let message "This looks like a direct question. End it with a question mark."
-let description "Adds a question mark when the sentence starts as a direct question and ends with a period. A later is, isn't, was, were, wants, or wanted is left alone, as are How do you do and Do you a favor."
+let description "Adds a question mark when the sentence starts as a direct question and ends with a period. A later is, isn't, aren't, was, were, wants, wanted, needs, remains, depends, matters, seems, or deserves is left alone, as are How do you do and Do you a favor."
 let kind "Punctuation"
 let becomes "?"
 let strategy "Exact"
@@ -105,6 +116,13 @@ allows "How do you do."
 allows "Who is calling wants a refund."
 allows "What time works isn't Tuesday."
 allows "Who is speaking was never announced."
+allows "Who is calling needs a refund."
+allows "What time works aren't Tuesdays."
+allows "Who is calling remains outside."
+allows "What time works depends on her."
+allows "Who is speaking matters today."
+allows "What time works seems early."
+allows "Who is calling deserves an answer."
 `);
 
 const objectCase = rule(`
@@ -155,9 +173,9 @@ allows "The less people know about the delay, the better."
 `);
 
 const dueToTheFact = rule(`
-expr main <([(![is, was, are, were, be, been, being, not, isn't, aren't, wasn't, weren't] due to the fact that), (^due to the fact that)]), (due to the fact that)>
+expr main <([(![is, was, are, were, be, been, being, not, isn't, aren't, wasn't, weren't, never, partly, largely, mostly, solely, seems, appears, remains, became] due to the fact that), (^due to the fact that)]), (due to the fact that)>
 let message "Use because."
-let description "Shortens due to the fact that. A copula, been, being, or not immediately before due is left alone."
+let description "Shortens due to the fact that. A copula, been, being, not, never, partly, or seems immediately before due is left alone. only, just, and now still shorten."
 let kind "WordChoice"
 let becomes "because"
 let strategy "MatchCase"
@@ -171,6 +189,15 @@ allows "The delay has been due to the fact that the server was down."
 allows "The delay was not due to the fact that the file was open."
 allows "The delay wasn't due to the fact that the file was open."
 allows "It has been due to the fact that the file was open."
+allows "The delay was never due to the fact that the file was open."
+allows "The delay seems due to the fact that the server was down."
+allows "The delay was partly due to the fact that the file was open."
+allows "The delay was largely due to the fact that the file was open."
+allows "The delay was mostly due to the fact that the file was open."
+allows "The delay was solely due to the fact that the file was open."
+allows "The delay appears due to the fact that the server was down."
+allows "The delay remains due to the fact that the server was down."
+allows "The delay became due to the fact that the server was down."
 `);
 
 const atThisPoint = rule(`
@@ -222,10 +249,10 @@ allows "The term irregardless is nonstandard."
 
 const couldCareLess = rule(`
 expr opener [(^could care less), (^[I, You, We, They] could care less)]
-expr span [${repeated('@opener about', '!more', '.', 24)}]
+expr span [${repeated('@opener about', '![more, than]', '.', 24)}]
 expr main <@span, (could care less)>
 let message "The phrase is couldn't care less."
-let description "Corrects could care less about at the start of a sentence. A comparison that uses more before the period is left alone. A later if still changes the phrase."
+let description "Corrects could care less about at the start of a sentence. A comparison that uses more or than before the period is left alone. A later if still changes the phrase."
 let kind "Usage"
 let becomes "couldn't care less"
 let strategy "MatchCase"
@@ -240,6 +267,7 @@ allows "You could care less than you do."
 allows "You could care less and still pass."
 allows "We could care less if we wanted to."
 allows "I could care less about the title and more about the work."
+allows "I could care less about the title than the work."
 `);
 
 function greetingComma(word: string): string {
@@ -325,16 +353,18 @@ allows "Just circling back on the trail, we turned around."
 `);
 
 const wantedToReachOut = rule(`
-expr target [(about the), (about a), (about an), (about our), (about your), (about this), (about my), (regarding the), (regarding a), (regarding an), (regarding our), (regarding your), (regarding this), (regarding my)]
+expr measure [mile, inch, foot, hour, minute, while]
+expr target [(about the), (about our), (about your), (about this), (about my), (regarding the), (regarding our), (regarding your), (regarding this), (regarding my), ((about a) !@measure), ((about an) !@measure), ((regarding a) !@measure), ((regarding an) !@measure)]
 expr main <((just wanted to reach out) @target), (just wanted to reach out)>
 let message "Say this in a plainer way."
-let description "Flags just wanted to reach out about or regarding when a determiner follows. Reaching out a window, or about a bare noun such as noon, is left alone. On only for the email preset."
+let description "Flags just wanted to reach out about or regarding when a determiner follows. A measure after a or an, such as a mile or an hour, is left alone. about the role still changes. On only for the email preset."
 let kind "Style"
 let becomes "wanted to write"
 let strategy "MatchCase"
 
 test "Just wanted to reach out about the role." "Wanted to write about the role."
 test "I just wanted to reach out about the role." "I wanted to write about the role."
+test "I just wanted to reach out about a role." "I wanted to write about a role."
 allows "I just wanted to reach out and shake your hand."
 allows "The intern just wanted to reach out the window."
 allows "I just wanted to reach out for the salt."
@@ -343,6 +373,8 @@ allows "He just wanted to reach out his hand."
 allows "They just wanted to reach out across the aisle."
 allows "I just wanted to reach out about noon to grab lunch."
 allows "He just wanted to reach out about six inches."
+allows "I just wanted to reach out about a mile."
+allows "I just wanted to reach out about an hour before lunch."
 `);
 
 const SOURCES: Record<string, string> = {
