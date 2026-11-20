@@ -16,15 +16,20 @@ const MANIFEST = `{
 }
 `;
 
-function stars(count: number): string {
-	return '*'.repeat(count);
-}
-
 /** Sentence-scoped arms. Stars are tokens, so they are written with no spaces. */
 function arms(head: string, tail: string, maxTokens: number): string {
+	return repeated(head, '*', tail, maxTokens);
+}
+
+/**
+ * Like `arms`, but `step` is repeated instead of `*`.
+ * `step` is written with no spaces. `!is` is a following token that is not is,
+ * so a second is cannot hide in the gap. A space would be its own token.
+ */
+function repeated(head: string, step: string, tail: string, maxTokens: number): string {
 	const choices: string[] = [];
 	for (let count = 0; count <= maxTokens; count += 1) {
-		choices.push(`(${head}${stars(count)}${tail})`);
+		choices.push(`(${head}${step.repeat(count)}${tail})`);
 	}
 	return choices.join(', ');
 }
@@ -34,12 +39,13 @@ function rule(source: string): string {
 }
 
 const commaSplice = rule(`
-expr firstVerb <VERB, (![know, mean, guess, suppose, understand, think])>
-expr head (^PRON @firstVerb)
-expr splice [${arms('@head', ', I @firstVerb', 24)}]
-expr main <@splice, (, I @firstVerb), (, )>
+expr headVerb <VERB, (![know, mean, guess, suppose, understand, think, said, says, told, asked])>
+expr tailVerb <VERB, (![know, mean, guess, suppose, understand, think, hope, believe, recall, remember])>
+expr head (^PRON @headVerb)
+expr splice [${arms('@head', ', I @tailVerb', 24)}]
+expr main <@splice, (, I @tailVerb), (, )>
 let message "This comma joins two sentences. Use a period or a semicolon."
-let description "Flags a comma splice that starts the sentence and continues with I. A clause such as When I arrived is left alone. The suggestion replaces only the comma, so the following word must already be I."
+let description "Flags a comma splice that starts the sentence and continues with I. Speech such as I said, and parentheticals such as I hope, are left alone. The suggestion replaces only the comma, so the following word must already be I."
 let kind "Punctuation"
 let becomes [". ", "; "]
 let strategy "Exact"
@@ -47,19 +53,28 @@ let scope "Sentence"
 
 test "I finished the draft, I sent it." "I finished the draft. I sent it."
 test "We wrote the note, I sent it." "We wrote the note. I sent it."
+test "I hope, I sent it." "I hope. I sent it."
 allows "Hi Sarah, I sent it."
 allows "I finished the draft. I sent it."
 allows "You know, I sent it."
 allows "When I arrived, I saw her."
 allows "We left, I think."
+allows "I sent, I hope, the file."
+allows "I sent, I believe, the note."
+allows "We left, I recall, around noon."
+allows "I called, I remember, on Tuesday."
+allows "I said, I sent it."
 `);
 
 const directQuestion = rule(`
-expr q [(Can you), (Could you), (Would you), (Did you), (Do you), (Does this), (Is there), (Are you), (Are there), (Have you), (What time), (When can), (Where is), (Why is), (Who is), (How are), (How do), (How can)]
-expr questions [${arms('^@q', '.', 24)}]
+expr doYou (Do you VERB)
+expr howDo (How do you !do)
+expr whatTime [(What time is), (What time)]
+expr q [(Can you), (Could you), (Would you), (Did you), @doYou, (Does this), (Is there), (Are you), (Are there), (Have you), (When can), (Where is), (Why is), (Who is), (How are), @howDo, (How can)]
+expr questions [${repeated('^@q', '!is', '.', 24)}, ${repeated('^@whatTime', '!is', '.', 24)}]
 expr main <@questions, (.)>
 let message "This looks like a direct question. End it with a question mark."
-let description "Adds a question mark when the sentence starts as a direct question and ends with a period."
+let description "Adds a question mark when the sentence starts as a direct question and ends with a period. A later is, How do you do, and Do you a favor are left alone."
 let kind "Punctuation"
 let becomes "?"
 let strategy "Exact"
@@ -67,11 +82,21 @@ let scope "Sentence"
 
 test "Can you send the file." "Can you send the file?"
 test "What time works." "What time works?"
+test "What time is it." "What time is it?"
+test "Do you send the file." "Do you send the file?"
+test "Where is the exit." "Where is the exit?"
 allows "Can you send the file?"
 allows "I sent the file."
 allows "Do the right thing."
 allows "When the build finished, I sent the note."
 allows "I know what time works."
+allows "What time works is Tuesday."
+allows "Who is speaking is none of your business."
+allows "Why is this hard is obvious."
+allows "Where is the exit is posted on the door."
+allows "How are the kids is beside the point."
+allows "Do you a favor and send the file."
+allows "How do you do."
 `);
 
 const objectCase = rule(`
@@ -94,70 +119,94 @@ test "The bond between you and I is strong." "The bond between you and me is str
 allows "Sarah and I went to the meeting."
 allows "I went with Sarah and I left."
 allows "I stood between you and I was stuck."
+allows "I went with Sarah and I was late."
+allows "He left without warning and I was stuck."
+allows "I came from work and I was late."
+allows "She stood with pride and I was proud too."
 `);
 
 const lessFewer = rule(`
 expr nouns [meetings, emails, people, items, things, options, days, hours, weeks, months, errors, issues, comments, files, messages, questions, tasks, updates, changes, details, examples, times, reasons, points, steps, notes, calls, drafts, replies, chances, opportunities]
-expr main <(less @nouns), (less)>
+expr main <([(^less @nouns), (![much, or] less @nouns)]), (less)>
 let message "Use fewer for a plural count."
-let description "Corrects less before a plural count noun."
+let description "Corrects less before a plural count noun. much less and more or less are left alone."
 let kind "Grammar"
 let becomes "fewer"
 let strategy "MatchCase"
 
 test "We need less meetings." "We need fewer meetings."
+test "Less meetings were scheduled." "Fewer meetings were scheduled."
 allows "We need less time."
 allows "We need fewer meetings."
+allows "There were much less calls."
+allows "There were much less messages."
+allows "There were much less people."
+allows "We have more or less options."
 `);
 
 const dueToTheFact = rule(`
-expr main (due to the fact that)
+expr main <([(![is, was, are, were, be] due to the fact that), (^due to the fact that)]), (due to the fact that)>
 let message "Use because."
-let description "Shortens due to the fact that."
+let description "Shortens due to the fact that. A copula such as was due to the fact is left alone."
 let kind "WordChoice"
 let becomes "because"
 let strategy "MatchCase"
 
 test "I waited due to the fact that the file was open." "I waited because the file was open."
+test "Due to the fact that the file was open, I waited." "Because the file was open, I waited."
+allows "The delay was due to the fact that the file was open."
+allows "Success was due to the fact that we started early."
+allows "The error is due to the fact that the key is missing."
 `);
 
 const atThisPoint = rule(`
-expr main (at this point in time)
+expr main <([((at this point in time).), ((at this point in time) ![and, travel])]), (at this point in time)>
 let message "Use now."
-let description "Shortens at this point in time."
+let description "Shortens at this point in time when the phrase ends there. time and space and time travel are left alone."
 let kind "WordChoice"
 let becomes "now"
 let strategy "MatchCase"
 
 test "Nothing is blocked at this point in time." "Nothing is blocked now."
+allows "We study the universe at this point in time and space."
+allows "At this point in time travel, the hero returns."
 `);
 
 const inTheEvent = rule(`
-expr main (in the event that)
+expr follower [the, a, an, it, we, I, you, they, he, she, this, there]
+expr main <((in the event that) @follower), (in the event that)>
 let message "Use if."
-let description "Shortens in the event that."
+let description "Shortens in the event that when a determiner or pronoun follows. A relative clause such as the event that raised is left alone."
 let kind "WordChoice"
 let becomes "if"
 let strategy "MatchCase"
 
 test "Call me in the event that the draft changes." "Call me if the draft changes."
+allows "We met in the event that raised the money."
+allows "In the event that happened last year, we were ready."
+allows "She spoke in the event that opened the conference."
 `);
 
 const irregardless = rule(`
-expr main irregardless
+expr main <([(![word, use, using, write, writing, say, saying, spell, spelling, stop] irregardless), (^irregardless)]), (irregardless)>
 let message "The word is regardless."
-let description "Corrects irregardless."
+let description "Corrects irregardless. Talking about the word itself is left alone."
 let kind "Usage"
 let becomes "regardless"
 let strategy "MatchCase"
 
 test "I will send it irregardless." "I will send it regardless."
+test "Irregardless of the delay, I sent it." "Regardless of the delay, I sent it."
+allows "Please stop writing irregardless."
+allows "Do not use irregardless in the draft."
+allows "The word irregardless is nonstandard."
 `);
 
 const couldCareLess = rule(`
-expr main <([(^could care less), (^[I, You, We, They] could care less)]), (could care less)>
+expr opener [(^could care less), (^[I, You, We, They] could care less)]
+expr main <(@opener about), (could care less)>
 let message "The phrase is couldn't care less."
-let description "Corrects could care less at the start of a sentence. A conditional such as if we could care less is left alone."
+let description "Corrects could care less about at the start of a sentence. than, and, and if right after the phrase are left alone."
 let kind "Usage"
 let becomes "couldn't care less"
 let strategy "MatchCase"
@@ -165,8 +214,12 @@ let scope "Sentence"
 
 test "I could care less about the font." "I couldn't care less about the font."
 test "Could care less about the font." "Couldn't care less about the font."
+test "They could care less about the cost if they tried." "They couldn't care less about the cost if they tried."
 allows "I couldn't care less about the font."
 allows "If we could care less, we would have left."
+allows "You could care less than you do."
+allows "You could care less and still pass."
+allows "We could care less if we wanted to."
 `);
 
 function greetingComma(word: string): string {
@@ -175,7 +228,7 @@ expr greet [Hi, Hey, Hello, Dear]
 expr addressee [PROPN, Sarah, John, Priya, Alex, Sam, Maria, David, Lisa, there, team, folks]
 expr main <(^@greet @addressee ${word}), ( ${word})>
 let message "Add a comma after the greeting."
-let description "Inserts the comma when the sentence starts with a greeting and a name. all and everyone are not treated as names."
+let description "Inserts the comma when the sentence starts with a greeting and a name. all and everyone are not treated as names. there stays, so Hey there, I still gains a comma."
 let kind "Punctuation"
 let becomes ", ${word}"
 let strategy "MatchCase"
@@ -218,9 +271,9 @@ allows "Thanks, Wanted to follow up."
 `);
 
 const perMyLastEmail = rule(`
-expr main (^per my last email)
+expr main <((^per my last email),), (per my last email)>
 let message "Say this in a plainer way."
-let description "Flags per my last email when it starts the sentence. On only for the email preset."
+let description "Flags per my last email when it starts the sentence and a comma follows. On only for the email preset."
 let kind "Style"
 let becomes "As I mentioned"
 let strategy "Exact"
@@ -228,12 +281,13 @@ let scope "Sentence"
 
 test "Per my last email, the draft is ready." "As I mentioned, the draft is ready."
 allows "See per my last email for the date."
+allows "Per my last email was a mistake."
 `);
 
 const circlingBack = rule(`
-expr main (^just circling back)
+expr main <((^just circling back) [on, about, regarding]), (just circling back)>
 let message "Say this in a plainer way."
-let description "Flags just circling back when it starts the sentence. On only for the email preset."
+let description "Flags just circling back on, about, or regarding when it starts the sentence. On only for the email preset."
 let kind "Style"
 let becomes "following up"
 let strategy "MatchCase"
@@ -241,6 +295,8 @@ let scope "Sentence"
 
 test "Just circling back on the draft." "Following up on the draft."
 allows "The hawk was just circling back toward the nest."
+allows "Just circling back toward the nest, the hawk cried."
+allows "Just circling back to the house, I noticed the light."
 `);
 
 const wantedToReachOut = rule(`
@@ -255,6 +311,10 @@ test "Just wanted to reach out about the role." "Wanted to write about the role.
 test "I just wanted to reach out about the role." "I wanted to write about the role."
 allows "I just wanted to reach out and shake your hand."
 allows "The intern just wanted to reach out the window."
+allows "I just wanted to reach out for the salt."
+allows "The baby just wanted to reach out toward her mother."
+allows "He just wanted to reach out his hand."
+allows "They just wanted to reach out across the aisle."
 `);
 
 const SOURCES: Record<string, string> = {
