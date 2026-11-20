@@ -5,6 +5,7 @@ const TEST_PAGE_URL = 'http://localhost:8081/editable_body.html';
 
 test('Keeps render boxes out of an editable body.', async ({ page }) => {
 	await page.goto(TEST_PAGE_URL);
+	await page.locator('body').focus();
 
 	await expect(getHarperHighlights(page).first()).toBeVisible({ timeout: 24000 });
 

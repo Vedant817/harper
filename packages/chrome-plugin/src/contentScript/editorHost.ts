@@ -25,6 +25,27 @@ export function isEditorHost(element: Element): element is HTMLElement {
 	return editable === '' || editable === 'true' || editable === 'plaintext-only';
 }
 
+/**
+ * The editing host that owns the document's active element.
+ * Open shadow roots are followed. A closed shadow root stops the walk.
+ */
+export function focusedEditor(): HTMLElement | null {
+	let current: Element | null = document.activeElement;
+	const seen = new Set<Element>();
+
+	while (current && !seen.has(current)) {
+		seen.add(current);
+		const inner = current.shadowRoot?.activeElement;
+		if (!inner) {
+			break;
+		}
+
+		current = inner;
+	}
+
+	return editorHostFromNode(current);
+}
+
 /** Walk up through open shadow roots to the editing host that contains `node`. */
 export function editorHostFromNode(node: Node | null): HTMLElement | null {
 	let current: Node | null = node;
