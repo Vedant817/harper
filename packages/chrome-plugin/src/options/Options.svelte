@@ -9,7 +9,8 @@ import {
 import { tick } from 'svelte';
 import logo from '/logo.png';
 import ProtocolClient from '../ProtocolClient';
-import type { Hotkey, Modifier, WeirpackMeta } from '../protocol';
+import { HARPER_PERSONAL } from '../personal';
+import type { Hotkey, Modifier, PersonalPresetId, WeirpackMeta } from '../protocol';
 import { ActivationKey } from '../protocol';
 import StructuredRuleSettings from './StructuredRuleSettings.svelte';
 
@@ -46,6 +47,7 @@ let searchQuery = $state('');
 let searchQueryLower = $derived(searchQuery.toLowerCase());
 let expandedGroups: Record<string, boolean> = $state({});
 let dialect = $state(Dialect.American);
+let personalPreset = $state<PersonalPresetId>('off');
 let isolateEnglish = $state(false);
 let openSuggestionsOnHover = $state(false);
 let delay = $state(0);
@@ -75,6 +77,11 @@ $effect(() => {
 $effect(() => {
 	if (!loaded) return;
 	ProtocolClient.setDialect(dialect);
+});
+
+$effect(() => {
+	if (!loaded || !HARPER_PERSONAL) return;
+	ProtocolClient.setPersonalPreset(personalPreset);
 });
 
 $effect(() => {
@@ -108,6 +115,7 @@ Promise.all([
 	ProtocolClient.getStructuredLintConfig(),
 	ProtocolClient.getLintDescriptions(),
 	ProtocolClient.getDialect(),
+	HARPER_PERSONAL ? ProtocolClient.getPersonalPreset() : Promise.resolve('off' as const),
 	ProtocolClient.getIsolateEnglish(),
 	ProtocolClient.getDelay(),
 	ProtocolClient.getOpenSuggestionsOnHover(),
@@ -122,6 +130,7 @@ Promise.all([
 		nextStructuredConfig,
 		nextLintDescriptions,
 		nextDialect,
+		nextPersonalPreset,
 		nextIsolateEnglish,
 		nextDelay,
 		nextOpenSuggestionsOnHover,
@@ -135,6 +144,7 @@ Promise.all([
 		structuredLintConfig = nextStructuredConfig;
 		lintDescriptions = nextLintDescriptions;
 		dialect = nextDialect;
+		personalPreset = nextPersonalPreset;
 		isolateEnglish = nextIsolateEnglish;
 		delay = nextDelay;
 		openSuggestionsOnHover = nextOpenSuggestionsOnHover;
@@ -516,6 +526,29 @@ async function removeWeirpack(id: string) {
                   <option value={Dialect.Indian}>Indian English</option>
                 </Select>
               </div>
+
+              {#if HARPER_PERSONAL}
+                <div class="flex items-center justify-between gap-4 py-3.5">
+                  <div class="flex flex-col">
+                    <h3 id="preset-label" class="text-base font-semibold">Writing preset</h3>
+                    <p id="preset-desc" class="text-xs text-gray-600 dark:text-[#d1d5db]!">
+                      Casual, LinkedIn DM, or email. Saved in this browser. It uses the dialect above and does not replace your dictionary or installed packs.
+                    </p>
+                  </div>
+                  <Select
+                    size="sm"
+                    class="h-9 w-48 shrink-0 outline-none! focus:border-primary! focus:ring-0! focus-visible:ring-2! focus-visible:ring-primary!"
+                    bind:value={personalPreset}
+                    aria-labelledby="preset-label"
+                    aria-describedby="preset-desc"
+                  >
+                    <option value="off">Off</option>
+                    <option value="casual">Casual</option>
+                    <option value="linkedin">LinkedIn DM</option>
+                    <option value="email">Email</option>
+                  </Select>
+                </div>
+              {/if}
 
               <!-- Ignore Non-English Text -->
               <div class="flex items-center justify-between gap-4 py-3.5">

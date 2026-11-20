@@ -6,8 +6,8 @@ import { fly } from 'svelte/transition';
 import Fa from 'svelte-fa';
 import logo from '/logo.png';
 import detectBrowserEngine from '../detectBrowserEngine';
-import { HARPER_PERSONAL } from '../personal';
 import { main, type PopupState } from '../PopupState';
+import { HARPER_PERSONAL } from '../personal';
 import DomainReview from './DomainReview.svelte';
 import Main from './Main.svelte';
 import Onboarding from './Onboarding.svelte';
@@ -35,8 +35,7 @@ onMount(async () => {
 $effect(() => {
 	chrome.storage.local.get({ popupState: { page: 'onboarding' } }).then((result) => {
 		const stored = result.popupState as PopupState;
-		popupState =
-			HARPER_PERSONAL && stored.page === 'domain-review' ? main() : stored;
+		popupState = HARPER_PERSONAL && stored.page === 'domain-review' ? main() : stored;
 	});
 });
 
@@ -63,7 +62,10 @@ function openUpdateHelpPage() {
 }
 
 // Per-page heights: compact for the main view, taller for forms.
-const PAGE_HEIGHTS: Record<string, number> = { main: 410, 'report-error': 580 };
+const PAGE_HEIGHTS: Record<string, number> = {
+	main: HARPER_PERSONAL ? 470 : 410,
+	'report-error': 580,
+};
 let heightPx = $derived(PAGE_HEIGHTS[popupState.page] ?? 500);
 const WIDTH_PX = 340;
 

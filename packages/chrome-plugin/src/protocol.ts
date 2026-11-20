@@ -37,7 +37,9 @@ export type Request =
 	| PostFormDataRequest
 	| GetWeirpacksRequest
 	| AddWeirpackRequest
-	| RemoveWeirpackRequest;
+	| RemoveWeirpackRequest
+	| GetPersonalPresetRequest
+	| SetPersonalPresetRequest;
 
 export type Response =
 	| LintResponse
@@ -59,7 +61,8 @@ export type Response =
 	| GetInstalledOnResponse
 	| GetReviewedResponse
 	| PostFormDataResponse
-	| GetWeirpacksResponse;
+	| GetWeirpacksResponse
+	| GetPersonalPresetResponse;
 
 export type LintRequest = {
 	kind: 'lint';
@@ -357,4 +360,21 @@ export type AddWeirpackRequest = {
 export type RemoveWeirpackRequest = {
 	kind: 'removeWeirpack';
 	id: string;
+};
+
+/** Saved only in this browser. `off` leaves the checker on the saved settings. */
+export type PersonalPresetId = 'off' | 'casual' | 'linkedin' | 'email';
+
+export type GetPersonalPresetRequest = {
+	kind: 'getPersonalPreset';
+};
+
+export type GetPersonalPresetResponse = {
+	kind: 'getPersonalPreset';
+	preset: PersonalPresetId;
+};
+
+export type SetPersonalPresetRequest = {
+	kind: 'setPersonalPreset';
+	preset: PersonalPresetId;
 };

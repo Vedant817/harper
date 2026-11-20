@@ -3,8 +3,10 @@ import { faThumbsDown, faThumbsUp } from '@fortawesome/free-solid-svg-icons';
 import { Button } from 'components';
 import Fa from 'svelte-fa';
 import generateGreeting from '../generateGreeting';
-import { HARPER_PERSONAL } from '../personal';
 import ProtocolClient from '../ProtocolClient';
+import { HARPER_PERSONAL } from '../personal';
+import { parsePersonalPreset } from '../personalPreset';
+import type { PersonalPresetId } from '../protocol';
 
 let { onReviewDomain }: { onReviewDomain: (works: boolean, domain: string) => void } = $props();
 
@@ -17,6 +19,7 @@ let site = $derived(domain || 'this page');
 
 let installDate: Date | null = $state(null);
 let hasBeenReviewed: boolean | null = $state(null);
+let personalPreset = $state<PersonalPresetId>('off');
 const REVIEW_URL =
 	'https://chromewebstore.google.com/detail/private-grammar-checker-h/lodbfhdipoipcjmlebjbgmmgekckhpfb/reviews';
 
@@ -36,6 +39,11 @@ Promise.all([
 	!isFirefox
 		? ProtocolClient.getReviewed().then((r) => {
 				hasBeenReviewed = r;
+			})
+		: Promise.resolve(),
+	HARPER_PERSONAL
+		? ProtocolClient.getPersonalPreset().then((preset) => {
+				personalPreset = preset;
 			})
 		: Promise.resolve(),
 ]).then(() => {
@@ -72,6 +80,12 @@ function openReviewPage() {
 
 async function reviewDomain(works: boolean) {
 	onReviewDomain(works, (await getCurrentTabDomain()) ?? 'unknown');
+}
+
+function choosePreset(event: Event) {
+	const next = parsePersonalPreset((event.currentTarget as HTMLSelectElement).value);
+	personalPreset = next;
+	void ProtocolClient.setPersonalPreset(next);
 }
 
 function isFirefoxExtension(): boolean {
@@ -156,7 +170,27 @@ function daysSince(date: Date): number {
             </div>
         </section>
 
-        {#if !HARPER_PERSONAL && !isFirefox && installDate != null && daysSince(installDate) > 14 && hasBeenReviewed === false}
+        {#if HARPER_PERSONAL}
+            <section class="flex shrink-0 flex-col gap-1.5 border-t border-gray-100 px-5 py-3 dark:border-slate-800">
+                <label class="text-xs font-semibold text-gray-500 dark:text-slate-300" for="harper-preset">
+                    Writing preset
+                </label>
+                <select
+                    id="harper-preset"
+                    class="h-9 rounded-md border border-gray-200 bg-white px-2 text-sm text-gray-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                    value={personalPreset}
+                    onchange={choosePreset}
+                >
+                    <option value="off">Off</option>
+                    <option value="casual">Casual</option>
+                    <option value="linkedin">LinkedIn DM</option>
+                    <option value="email">Email</option>
+                </select>
+                <p class="text-xs leading-snug text-gray-500 dark:text-slate-400">
+                    Saved in this browser. Switching reloads the checker and drops the preset's style rules.
+                </p>
+            </section>
+        {:else if !isFirefox && installDate != null && daysSince(installDate) > 14 && hasBeenReviewed === false}
             <section class="flex shrink-0 flex-row items-center justify-between gap-3 bg-primary px-5 py-3 text-black">
                 <div class="text-sm font-semibold leading-snug">
                     Enjoying Harper? A quick review helps a lot.

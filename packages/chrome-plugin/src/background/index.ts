@@ -3,6 +3,7 @@ import {
 	type Dialect,
 	type LintConfig,
 	LocalLinter,
+	packWeirpackFiles,
 	unpackWeirpackBytes,
 } from 'harper.js';
 import { type UnpackedLintGroups, unpackLint } from 'lint-framework';
@@ -14,6 +15,8 @@ import {
 } from '../domainPolicy';
 import type { PopupState } from '../PopupState';
 import { HARPER_PERSONAL } from '../personal';
+import { overlayLintConfig, parsePersonalPreset } from '../personalPreset';
+import { buildPresetFiles } from '../personalWeir';
 import {
 	ActivationKey,
 	type AddToUserDictionaryRequest,
@@ -37,6 +40,7 @@ import {
 	type GetIsolateEnglishResponse,
 	type GetLintDescriptionsRequest,
 	type GetLintDescriptionsResponse,
+	type GetPersonalPresetResponse,
 	type GetReviewedRequest,
 	type GetReviewedResponse,
 	type GetStructuredConfigResponse,
@@ -60,6 +64,7 @@ import {
 	type SetDomainStatusRequest,
 	type SetHotkeyRequest,
 	type SetIsolateEnglishRequest,
+	type SetPersonalPresetRequest,
 	type SetReviewedRequest,
 	type SetUserDictionaryRequest,
 	type UnitResponse,
@@ -79,7 +84,10 @@ chrome.runtime.onInstalled.addListener((details) => {
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-	handleRequest(request, sender).then(sendResponse);
+	handleRequest(request, sender).then(sendResponse, (error: unknown) => {
+		console.error(`Harper failed a ${request.kind} request`, error);
+		sendResponse(undefined);
+	});
 
 	return true;
 });
@@ -114,6 +122,8 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
 });
 
 let linter: LocalLinter;
+/** Rule config last saved by the user. Preset overlays are not written here. */
+let baselineLintConfigJson: string | null = null;
 const WEIRPACKS_KEY = 'weirpacks';
 const linterStorageKeys = [
 	'dialect',
@@ -121,6 +131,7 @@ const linterStorageKeys = [
 	'lintConfig',
 	WEIRPACKS_KEY,
 	'userDictionary',
+	'personalPreset',
 ];
 let linterHasPersistedState = false;
 const defaultEnabledDomains = [
@@ -321,6 +332,10 @@ function handleRequest(message: Request, sender?: chrome.runtime.MessageSender):
 			return handleAddWeirpack(message);
 		case 'removeWeirpack':
 			return handleRemoveWeirpack(message);
+		case 'getPersonalPreset':
+			return handleGetPersonalPreset();
+		case 'setPersonalPreset':
+			return handleSetPersonalPreset(message);
 	}
 }
 
@@ -706,15 +721,86 @@ async function setLintConfig(lintConfig: LintConfig): Promise<void> {
 	linterHasPersistedState = true;
 
 	const json = await linter.getLintConfigAsJSON();
+	baselineLintConfigJson = json;
 
 	await chrome.storage.local.set({ lintConfig: json });
+	await applyPersonalPresetOverlay();
 }
 
-/** Get the lint configuration from permanent storage. */
+/** Get the saved lint configuration. A preset overlay is not part of this value. */
 async function getLintConfig(): Promise<LintConfig> {
+	const stored = await chrome.storage.local.get('lintConfig');
+	if (typeof stored.lintConfig === 'string') {
+		return JSON.parse(stored.lintConfig) as LintConfig;
+	}
+	if (baselineLintConfigJson != null) {
+		return JSON.parse(baselineLintConfigJson) as LintConfig;
+	}
 	const json = await linter.getLintConfigAsJSON();
-	const resp = await chrome.storage.local.get({ lintConfig: json });
-	return JSON.parse(resp.lintConfig);
+	return JSON.parse(json) as LintConfig;
+}
+
+async function readPersonalPreset() {
+	if (!HARPER_PERSONAL) {
+		return 'off' as const;
+	}
+	const stored = await chrome.storage.local.get('personalPreset');
+	return parsePersonalPreset(stored.personalPreset);
+}
+
+/**
+ * Turn preset-owned rules on or off in the running engine.
+ * The saved config is left unchanged. The pack itself is loaded only from `initializeLinter`,
+ * because a loaded Weirpack cannot be unloaded.
+ */
+async function applyPersonalPresetOverlay(): Promise<void> {
+	if (!HARPER_PERSONAL) {
+		return;
+	}
+	const preset = await readPersonalPreset();
+	if (preset === 'off') {
+		return;
+	}
+	const current = JSON.parse(await linter.getLintConfigAsJSON()) as LintConfig;
+	await linter.setLintConfig(overlayLintConfig(current, preset));
+}
+
+async function loadPersonalPresetPack(): Promise<void> {
+	if (!HARPER_PERSONAL) {
+		return;
+	}
+	const files = buildPresetFiles(await readPersonalPreset());
+	if (files == null) {
+		return;
+	}
+	const failures = await linter.loadWeirpackFromBytes(packWeirpackFiles(files));
+	if (failures) {
+		console.error('Personal preset pack failed its tests', failures);
+	}
+}
+
+async function handleGetPersonalPreset(): Promise<GetPersonalPresetResponse> {
+	return { kind: 'getPersonalPreset', preset: await readPersonalPreset() };
+}
+
+async function handleSetPersonalPreset(req: SetPersonalPresetRequest): Promise<UnitResponse> {
+	if (!HARPER_PERSONAL) {
+		return createUnitResponse();
+	}
+	const preset = parsePersonalPreset(req.preset);
+	if ((await readPersonalPreset()) === preset) {
+		return createUnitResponse();
+	}
+	await chrome.storage.local.set({ personalPreset: preset });
+	if (linterReady != null) {
+		await linterReady.catch(() => undefined);
+	}
+	linterReady = initializeLinter(await getDialect()).catch((err) => {
+		linterReady = null;
+		throw err;
+	});
+	await linterReady;
+	return createUnitResponse();
 }
 
 /** Update the linter's ignored suggestions and save them to permanent storage. */
@@ -784,18 +870,26 @@ async function initializeLinter(dialect: Dialect) {
 	linter = new LocalLinter({
 		binary: createBinaryModuleFromUrl(
 			chrome.runtime.getURL(
+				// The slim file must be built with `--out-name harper_wasm`.
+				// A different name makes the binary import `./harper_wasm_slim_bg.js`,
+				// which the shared glue does not provide, and the worker never answers.
 				HARPER_PERSONAL ? './wasm/harper_wasm_slim_bg.wasm' : './wasm/harper_wasm_bg.wasm',
 			),
 		),
 		dialect,
 	});
 
+	const baseline = await getLintConfig();
+	baselineLintConfigJson = JSON.stringify(baseline);
+
 	await Promise.all([
 		getIgnoredLints().then((i) => linter.importIgnoredLints(i)),
 		getUserDictionary().then((u) => linter.importWords(u)),
-		getLintConfig().then((c) => linter.setLintConfig(c)),
-		loadStoredWeirpacksIntoLinter(),
 	]);
+	await linter.setLintConfig(baseline);
+	await loadStoredWeirpacksIntoLinter();
+	await loadPersonalPresetPack();
+	await applyPersonalPresetOverlay();
 
 	await linter.setup();
 }

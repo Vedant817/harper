@@ -3,7 +3,7 @@ use hashbrown::HashMap;
 use is_macro::Is;
 use itertools::Itertools;
 
-use crate::expr::{Expr, Filter, LongestMatchOf, SequenceExpr, UnlessStep};
+use crate::expr::{AnchorStart, Expr, Filter, LongestMatchOf, SequenceExpr, UnlessStep};
 use crate::patterns::{AnyPattern, DerivedFrom, UPOSSet, WhitespacePattern, Word};
 use crate::{CharString, CharStringExt, Lrc, Punctuation, Token};
 
@@ -95,6 +95,8 @@ pub enum AstExprNode {
     Filter(Vec<AstExprNode>),
     ExprRef(CharString),
     Anything,
+    /// The first word of the current chunk. Matches no characters.
+    AnchorStart,
 }
 
 impl AstExprNode {
@@ -107,6 +109,7 @@ impl AstExprNode {
     ) -> Result<Box<dyn Expr>, Error> {
         match self {
             AstExprNode::Anything => Ok(Box::new(AnyPattern)),
+            AstExprNode::AnchorStart => Ok(Box::new(AnchorStart)),
             AstExprNode::Progressive => Ok(Box::new(|tok: &Token, _: &[char]| {
                 tok.kind.is_verb_progressive_form()
             })),

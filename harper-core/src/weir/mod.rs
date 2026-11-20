@@ -568,6 +568,25 @@ pub mod tests {
     }
 
     #[test]
+    fn caret_matches_only_the_first_word() {
+        let source = r#"
+            expr main (^Hope you're well)
+            let message "Start with I."
+            let description "Inserts I only when the chunk starts with the phrase."
+            let kind "Style"
+            let becomes "I hope you're well"
+            let strategy "Exact"
+
+            test "Hope you're well." "I hope you're well."
+            allows "I hope you're well."
+            allows "I hope you're well today."
+        "#;
+
+        let mut linter = WeirLinter::new(source).unwrap();
+        assert_passes_all(&mut linter);
+    }
+
+    #[test]
     fn invalid_scope_errors() {
         let source = r#"
             expr main one

@@ -1,7 +1,7 @@
 import type { Dialect, LintConfig, LintOptions, StructuredLintConfig } from 'harper.js';
 import type { UnpackedLintGroups } from 'lint-framework';
 import { LRUCache } from 'lru-cache';
-import type { ActivationKey, Hotkey, WeirpackMeta } from './protocol';
+import type { ActivationKey, Hotkey, PersonalPresetId, WeirpackMeta } from './protocol';
 
 export default class ProtocolClient {
 	private static readonly lintCache = new LRUCache<string, Promise<UnpackedLintGroups>>({
@@ -232,5 +232,15 @@ export default class ProtocolClient {
 	public static async removeWeirpack(id: string): Promise<void> {
 		this.lintCache.clear();
 		await chrome.runtime.sendMessage({ kind: 'removeWeirpack', id });
+	}
+
+	public static async getPersonalPreset(): Promise<PersonalPresetId> {
+		const response = await chrome.runtime.sendMessage({ kind: 'getPersonalPreset' });
+		return response.preset;
+	}
+
+	public static async setPersonalPreset(preset: PersonalPresetId): Promise<void> {
+		this.lintCache.clear();
+		await chrome.runtime.sendMessage({ kind: 'setPersonalPreset', preset });
 	}
 }

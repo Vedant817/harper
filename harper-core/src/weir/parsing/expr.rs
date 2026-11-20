@@ -63,6 +63,11 @@ fn parse_single_expr(tokens: &[Token], source: &[char]) -> Result<FoundNode<AstE
         TokenKind::Punctuation(Punctuation::Star) => {
             Ok(FoundNode::new(AstExprNode::Anything, 1))
         }
+        // Zero-width assertion: the cursor is the first word of this chunk.
+        // A space after ^ is a real whitespace token, so write ^Word.
+        TokenKind::Punctuation(Punctuation::Caret) => {
+            Ok(FoundNode::new(AstExprNode::AnchorStart, 1))
+        }
         TokenKind::Word(_) => {
             let text = tok.get_str(source);
 
