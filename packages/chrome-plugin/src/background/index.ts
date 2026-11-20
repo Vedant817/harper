@@ -28,7 +28,7 @@ import {
 	polishStorageKeys,
 	samePolishSettings,
 } from '../personalPolish';
-import { overlayLintConfig, parsePersonalPreset } from '../personalPreset';
+import { overlayLintConfig, parsePersonalPreset, presetHandoffAction } from '../personalPreset';
 import { buildPresetFiles } from '../personalWeir';
 import {
 	ActivationKey,
@@ -149,6 +149,8 @@ let linterTicket = 0;
 let appliedPersonalPreset: PersonalPresetId | null = null;
 /** A newer preset choice invalidates a rebuild that has not published storage yet. */
 let personalPresetTicket = 0;
+/** Preset a queued rebuild will publish. Null when no rebuild is waiting. */
+let personalPresetInFlight: PersonalPresetId | null = null;
 const defaultEnabledDomains = [
 	'old.reddit.com',
 	'sh.reddit.com',
@@ -893,21 +895,51 @@ async function handleSetPersonalPreset(req: SetPersonalPresetRequest): Promise<U
 		return createUnitResponse();
 	}
 	const preset = parsePersonalPreset(req.preset);
-	const ticket = ++personalPresetTicket;
-	if (appliedPersonalPreset === preset && (await readPersonalPreset()) === preset) {
+	const seenTicket = personalPresetTicket;
+	// Repeating the queued preset must not bump the ticket. That drops its storage write.
+	if (personalPresetInFlight === preset) {
 		return createUnitResponse();
 	}
+
+	let stored: PersonalPresetId | null = null;
+	if (personalPresetInFlight == null && appliedPersonalPreset === preset) {
+		stored = await readPersonalPreset();
+		// A newer choice queued while storage was read. Leave that rebuild alone.
+		if (personalPresetTicket !== seenTicket) {
+			return createUnitResponse();
+		}
+	}
+
+	if (
+		presetHandoffAction({
+			inFlight: personalPresetInFlight,
+			applied: appliedPersonalPreset,
+			stored,
+			requested: preset,
+		}) === 'keep'
+	) {
+		return createUnitResponse();
+	}
+
+	const ticket = ++personalPresetTicket;
+	personalPresetInFlight = preset;
 	await replaceLinter(async () => {
 		// The callback must not wait on linterReady. This call already is that promise.
 		if (ticket !== personalPresetTicket) {
 			return;
 		}
-		await initializeLinter(await getDialect(), preset);
-		if (ticket !== personalPresetTicket) {
-			return;
+		try {
+			await initializeLinter(await getDialect(), preset);
+			if (ticket !== personalPresetTicket) {
+				return;
+			}
+			// Storage changes after the engine is ready, so a poll means the rules match.
+			await chrome.storage.local.set({ personalPreset: preset });
+		} finally {
+			if (ticket === personalPresetTicket) {
+				personalPresetInFlight = null;
+			}
 		}
-		// Storage changes after the engine is ready, so a poll means the rules match.
-		await chrome.storage.local.set({ personalPreset: preset });
 	});
 	return createUnitResponse();
 }

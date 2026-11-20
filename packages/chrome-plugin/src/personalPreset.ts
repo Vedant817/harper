@@ -7,6 +7,32 @@ import type { PersonalPresetId } from './protocol';
  */
 export const PERSONAL_PRESETS = ['off', 'casual', 'linkedin', 'email'] as const;
 
+/**
+ * Whether a preset choice must rebuild the engine.
+ * A choice that repeats the in-flight preset must not cancel that rebuild's storage write.
+ * A switch back to the stored preset while another preset is still rebuilding must queue.
+ */
+export function presetHandoffAction(input: {
+	inFlight: PersonalPresetId | null;
+	applied: PersonalPresetId | null;
+	stored: PersonalPresetId | null;
+	requested: PersonalPresetId;
+}): 'keep' | 'rebuild' {
+	if (input.inFlight === input.requested) {
+		return 'keep';
+	}
+
+	if (
+		input.inFlight == null &&
+		input.applied === input.requested &&
+		input.stored === input.requested
+	) {
+		return 'keep';
+	}
+
+	return 'rebuild';
+}
+
 export const GREETING_FOLLOWERS = [
 	'I',
 	'We',
