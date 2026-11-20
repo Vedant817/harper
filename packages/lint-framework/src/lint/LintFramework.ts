@@ -305,6 +305,10 @@ export default class LintFramework {
 		}
 	}
 
+	public hasTarget(target: Node): boolean {
+		return this.targets.has(target);
+	}
+
 	public async removeTarget(target: HTMLElement) {
 		if (this.targets.has(target)) {
 			this.targets.delete(target);

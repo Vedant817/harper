@@ -203,6 +203,115 @@ function maybeAddTextareaTarget(element: HTMLTextAreaElement, requireVisible: bo
 	fw.addTarget(element);
 }
 
+/** CodeMirror is linted only when the page is Typst. */
+function maybeAddTypstEditor(element: HTMLElement, requireVisible: boolean): void {
+	if (!relatesToFocusedEditor(element)) {
+		return;
+	}
+
+	const isTypstPlayground = window.location.hostname === 'typst.app';
+	const explicitlyTypst = element.getAttribute('data-language') === 'typst';
+
+	if (!isTypstPlayground && !explicitlyTypst) {
+		return;
+	}
+
+	if (element.closest('[contenteditable="false"],[disabled],[readonly]') != null) {
+		return;
+	}
+
+	if (requireVisible && !isVisible(element)) {
+		return;
+	}
+
+	element.setAttribute('data-language', 'typst');
+	fw.addTarget(element);
+}
+
+/**
+ * Lint the blocks inside a contenteditable.
+ * The host text includes every block, so targeting both draws two underlines for one mistake.
+ */
+function addContentEditableTarget(element: HTMLElement, requireVisible: boolean): void {
+	if (!relatesToFocusedEditor(element)) {
+		return;
+	}
+
+	if (element.classList.contains('cm-content') && element.closest('.cm-editor') != null) {
+		return;
+	}
+
+	// spellcheck="false" is how LinkedIn and other composers avoid a second underline.
+	// A combobox is skipped only when it is not itself an editing host.
+	if (!isEditorHost(element)) {
+		return;
+	}
+
+	// Quill replaces the inner paragraph while typing. The host stays, so it is the only target.
+	if (element.classList.contains('ql-editor')) {
+		if (!requireVisible || isVisible(element)) {
+			fw.addTarget(element);
+		}
+		return;
+	}
+
+	if (element.classList.contains('ck-editor__editable')) {
+		let added = false;
+
+		element.querySelectorAll('p').forEach((paragraph) => {
+			if (paragraph.closest('[contenteditable="false"],[disabled],[readonly]') != null) {
+				return;
+			}
+
+			if (requireVisible && !isVisible(paragraph)) {
+				return;
+			}
+
+			addEditableLintTarget(element, paragraph);
+			added = true;
+		});
+
+		if (!added && (!requireVisible || isVisible(element))) {
+			addEditableLintTarget(element, element);
+		}
+
+		return;
+	}
+
+	const leafs = leafNodes(element);
+	const seenBlockContainers = new Set<Element>();
+
+	for (const leaf of leafs) {
+		if (lockedInsideHost(leaf, element)) {
+			continue;
+		}
+
+		// Flex and grid composers have no `display: block` ancestor. Lint the host itself.
+		const blockContainer = getClosestBlockAncestor(leaf, element) ?? element;
+
+		if (!blockContainer || seenBlockContainers.has(blockContainer)) {
+			continue;
+		}
+
+		seenBlockContainers.add(blockContainer);
+
+		if (requireVisible && !isVisible(blockContainer)) {
+			continue;
+		}
+
+		addEditableLintTarget(element, blockContainer);
+	}
+}
+
+/** A descendant block replaces the host. Keeping both would underline the same words twice. */
+function addEditableLintTarget(host: HTMLElement, target: Element): void {
+	if (target !== host && fw.hasTarget(host)) {
+		void fw.removeTarget(host);
+	}
+
+	fw.addTarget(target);
+}
+
 function scan() {
 	void syncGoogleDocsBridge();
 
@@ -257,87 +366,14 @@ function scan() {
 	document
 		.querySelectorAll<HTMLElement>('.cm-editor .cm-content[contenteditable="true"]')
 		.forEach((element) => {
-			if (!relatesToFocusedEditor(element)) {
-				return;
-			}
-
-			const isTypstPlayground = window.location.hostname === 'typst.app';
-			const explicitlyTypst = element.getAttribute('data-language') === 'typst';
-
-			if (!isTypstPlayground && !explicitlyTypst) {
-				return;
-			}
-
-			if (element.closest('[contenteditable="false"],[disabled],[readonly]') != null) {
-				return;
-			}
-
-			if (!isVisible(element)) {
-				return;
-			}
-
-			element.setAttribute('data-language', 'typst');
-			fw.addTarget(element);
+			maybeAddTypstEditor(element, true);
 		});
 
 	querySelectorAllDeep<HTMLElement>(
 		document,
 		'[contenteditable="true"],[contenteditable="plaintext-only"],[contenteditable=""]',
 	).forEach((element) => {
-		if (!relatesToFocusedEditor(element)) {
-			return;
-		}
-
-		if (element.classList.contains('cm-content') && element.closest('.cm-editor') != null) {
-			return;
-		}
-
-		// spellcheck="false" is how LinkedIn and other composers avoid a second underline.
-		// A combobox is skipped only when it is not itself an editing host.
-		if (!isEditorHost(element)) {
-			return;
-		}
-
-		if (element.classList.contains('ck-editor__editable')) {
-			element.querySelectorAll('p').forEach((paragraph) => {
-				if (paragraph.closest('[contenteditable="false"],[disabled],[readonly]') != null) {
-					return;
-				}
-
-				if (!isVisible(paragraph)) {
-					return;
-				}
-
-				fw.addTarget(paragraph);
-			});
-
-			return;
-		}
-
-		const leafs = leafNodes(element);
-
-		const seenBlockContainers = new Set<Element>();
-
-		for (const leaf of leafs) {
-			if (lockedInsideHost(leaf, element)) {
-				continue;
-			}
-
-			// Flex and grid composers have no `display: block` ancestor. Lint the host itself.
-			const blockContainer = getClosestBlockAncestor(leaf, element) ?? element;
-
-			if (!blockContainer || seenBlockContainers.has(blockContainer)) {
-				continue;
-			}
-
-			seenBlockContainers.add(blockContainer);
-
-			if (!isVisible(blockContainer)) {
-				continue;
-			}
-
-			fw.addTarget(blockContainer);
-		}
+		addContentEditableTarget(element, true);
 	});
 
 	if (document.body) {
@@ -395,9 +431,23 @@ function lintFocusedEditor(node: EventTarget | null, requireVisible: boolean) {
 		return;
 	}
 
-	if (requireVisible && !isVisible(host)) {
+	if (host instanceof HTMLInputElement) {
+		if (!relatesToFocusedEditor(host)) {
+			return;
+		}
+
+		if (requireVisible && !isVisible(host)) {
+			return;
+		}
+
+		fw.addTarget(host);
 		return;
 	}
 
-	fw.addTarget(host);
+	if (host.classList.contains('cm-content') && host.closest('.cm-editor') != null) {
+		maybeAddTypstEditor(host, requireVisible);
+		return;
+	}
+
+	addContentEditableTarget(host, requireVisible);
 }
