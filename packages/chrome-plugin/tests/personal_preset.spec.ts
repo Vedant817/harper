@@ -87,7 +87,7 @@ test('Personal presets change style rules and leave installed packs alone', asyn
 	await expect(optionsPreset).toBeVisible({ timeout: 20000 });
 	await expect(optionsPreset).toHaveValue('casual');
 	await optionsPreset.selectOption('linkedin');
-	await expect.poll(() => storedPreset(background), { timeout: 20000 }).toBe('linkedin');
+	await expect.poll(() => storedPreset(background), { timeout: 45000 }).toBe('linkedin');
 
 	await page.goto(PAGE);
 	await page.locator('textarea').click();

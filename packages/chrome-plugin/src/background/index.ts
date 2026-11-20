@@ -17,6 +17,17 @@ import { linterStorageKeys } from '../linterStorageKeys';
 import type { PopupState } from '../PopupState';
 import { packRulesToRestore } from '../packRules';
 import { HARPER_PERSONAL } from '../personal';
+import {
+	defaultPolishSettings,
+	executePolish,
+	normalizePolishSettings,
+	POLISH_OFF,
+	POLISH_UNAVAILABLE,
+	polishSettingsFromStorage,
+	polishSettingsToStorage,
+	polishStorageKeys,
+	samePolishSettings,
+} from '../personalPolish';
 import { overlayLintConfig, parsePersonalPreset } from '../personalPreset';
 import { buildPresetFiles } from '../personalWeir';
 import {
@@ -43,6 +54,7 @@ import {
 	type GetLintDescriptionsRequest,
 	type GetLintDescriptionsResponse,
 	type GetPersonalPresetResponse,
+	type GetPolishSettingsResponse,
 	type GetReviewedRequest,
 	type GetReviewedResponse,
 	type GetStructuredConfigResponse,
@@ -53,6 +65,9 @@ import {
 	type LintRequest,
 	type LintResponse,
 	type OpenReportErrorRequest,
+	type PersonalPresetId,
+	type PolishTextRequest,
+	type PolishTextResponse,
 	type PostFormDataRequest,
 	type PostFormDataResponse,
 	type RemoveWeirpackRequest,
@@ -67,6 +82,7 @@ import {
 	type SetHotkeyRequest,
 	type SetIsolateEnglishRequest,
 	type SetPersonalPresetRequest,
+	type SetPolishSettingsRequest,
 	type SetReviewedRequest,
 	type SetUserDictionaryRequest,
 	type UnitResponse,
@@ -129,6 +145,10 @@ let baselineLintConfigJson: string | null = null;
 const WEIRPACKS_KEY = 'weirpacks';
 let linterHasPersistedState = false;
 let linterTicket = 0;
+/** Preset last built into the running engine. Storage can lag behind this. */
+let appliedPersonalPreset: PersonalPresetId | null = null;
+/** A newer preset choice invalidates a rebuild that has not published storage yet. */
+let personalPresetTicket = 0;
 const defaultEnabledDomains = [
 	'old.reddit.com',
 	'sh.reddit.com',
@@ -236,7 +256,22 @@ function ensureLinterReady(): Promise<void> {
 		linterReady = pending;
 	}
 
-	return linterReady;
+	return waitForLinterQueue();
+}
+
+/**
+ * A lint must see the newest engine. Waiting on the first promise lets a rebuild
+ * that was queued a moment later dispose that engine before the lint reads it.
+ */
+async function waitForLinterQueue(): Promise<void> {
+	let ready = linterReady;
+	while (ready != null) {
+		await ready;
+		if (linterReady === ready) {
+			return;
+		}
+		ready = linterReady;
+	}
 }
 
 /**
@@ -357,6 +392,12 @@ function handleRequest(message: Request, sender?: chrome.runtime.MessageSender):
 			return handleGetPersonalPreset();
 		case 'setPersonalPreset':
 			return handleSetPersonalPreset(message);
+		case 'getPolishSettings':
+			return handleGetPolishSettings();
+		case 'setPolishSettings':
+			return handleSetPolishSettings(message);
+		case 'polishText':
+			return handlePolishText(message);
 	}
 }
 
@@ -568,9 +609,14 @@ async function handleGetLintDescriptions(
 }
 
 async function handleSetUserDictionary(req: SetUserDictionaryRequest): Promise<UnitResponse> {
+	const next = Array.isArray(req.words) ? req.words : [];
+	const current = await getUserDictionary();
+	if (current.length === next.length && current.every((word, index) => word === next[index])) {
+		return createUnitResponse();
+	}
 	await ensureLinterReady();
 	await resetDictionary();
-	await addToDictionary(req.words);
+	await addToDictionary(next);
 
 	return createUnitResponse();
 }
@@ -738,24 +784,52 @@ async function handleRemoveWeirpack(req: RemoveWeirpackRequest): Promise<UnitRes
 	return createUnitResponse();
 }
 
+/** Stable JSON so an unchanged options page does not rebuild the engine. */
+function stableLintConfigJson(config: LintConfig): string {
+	const sorted: LintConfig = {};
+	for (const key of Object.keys(config).sort()) {
+		sorted[key] = config[key];
+	}
+	return JSON.stringify(sorted);
+}
+
 /**
  * Save the user's rule config, then turn pack rules back on in the running engine.
  * The saved JSON stays the user's config. Open pages are notified only after that.
+ * This shares the engine queue with preset swaps. Waiting on `linterReady` here would
+ * deadlock, because this call is already that promise.
  */
 async function setLintConfig(lintConfig: LintConfig): Promise<void> {
-	const previous = JSON.parse(await linter.getLintConfigAsJSON()) as LintConfig;
-	await linter.setLintConfig(lintConfig);
-	linterHasPersistedState = true;
-
-	const json = await linter.getLintConfigAsJSON();
-	baselineLintConfigJson = json;
-	const saved = JSON.parse(json) as LintConfig;
-	const restored = { ...saved, ...packRulesToRestore(previous, saved) };
-	if (Object.keys(restored).length !== Object.keys(saved).length) {
-		await linter.setLintConfig(restored);
+	const stored = await chrome.storage.local.get('lintConfig');
+	if (typeof stored.lintConfig === 'string') {
+		try {
+			const saved = JSON.parse(stored.lintConfig) as LintConfig;
+			if (stableLintConfigJson(saved) === stableLintConfigJson(lintConfig)) {
+				return;
+			}
+		} catch {
+			// Replace a saved config that is not JSON.
+		}
 	}
-	await applyPersonalPresetOverlay();
-	await chrome.storage.local.set({ lintConfig: json });
+
+	await replaceLinter(async () => {
+		if (linter == null) {
+			await initializeLinter(await getDialect());
+		}
+		const previous = JSON.parse(await linter.getLintConfigAsJSON()) as LintConfig;
+		await linter.setLintConfig(lintConfig);
+		linterHasPersistedState = true;
+
+		const json = await linter.getLintConfigAsJSON();
+		baselineLintConfigJson = json;
+		const saved = JSON.parse(json) as LintConfig;
+		const restored = { ...saved, ...packRulesToRestore(previous, saved) };
+		if (Object.keys(restored).length !== Object.keys(saved).length) {
+			await linter.setLintConfig(restored);
+		}
+		await applyPersonalPresetOverlay(appliedPersonalPreset ?? undefined);
+		await chrome.storage.local.set({ lintConfig: json });
+	});
 }
 
 /** Get the saved lint configuration. A preset overlay is not part of this value. */
@@ -784,23 +858,23 @@ async function readPersonalPreset() {
  * The saved config is left unchanged. The pack itself is loaded only from `initializeLinter`,
  * because a loaded Weirpack cannot be unloaded.
  */
-async function applyPersonalPresetOverlay(): Promise<void> {
+async function applyPersonalPresetOverlay(preset?: PersonalPresetId): Promise<void> {
 	if (!HARPER_PERSONAL) {
 		return;
 	}
-	const preset = await readPersonalPreset();
-	if (preset === 'off') {
+	const selected = preset ?? (await readPersonalPreset());
+	if (selected === 'off') {
 		return;
 	}
 	const current = JSON.parse(await linter.getLintConfigAsJSON()) as LintConfig;
-	await linter.setLintConfig(overlayLintConfig(current, preset));
+	await linter.setLintConfig(overlayLintConfig(current, selected));
 }
 
-async function loadPersonalPresetPack(): Promise<void> {
+async function loadPersonalPresetPack(preset?: PersonalPresetId): Promise<void> {
 	if (!HARPER_PERSONAL) {
 		return;
 	}
-	const files = buildPresetFiles(await readPersonalPreset());
+	const files = buildPresetFiles(preset ?? (await readPersonalPreset()));
 	if (files == null) {
 		return;
 	}
@@ -819,14 +893,73 @@ async function handleSetPersonalPreset(req: SetPersonalPresetRequest): Promise<U
 		return createUnitResponse();
 	}
 	const preset = parsePersonalPreset(req.preset);
-	if ((await readPersonalPreset()) === preset) {
+	const ticket = ++personalPresetTicket;
+	if (appliedPersonalPreset === preset && (await readPersonalPreset()) === preset) {
 		return createUnitResponse();
 	}
 	await replaceLinter(async () => {
+		// The callback must not wait on linterReady. This call already is that promise.
+		if (ticket !== personalPresetTicket) {
+			return;
+		}
+		await initializeLinter(await getDialect(), preset);
+		if (ticket !== personalPresetTicket) {
+			return;
+		}
+		// Storage changes after the engine is ready, so a poll means the rules match.
 		await chrome.storage.local.set({ personalPreset: preset });
-		await initializeLinter(await getDialect());
 	});
 	return createUnitResponse();
+}
+
+async function readPolishSettings() {
+	if (!HARPER_PERSONAL) {
+		return defaultPolishSettings();
+	}
+	const stored = await chrome.storage.local.get([...polishStorageKeys]);
+	return polishSettingsFromStorage(stored);
+}
+
+async function handleGetPolishSettings(): Promise<GetPolishSettingsResponse> {
+	return { kind: 'getPolishSettings', settings: await readPolishSettings() };
+}
+
+async function handleSetPolishSettings(req: SetPolishSettingsRequest): Promise<UnitResponse> {
+	if (!HARPER_PERSONAL) {
+		return createUnitResponse();
+	}
+	const next = normalizePolishSettings(req.settings);
+	if (samePolishSettings(await readPolishSettings(), next)) {
+		return createUnitResponse();
+	}
+	await chrome.storage.local.set(polishSettingsToStorage(next));
+	return createUnitResponse();
+}
+
+/**
+ * Re-reads saved settings before any request leaves the browser.
+ * The page's copy of the settings is ignored. The address, the key, and the text are not logged.
+ */
+async function handlePolishText(req: PolishTextRequest): Promise<PolishTextResponse> {
+	if (!HARPER_PERSONAL) {
+		return { kind: 'polishText', ok: false, text: POLISH_UNAVAILABLE };
+	}
+
+	const text = typeof req.text === 'string' ? req.text : '';
+	const source = req.source === 'selection' || req.source === 'idle' ? req.source : null;
+	if (!source) {
+		return { kind: 'polishText', ok: false, text: POLISH_OFF };
+	}
+
+	const settings = await readPolishSettings();
+	const result = await executePolish(
+		settings,
+		text,
+		source,
+		(pattern) => chrome.permissions.contains({ origins: [pattern] }),
+		(url, init) => fetch(url, init),
+	);
+	return { kind: 'polishText', ok: result.ok, text: result.text };
 }
 
 /** Update the linter's ignored suggestions and save them to permanent storage. */
@@ -888,7 +1021,7 @@ async function setHotkey(hotkey: Hotkey) {
 	await chrome.storage.local.set({ hotkey: hotkey });
 }
 
-async function initializeLinter(dialect: Dialect) {
+async function initializeLinter(dialect: Dialect, preset?: PersonalPresetId) {
 	if (linter != null) {
 		linter.dispose();
 	}
@@ -914,15 +1047,25 @@ async function initializeLinter(dialect: Dialect) {
 	]);
 	await linter.setLintConfig(baseline);
 	await loadStoredWeirpacksIntoLinter();
-	await loadPersonalPresetPack();
-	await applyPersonalPresetOverlay();
+	const selected = preset ?? (await readPersonalPreset());
+	await loadPersonalPresetPack(selected);
+	await applyPersonalPresetOverlay(selected);
 
 	await linter.setup();
+	appliedPersonalPreset = selected;
 }
 
 async function setDialect(dialect: Dialect) {
+	// Opening settings sends the current dialect again. Rebuilding the engine
+	// here used to sit ahead of a preset change and leave storage on the old preset.
+	if ((await getDialect()) === dialect) {
+		return;
+	}
 	linterHasPersistedState = true;
 	await replaceLinter(async () => {
+		if ((await getDialect()) === dialect) {
+			return;
+		}
 		await initializeLinter(dialect);
 		await chrome.storage.local.set({ dialect });
 	});

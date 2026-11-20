@@ -1,6 +1,13 @@
 import type { Dialect, LintConfig, LintOptions, StructuredLintConfig } from 'harper.js';
 import type { UnpackedLintGroups } from 'lint-framework';
 import { LRUCache } from 'lru-cache';
+import {
+	defaultPolishSettings,
+	POLISH_NO_ANSWER,
+	type PolishResult,
+	type PolishSettings,
+	type PolishSource,
+} from './personalPolish';
 import type { ActivationKey, Hotkey, PersonalPresetId, WeirpackMeta } from './protocol';
 
 export default class ProtocolClient {
@@ -259,5 +266,28 @@ export default class ProtocolClient {
 	public static async setPersonalPreset(preset: PersonalPresetId): Promise<void> {
 		this.lintCache.clear();
 		await chrome.runtime.sendMessage({ kind: 'setPersonalPreset', preset });
+	}
+
+	public static async getPolishSettings(): Promise<PolishSettings> {
+		const response = await chrome.runtime.sendMessage({ kind: 'getPolishSettings' });
+		return response?.settings ?? defaultPolishSettings();
+	}
+
+	/** Saves polish settings. This does not clear lint suggestions. */
+	public static async setPolishSettings(settings: PolishSettings): Promise<void> {
+		await chrome.runtime.sendMessage({ kind: 'setPolishSettings', settings });
+	}
+
+	/** Asks the worker to polish. The result is not cached. */
+	public static async polishText(text: string, source: PolishSource): Promise<PolishResult> {
+		try {
+			const response = await chrome.runtime.sendMessage({ kind: 'polishText', text, source });
+			if (response == null || typeof response.text !== 'string') {
+				return { ok: false, text: POLISH_NO_ANSWER };
+			}
+			return { ok: response.ok === true, text: response.text };
+		} catch {
+			return { ok: false, text: POLISH_NO_ANSWER };
+		}
 	}
 }

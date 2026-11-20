@@ -10,6 +10,7 @@ import isSubstack from '../isSubstack';
 import isWordPress from '../isWordPress';
 import { linterStorageKeys } from '../linterStorageKeys';
 import ProtocolClient from '../ProtocolClient';
+import { HARPER_PERSONAL } from '../personal';
 import {
 	editorHostFromNode,
 	focusedEditor,
@@ -111,6 +112,13 @@ async function bootLintPage() {
 	}
 
 	lintFocusedEditor(document.activeElement, false);
+
+	// The scout must not load this. A public build drops the import.
+	if (HARPER_PERSONAL) {
+		void import('./personalPolishBar').then((mod) => {
+			mod.startPersonalPolish();
+		});
+	}
 }
 
 function padWithContext(source: string, start: number, end: number, contextLength: number): string {

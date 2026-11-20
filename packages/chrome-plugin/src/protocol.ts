@@ -1,5 +1,6 @@
 import type { Dialect, LintConfig, LintOptions, StructuredLintConfig } from 'harper.js';
 import type { UnpackedLintGroups } from 'lint-framework';
+import type { PolishSettings, PolishSource } from './personalPolish';
 
 export type Request =
 	| LintRequest
@@ -39,7 +40,10 @@ export type Request =
 	| AddWeirpackRequest
 	| RemoveWeirpackRequest
 	| GetPersonalPresetRequest
-	| SetPersonalPresetRequest;
+	| SetPersonalPresetRequest
+	| GetPolishSettingsRequest
+	| SetPolishSettingsRequest
+	| PolishTextRequest;
 
 export type Response =
 	| LintResponse
@@ -62,7 +66,9 @@ export type Response =
 	| GetReviewedResponse
 	| PostFormDataResponse
 	| GetWeirpacksResponse
-	| GetPersonalPresetResponse;
+	| GetPersonalPresetResponse
+	| GetPolishSettingsResponse
+	| PolishTextResponse;
 
 export type LintRequest = {
 	kind: 'lint';
@@ -377,4 +383,30 @@ export type GetPersonalPresetResponse = {
 export type SetPersonalPresetRequest = {
 	kind: 'setPersonalPreset';
 	preset: PersonalPresetId;
+};
+
+export type GetPolishSettingsRequest = {
+	kind: 'getPolishSettings';
+};
+
+export type GetPolishSettingsResponse = {
+	kind: 'getPolishSettings';
+	settings: PolishSettings;
+};
+
+export type SetPolishSettingsRequest = {
+	kind: 'setPolishSettings';
+	settings: PolishSettings;
+};
+
+export type PolishTextRequest = {
+	kind: 'polishText';
+	text: string;
+	source: PolishSource;
+};
+
+export type PolishTextResponse = {
+	kind: 'polishText';
+	ok: boolean;
+	text: string;
 };

@@ -1,5 +1,6 @@
 import { defineManifest } from '@crxjs/vite-plugin';
 import packageData from '../package.json';
+import { personalConnectSources, personalOptionalOrigins } from './personalPolish';
 
 const isDev = process.env.NODE_ENV == 'development';
 
@@ -10,7 +11,7 @@ const isDev = process.env.NODE_ENV == 'development';
  *
  * NOTE: `'unsafe-eval'` is *omitted* because Chrome blocks it outright.
  */
-export function makeExtensionCSP(isDev: boolean): string {
+export function makeExtensionCSP(isDev: boolean, personal = false): string {
 	const scriptSrc = ["'self'", "'wasm-unsafe-eval'"]; // minimum, cannot add more
 	const objectSrc = ["'self'"]; // standard
 	const connectSrc = ["'self'"]; // WebSocket goes here
@@ -26,6 +27,9 @@ export function makeExtensionCSP(isDev: boolean): string {
 	}
 
 	connectSrc.push('https://writewithharper.com');
+	if (personal) {
+		connectSrc.push(...personalConnectSources());
+	}
 
 	// Assemble the semicolon-delimited CSP
 	return `${[
@@ -37,63 +41,67 @@ export function makeExtensionCSP(isDev: boolean): string {
 	].join('; ')};`;
 }
 
-export default defineManifest({
-	name: `Private Grammar & Spell Checker - Harper${isDev ? ' ➡️ Dev' : ''}`,
-	description: packageData.description,
-	version: packageData.version,
-	manifest_version: 3,
-	action: {
-		default_popup: 'popup.html',
-	},
-	options_page: 'options.html',
-	browser_specific_settings: {
-		gecko: {
-			id: 'harper@writewithharper.com',
-			strict_min_version: '146.0',
+/** Personal builds may call a model the user names. Public builds stay on the store host. */
+export function createManifest(personal: boolean) {
+	return defineManifest({
+		name: `Private Grammar & Spell Checker - Harper${isDev ? ' ➡️ Dev' : ''}`,
+		description: packageData.description,
+		version: packageData.version,
+		manifest_version: 3,
+		action: {
+			default_popup: 'popup.html',
 		},
-	},
-	background: {
-		service_worker: 'src/background/index.ts',
-		scripts: ['src/background/index.ts'],
-		type: 'module',
-	},
-	content_scripts: [
-		{
-			matches: ['https://docs.google.com/document/*'],
-			all_frames: false,
-			js: ['src/contentScript/googleDocsBootstrap.js'],
-			run_at: 'document_start',
-			world: 'MAIN',
+		options_page: 'options.html',
+		browser_specific_settings: {
+			gecko: {
+				id: 'harper@writewithharper.com',
+				strict_min_version: '146.0',
+			},
 		},
-		{
-			matches: ['<all_urls>'],
-			all_frames: true,
-			match_about_blank: true,
-			// CRXJS's manifest types do not include this Chromium manifest option.
-			// @ts-expect-error Valid for Manifest V3 content scripts.
-			match_origin_as_fallback: true,
-			js: ['src/contentScript/index.ts'],
-			run_at: 'document_idle',
+		background: {
+			service_worker: 'src/background/index.ts',
+			scripts: ['src/background/index.ts'],
+			type: 'module',
 		},
-	],
-	web_accessible_resources: [
-		{
-			matches: ['<all_urls>'],
-			resources: [
-				'wasm/harper_wasm_bg.wasm',
-				'wasm/harper_wasm_slim_bg.wasm',
-				'google-docs-bridge.js',
-				'google-docs-protocol.js',
-				'google-docs-bridge-request-handler.js',
-			],
+		content_scripts: [
+			{
+				matches: ['https://docs.google.com/document/*'],
+				all_frames: false,
+				js: ['src/contentScript/googleDocsBootstrap.js'],
+				run_at: 'document_start',
+				world: 'MAIN',
+			},
+			{
+				matches: ['<all_urls>'],
+				all_frames: true,
+				match_about_blank: true,
+				// CRXJS's manifest types do not include this Chromium manifest option.
+				// @ts-expect-error Valid for Manifest V3 content scripts.
+				match_origin_as_fallback: true,
+				js: ['src/contentScript/index.ts'],
+				run_at: 'document_idle',
+			},
+		],
+		web_accessible_resources: [
+			{
+				matches: ['<all_urls>'],
+				resources: [
+					'wasm/harper_wasm_bg.wasm',
+					'wasm/harper_wasm_slim_bg.wasm',
+					'google-docs-bridge.js',
+					'google-docs-protocol.js',
+					'google-docs-bridge-request-handler.js',
+				],
+			},
+		],
+		icons: {
+			'512': 'logo.png',
 		},
-	],
-	icons: {
-		'512': 'logo.png',
-	},
-	permissions: ['storage', 'tabs'],
-	content_security_policy: {
-		extension_pages: makeExtensionCSP(isDev),
-	},
-	host_permissions: ['https://writewithharper.com/*'],
-});
+		permissions: ['storage', 'tabs'],
+		content_security_policy: {
+			extension_pages: makeExtensionCSP(isDev, personal),
+		},
+		host_permissions: ['https://writewithharper.com/*'],
+		...(personal ? { optional_host_permissions: personalOptionalOrigins() } : {}),
+	});
+}

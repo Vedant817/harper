@@ -5,7 +5,7 @@ import path from 'path';
 import copy from 'rollup-plugin-copy';
 import sveltePreprocess from 'svelte-preprocess';
 import { defineConfig, loadEnv, type PluginOption } from 'vite';
-import manifest from './src/manifest';
+import { createManifest } from './src/manifest';
 
 export default defineConfig(({ mode }) => {
 	const env = loadEnv(mode, process.cwd(), '');
@@ -54,7 +54,7 @@ export default defineConfig(({ mode }) => {
 				],
 			}) as unknown as PluginOption,
 			tailwindcss(),
-			crx({ manifest, browser }) as unknown as PluginOption,
+			crx({ manifest: createManifest(personal), browser }) as unknown as PluginOption,
 			svelte({
 				compilerOptions: {
 					dev: !production,

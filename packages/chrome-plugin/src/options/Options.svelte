@@ -10,6 +10,15 @@ import { tick } from 'svelte';
 import logo from '/logo.png';
 import ProtocolClient from '../ProtocolClient';
 import { HARPER_PERSONAL } from '../personal';
+import {
+	defaultPolishSettings,
+	POLISH_INVALID_URL,
+	POLISH_NEED_PERMISSION,
+	type PolishSettings,
+	polishBlockReason,
+	polishOriginPattern,
+} from '../personalPolish';
+import { parsePersonalPreset } from '../personalPreset';
 import type { Hotkey, Modifier, PersonalPresetId, WeirpackMeta } from '../protocol';
 import { ActivationKey } from '../protocol';
 import StructuredRuleSettings from './StructuredRuleSettings.svelte';
@@ -48,6 +57,13 @@ let searchQueryLower = $derived(searchQuery.toLowerCase());
 let expandedGroups: Record<string, boolean> = $state({});
 let dialect = $state(Dialect.American);
 let personalPreset = $state<PersonalPresetId>('off');
+let polishSelection = $state(false);
+let polishIdle = $state(false);
+let polishEndpoint = $state('');
+let polishModel = $state('');
+let polishApiKey = $state('');
+let polishCloudAck = $state(false);
+let polishStatus = $state('');
 let isolateEnglish = $state(false);
 let openSuggestionsOnHover = $state(false);
 let delay = $state(0);
@@ -69,19 +85,35 @@ let fileInputRef: HTMLInputElement | undefined = $state();
 /** Announced to screen readers through a polite live region. */
 let statusMessage = $state('');
 
-$effect(() => {
-	if (!loaded) return;
-	ProtocolClient.setLintConfig($state.snapshot(lintConfig));
-});
+/** Opening the page loads these values. Sending them again rebuilds the engine ahead of a preset change. */
+let settingsHydrated = false;
 
 $effect(() => {
+	const nextConfig = $state.snapshot(lintConfig);
+	const nextDialect = dialect;
 	if (!loaded) return;
-	ProtocolClient.setDialect(dialect);
+	if (!settingsHydrated) {
+		settingsHydrated = true;
+		return;
+	}
+	ProtocolClient.setLintConfig(nextConfig);
+	ProtocolClient.setDialect(nextDialect);
 });
+
+/** The select component forwards the native change event. Ignore anything that is not that select. */
+function choosePreset(event: Event): void {
+	const native =
+		event instanceof CustomEvent && event.detail instanceof Event ? event.detail : event;
+	const select = native.target;
+	if (!(select instanceof HTMLSelectElement)) return;
+	const next = parsePersonalPreset(select.value);
+	personalPreset = next;
+	void ProtocolClient.setPersonalPreset(next);
+}
 
 $effect(() => {
 	if (!loaded || !HARPER_PERSONAL) return;
-	ProtocolClient.setPersonalPreset(personalPreset);
+	ProtocolClient.setPolishSettings(currentPolishSettings());
 });
 
 $effect(() => {
@@ -99,9 +131,17 @@ $effect(() => {
 	ProtocolClient.setActivationKey(activationKey);
 });
 
+/** Opening settings loads the saved dictionary. Sending it back used to rebuild the engine. */
+let dictionaryHydrated = false;
+
 $effect(() => {
+	const next = userDict;
 	if (!loaded) return;
-	ProtocolClient.setUserDictionary(stringToDict(userDict));
+	if (!dictionaryHydrated) {
+		dictionaryHydrated = true;
+		return;
+	}
+	ProtocolClient.setUserDictionary(stringToDict(next));
 });
 
 $effect(() => {
@@ -116,6 +156,7 @@ Promise.all([
 	ProtocolClient.getLintDescriptions(),
 	ProtocolClient.getDialect(),
 	HARPER_PERSONAL ? ProtocolClient.getPersonalPreset() : Promise.resolve('off' as const),
+	HARPER_PERSONAL ? ProtocolClient.getPolishSettings() : Promise.resolve(defaultPolishSettings()),
 	ProtocolClient.getIsolateEnglish(),
 	ProtocolClient.getDelay(),
 	ProtocolClient.getOpenSuggestionsOnHover(),
@@ -131,6 +172,7 @@ Promise.all([
 		nextLintDescriptions,
 		nextDialect,
 		nextPersonalPreset,
+		nextPolish,
 		nextIsolateEnglish,
 		nextDelay,
 		nextOpenSuggestionsOnHover,
@@ -145,6 +187,12 @@ Promise.all([
 		lintDescriptions = nextLintDescriptions;
 		dialect = nextDialect;
 		personalPreset = nextPersonalPreset;
+		polishSelection = nextPolish.selection;
+		polishIdle = nextPolish.idle;
+		polishEndpoint = nextPolish.endpoint;
+		polishModel = nextPolish.model;
+		polishApiKey = nextPolish.apiKey;
+		polishCloudAck = nextPolish.cloudAck;
 		isolateEnglish = nextIsolateEnglish;
 		delay = nextDelay;
 		openSuggestionsOnHover = nextOpenSuggestionsOnHover;
@@ -174,6 +222,42 @@ export function stringToDict(s: string): string[] {
 /** Converts the content of a text area to viable dictionary values. */
 export function dictToString(values: string[]): string {
 	return values.map((v) => v.trim()).join('\n');
+}
+
+function currentPolishSettings(): PolishSettings {
+	return {
+		selection: polishSelection,
+		idle: polishIdle,
+		endpoint: polishEndpoint,
+		model: polishModel,
+		apiKey: polishApiKey,
+		cloudAck: polishCloudAck,
+	};
+}
+
+/** Ask for the model host during this click. Awaiting first would drop the user gesture. */
+function allowPolishOrigin(): void {
+	const settings = currentPolishSettings();
+	const reason = polishBlockReason(settings, 'Hello');
+	if (reason) {
+		polishStatus = reason;
+		return;
+	}
+
+	const pattern = polishOriginPattern(settings.endpoint);
+	if (!pattern) {
+		polishStatus = POLISH_INVALID_URL;
+		return;
+	}
+
+	void ProtocolClient.setPolishSettings(settings);
+	try {
+		chrome.permissions.request({ origins: [pattern] }, (granted) => {
+			polishStatus = granted ? 'Harper can reach this model address.' : POLISH_NEED_PERMISSION;
+		});
+	} catch {
+		polishStatus = POLISH_NEED_PERMISSION;
+	}
 }
 
 function resetRulesToDefaults(): void {
@@ -429,7 +513,7 @@ async function removeWeirpack(id: string) {
 }
 </script>
 
-<main class="flex min-h-screen flex-col px-4 py-6 font-sans lg:h-screen lg:overflow-hidden lg:px-8">
+<main id="harper-build" data-personal={HARPER_PERSONAL ? 'true' : 'false'} class="flex min-h-screen flex-col px-4 py-6 font-sans lg:h-screen lg:overflow-hidden lg:px-8">
   <!-- Skip links: visible only while focused -->
   <a href="#rules-list" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-black">Skip to rules</a>
   <a href="#settings" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-black">Skip to settings</a>
@@ -541,12 +625,76 @@ async function removeWeirpack(id: string) {
                     bind:value={personalPreset}
                     aria-labelledby="preset-label"
                     aria-describedby="preset-desc"
+                    on:change={choosePreset}
                   >
                     <option value="off">Off</option>
                     <option value="casual">Casual</option>
                     <option value="linkedin">LinkedIn DM</option>
                     <option value="email">Email</option>
                   </Select>
+                </div>
+                <div class="space-y-3 py-3.5">
+                  <div class="flex flex-col">
+                    <h3 id="polish-label" class="text-base font-semibold">Selection polish</h3>
+                    <p id="polish-desc" class="text-xs text-gray-600 dark:text-[#d1d5db]!">
+                      Optional, and off until you turn it on. Grammar underlines do not wait. A model on this computer stays on this computer. A non-local address sends the selection only after you confirm. The key stays in this browser.
+                    </p>
+                  </div>
+                  <label class="flex items-center gap-2 text-sm">
+                    <input id="harper-polish-selection" type="checkbox" bind:checked={polishSelection} />
+                    Polish the text I select
+                  </label>
+                  <label class="flex items-center gap-2 text-sm">
+                    <input id="harper-polish-idle" type="checkbox" bind:checked={polishIdle} />
+                    Also polish this field after I stop typing
+                  </label>
+                  <label class="flex flex-col gap-1 text-sm" for="harper-polish-endpoint">
+                    Model address
+                    <input
+                      id="harper-polish-endpoint"
+                      type="text"
+                      autocomplete="off"
+                      spellcheck="false"
+                      placeholder="http://127.0.0.1:11434/v1/chat/completions"
+                      bind:value={polishEndpoint}
+                      class="h-9 rounded-lg border border-gray-200 px-2 dark:border-slate-700 dark:bg-slate-900"
+                    />
+                  </label>
+                  <label class="flex flex-col gap-1 text-sm" for="harper-polish-model">
+                    Model name
+                    <input
+                      id="harper-polish-model"
+                      type="text"
+                      autocomplete="off"
+                      spellcheck="false"
+                      placeholder="llama3.2"
+                      bind:value={polishModel}
+                      class="h-9 rounded-lg border border-gray-200 px-2 dark:border-slate-700 dark:bg-slate-900"
+                    />
+                  </label>
+                  <label class="flex flex-col gap-1 text-sm" for="harper-polish-key">
+                    API key
+                    <input
+                      id="harper-polish-key"
+                      type="password"
+                      autocomplete="off"
+                      bind:value={polishApiKey}
+                      class="h-9 rounded-lg border border-gray-200 px-2 dark:border-slate-700 dark:bg-slate-900"
+                    />
+                  </label>
+                  <label class="flex items-center gap-2 text-sm">
+                    <input id="harper-polish-cloud" type="checkbox" bind:checked={polishCloudAck} />
+                    This address is not on this computer. Harper may send the selection there.
+                  </label>
+                  <button
+                    id="harper-polish-allow"
+                    type="button"
+                    class="h-9 cursor-pointer rounded-lg bg-primary px-3 text-sm font-semibold text-black"
+                    onclick={allowPolishOrigin}
+                  >
+                    Allow this model address
+                  </button>
+                  <p class="text-xs text-gray-600 dark:text-[#d1d5db]!" aria-live="polite">{polishStatus}</p>
                 </div>
               {/if}
 
