@@ -29,7 +29,6 @@ export const CORE_RULES = [
 	'PersonalDirectQuestion',
 	'PersonalObjectCase',
 	'PersonalLessFewer',
-	'PersonalInOrderTo',
 	'PersonalDueToTheFact',
 	'PersonalAtThisPoint',
 	'PersonalInTheEvent',

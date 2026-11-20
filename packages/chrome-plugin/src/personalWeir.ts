@@ -34,30 +34,32 @@ function rule(source: string): string {
 }
 
 const commaSplice = rule(`
-expr firstVerb <VERB, (![know, mean, guess, suppose, understand])>
-expr head (PRON @firstVerb)
-expr splice [${arms('@head', ', PRON VERB', 24)}]
-expr main <@splice, (, PRON VERB), (, )>
+expr firstVerb <VERB, (![know, mean, guess, suppose, understand, think])>
+expr head (^PRON @firstVerb)
+expr splice [${arms('@head', ', I @firstVerb', 24)}]
+expr main <@splice, (, I @firstVerb), (, )>
 let message "This comma joins two sentences. Use a period or a semicolon."
-let description "Flags a comma splice when a subject and verb are followed by a comma and another subject and verb. Greetings are left alone."
+let description "Flags a comma splice that starts the sentence and continues with I. A clause such as When I arrived is left alone. The suggestion replaces only the comma, so the following word must already be I."
 let kind "Punctuation"
 let becomes [". ", "; "]
 let strategy "Exact"
 let scope "Sentence"
 
 test "I finished the draft, I sent it." "I finished the draft. I sent it."
-test "We wrote the note, she sent it." "We wrote the note. she sent it."
+test "We wrote the note, I sent it." "We wrote the note. I sent it."
 allows "Hi Sarah, I sent it."
 allows "I finished the draft. I sent it."
 allows "You know, I sent it."
+allows "When I arrived, I saw her."
+allows "We left, I think."
 `);
 
 const directQuestion = rule(`
 expr q [(Can you), (Could you), (Would you), (Did you), (Do you), (Does this), (Is there), (Are you), (Are there), (Have you), (What time), (When can), (Where is), (Why is), (Who is), (How are), (How do), (How can)]
-expr questions [${arms('@q', '.', 24)}]
+expr questions [${arms('^@q', '.', 24)}]
 expr main <@questions, (.)>
 let message "This looks like a direct question. End it with a question mark."
-let description "Adds a question mark when a direct question ends with a period."
+let description "Adds a question mark when the sentence starts as a direct question and ends with a period."
 let kind "Punctuation"
 let becomes "?"
 let strategy "Exact"
@@ -69,14 +71,17 @@ allows "Can you send the file?"
 allows "I sent the file."
 allows "Do the right thing."
 allows "When the build finished, I sent the note."
+allows "I know what time works."
 `);
 
 const objectCase = rule(`
 expr prep [between, with, for, to, from, without, about]
 expr person [you, him, her, them, us, PROPN, NOUN]
-expr main <(@prep @person and I[., ?]), (I)>
+expr punct <(@prep @person and I[., ?]), (I)>
+expr verb <(@prep @person and I [is, was, has, does]), (I)>
+expr main [@punct, @verb]
 let message "Use me when this is the object."
-let description "Corrects object-case and I, as in between you and I."
+let description "Corrects object-case and I after a preposition. A following verb that can take I as its subject, such as left, is left alone."
 let kind "Grammar"
 let becomes "me"
 let strategy "Exact"
@@ -85,6 +90,7 @@ let scope "Sentence"
 test "This stays between you and I." "This stays between you and me."
 test "I spoke with Sarah and I." "I spoke with Sarah and me."
 test "Is this between you and I?" "Is this between you and me?"
+test "The bond between you and I is strong." "The bond between you and me is strong."
 allows "Sarah and I went to the meeting."
 allows "I went with Sarah and I left."
 `);
@@ -101,17 +107,6 @@ let strategy "MatchCase"
 test "We need less meetings." "We need fewer meetings."
 allows "We need less time."
 allows "We need fewer meetings."
-`);
-
-const inOrderTo = rule(`
-expr main (in order to)
-let message "Use to."
-let description "Shortens in order to."
-let kind "WordChoice"
-let becomes "to"
-let strategy "MatchCase"
-
-test "I wrote in order to explain." "I wrote to explain."
 `);
 
 const dueToTheFact = rule(`
@@ -159,90 +154,105 @@ test "I will send it irregardless." "I will send it regardless."
 `);
 
 const couldCareLess = rule(`
-expr main (could care less)
+expr main <([(^could care less), (^[I, You, We, They] could care less)]), (could care less)>
 let message "The phrase is couldn't care less."
-let description "Corrects could care less."
+let description "Corrects could care less at the start of a sentence. A conditional such as if we could care less is left alone."
 let kind "Usage"
 let becomes "couldn't care less"
 let strategy "MatchCase"
+let scope "Sentence"
 
 test "I could care less about the font." "I couldn't care less about the font."
+test "Could care less about the font." "Couldn't care less about the font."
 allows "I couldn't care less about the font."
+allows "If we could care less, we would have left."
 `);
 
 function greetingComma(word: string): string {
 	return rule(`
 expr greet [Hi, Hey, Hello, Dear]
-expr addressee [PROPN, Sarah, John, Priya, Alex, Sam, Maria, David, Lisa, there, team, all, everyone, folks]
-expr main <(@greet @addressee ${word}), ( ${word})>
+expr addressee [PROPN, Sarah, John, Priya, Alex, Sam, Maria, David, Lisa, there, team, folks]
+expr main <(^@greet @addressee ${word}), ( ${word})>
 let message "Add a comma after the greeting."
-let description "Inserts the comma in a greeting such as Hi Priya, before the next word."
+let description "Inserts the comma when the sentence starts with a greeting and a name. all and everyone are not treated as names."
 let kind "Punctuation"
 let becomes ", ${word}"
-let strategy "Exact"
+let strategy "MatchCase"
 let scope "Sentence"
 
 test "Hi Sarah ${word} sent a note." "Hi Sarah, ${word} sent a note."
+test "Hi Sarah ${word.toLowerCase()} sent a note." "Hi Sarah, ${word.toLowerCase()} sent a note."
 allows "Hi Sarah, ${word} sent a note."
+allows "I said hey all I know is the title."
+allows "Everyone I know is here."
 `);
 }
 
 const hopeYoureWell = rule(`
 expr main (^Hope you're well)
 let message "Start with I."
-let description "Inserts I in Hope you're well, and only in that phrase."
+let description "Inserts I in Hope you're well when that phrase starts the sentence."
 let kind "Style"
 let becomes "I hope you're well"
 let strategy "Exact"
+let scope "Sentence"
 
 test "Hope you're well." "I hope you're well."
 allows "I hope you're well."
+allows "Thanks, Hope you're well."
 `);
 
 const wantedToFollowUp = rule(`
 expr main (^Wanted to follow up)
 let message "Start with I."
-let description "Inserts I in Wanted to follow up, and only in that phrase."
+let description "Inserts I in Wanted to follow up when that phrase starts the sentence."
 let kind "Style"
 let becomes "I wanted to follow up"
 let strategy "Exact"
+let scope "Sentence"
 
 test "Wanted to follow up on the draft." "I wanted to follow up on the draft."
 allows "I wanted to follow up on the draft."
+allows "Thanks, Wanted to follow up."
 `);
 
 const perMyLastEmail = rule(`
-expr main (per my last email)
+expr main (^per my last email)
 let message "Say this in a plainer way."
-let description "Flags per my last email. On only for the email preset."
+let description "Flags per my last email when it starts the sentence. On only for the email preset."
 let kind "Style"
 let becomes "As I mentioned"
 let strategy "Exact"
+let scope "Sentence"
 
 test "Per my last email, the draft is ready." "As I mentioned, the draft is ready."
+allows "See per my last email for the date."
 `);
 
 const circlingBack = rule(`
-expr main (just circling back)
+expr main (^just circling back)
 let message "Say this in a plainer way."
-let description "Flags just circling back. On only for the email preset."
+let description "Flags just circling back when it starts the sentence. On only for the email preset."
 let kind "Style"
 let becomes "following up"
 let strategy "MatchCase"
+let scope "Sentence"
 
 test "Just circling back on the draft." "Following up on the draft."
+allows "The hawk was just circling back toward the nest."
 `);
 
 const wantedToReachOut = rule(`
-expr main (just wanted to reach out)
+expr main <((just wanted to reach out) ![and]), (just wanted to reach out)>
 let message "Say this in a plainer way."
-let description "Flags just wanted to reach out. On only for the email preset."
+let description "Flags just wanted to reach out. A literal reach out and is left alone. On only for the email preset."
 let kind "Style"
 let becomes "wanted to write"
 let strategy "MatchCase"
 
 test "Just wanted to reach out about the role." "Wanted to write about the role."
 test "I just wanted to reach out about the role." "I wanted to write about the role."
+allows "I just wanted to reach out and shake your hand."
 `);
 
 const SOURCES: Record<string, string> = {
@@ -250,7 +260,6 @@ const SOURCES: Record<string, string> = {
 	PersonalDirectQuestion: directQuestion,
 	PersonalObjectCase: objectCase,
 	PersonalLessFewer: lessFewer,
-	PersonalInOrderTo: inOrderTo,
 	PersonalDueToTheFact: dueToTheFact,
 	PersonalAtThisPoint: atThisPoint,
 	PersonalInTheEvent: inTheEvent,
