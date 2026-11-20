@@ -1,5 +1,5 @@
 import { type BrowserContext, expect } from '@playwright/test';
-import { POLISH_EMPTY_ENDPOINT } from '../src/personalPolish';
+import { POLISH_EMPTY_ENDPOINT, POLISH_IDLE_MS } from '../src/personalPolish';
 import { test } from './fixtures';
 import { openExtensionPage, skipUnlessPersonalControl } from './testUtils';
 
@@ -16,7 +16,23 @@ test('Polish stays quiet while grammar underlines still appear', async ({ page, 
 	await expect(page.locator('#harper-highlight[data-problem-text="an"]')).toBeVisible({
 		timeout: 90000,
 	});
-	await expect(page.locator('#harper-polish-go')).toBeHidden();
+
+	// A non-collapsed selection would show Polish if the switch defaulted on.
+	await box.evaluate((element) => {
+		const editor = element as HTMLTextAreaElement;
+		editor.focus();
+		editor.setSelectionRange(0, editor.value.length);
+	});
+	const go = page.locator('#harper-polish-go');
+	await expect(go).toBeHidden();
+	await page.waitForTimeout(POLISH_IDLE_MS);
+	expect(leaked).toEqual([]);
+
+	// A page script must not be able to press the hidden button.
+	await go.evaluate((element) => {
+		(element as HTMLButtonElement).click();
+	});
+	await expect(page.locator('#harper-polish-status')).toHaveText('');
 	expect(leaked).toEqual([]);
 });
 
@@ -42,7 +58,9 @@ test('An empty model address does not phone home', async ({ page, context }) => 
 	await box.fill('This is an test');
 	const an = page.locator('#harper-highlight[data-problem-text="an"]');
 	await expect(an).toBeVisible({ timeout: 90000 });
-	await expect(page.getByText(POLISH_EMPTY_ENDPOINT)).toHaveCount(0);
+	// Idle is on. Wait out the timer. An empty address must stay quiet and must not fetch.
+	await page.waitForTimeout(POLISH_IDLE_MS);
+	await expect(page.locator('#harper-polish-status')).toHaveText('');
 	expect(leaked).toEqual([]);
 
 	await box.evaluate((element) => {
@@ -52,6 +70,11 @@ test('An empty model address does not phone home', async ({ page, context }) => 
 	});
 	const go = page.locator('#harper-polish-go');
 	await expect(go).toBeVisible({ timeout: 10000 });
+	await go.evaluate((element) => {
+		(element as HTMLButtonElement).click();
+	});
+	await expect(page.locator('#harper-polish-status')).toHaveText('');
+	expect(leaked).toEqual([]);
 	await go.click();
 	await expect(page.locator('#harper-polish-status')).toHaveText(POLISH_EMPTY_ENDPOINT);
 	expect(leaked).toEqual([]);
@@ -67,7 +90,8 @@ test('An empty model address does not phone home', async ({ page, context }) => 
 });
 
 /**
- * The options page already loads its fonts. Anything else, including a model, fails the test.
+ * The install tab and the options fonts are expected.
+ * A model call, including one to writewithharper.com, fails the test.
  */
 function watchModelRequests(context: BrowserContext): string[] {
 	const leaked: string[] = [];
@@ -77,7 +101,7 @@ function watchModelRequests(context: BrowserContext): string[] {
 			url.startsWith('http://localhost:8081') ||
 			url.startsWith('http://127.0.0.1:8081') ||
 			url.startsWith('chrome-extension:') ||
-			url.startsWith('https://writewithharper.com') ||
+			url.startsWith('https://writewithharper.com/install-browser-extension') ||
 			url.startsWith('https://fonts.googleapis.com') ||
 			url.startsWith('https://fonts.gstatic.com')
 		) {

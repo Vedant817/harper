@@ -20,6 +20,7 @@ import {
 	polishEndpointKind,
 	polishOriginPattern,
 	polishReplyText,
+	polishSettingsFromStorage,
 } from './personalPolish.ts';
 
 const local: PolishSettings = {
@@ -50,6 +51,12 @@ describe('polish stays on this device until the user allows it', () => {
 
 	it('does not build a request for the default settings', () => {
 		const settings = defaultPolishSettings();
+		assert.equal(settings.selection, false);
+		assert.equal(settings.idle, false);
+		assert.equal(settings.cloudAck, false);
+		const missing = polishSettingsFromStorage({});
+		assert.equal(missing.selection, false);
+		assert.equal(missing.idle, false);
 		assert.equal(polishBlockReason(settings, 'Hello'), POLISH_EMPTY_ENDPOINT);
 		assert.equal(buildPolishRequest(settings, 'Hello'), null);
 		assert.equal(polishOriginPattern('http://example.com/v1'), null);
@@ -141,6 +148,7 @@ describe('polish stays on this device until the user allows it', () => {
 		assert.equal(seenInit?.method, 'POST');
 		assert.equal(seenInit?.redirect, 'error');
 		assert.equal(seenInit?.credentials, 'omit');
+		assert.equal(seenInit?.referrerPolicy, 'no-referrer');
 		const headers = seenInit?.headers as Record<string, string>;
 		assert.equal(headers.authorization, 'Bearer secret-key');
 		const body = String(seenInit?.body);

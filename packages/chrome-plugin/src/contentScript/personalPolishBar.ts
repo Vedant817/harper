@@ -120,6 +120,10 @@ function actionButton(id: string, label: string, action: () => void): HTMLButton
 	button.style.font = 'inherit';
 	button.style.cursor = 'pointer';
 	button.addEventListener('click', (event) => {
+		// A page script can call click() on a hidden button. Only a real user click counts.
+		if (!event.isTrusted) {
+			return;
+		}
 		event.preventDefault();
 		event.stopPropagation();
 		action();
@@ -170,6 +174,10 @@ async function runIdle(editor: HTMLElement): Promise<void> {
 }
 
 function onGo(): void {
+	if (!settings.selection) {
+		return;
+	}
+
 	window.clearTimeout(idleTimer);
 	const editor = focusedEditor();
 	const selection = editor ? readSelection(editor) : null;
@@ -248,7 +256,7 @@ function dismiss(): void {
 }
 
 function onKeydown(event: KeyboardEvent): void {
-	if (event.key !== 'Escape' || region.style.display === 'none') {
+	if (!event.isTrusted || event.key !== 'Escape' || region.style.display === 'none') {
 		return;
 	}
 	event.preventDefault();
