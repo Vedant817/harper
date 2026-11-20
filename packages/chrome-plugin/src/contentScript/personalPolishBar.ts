@@ -5,8 +5,10 @@ import {
 	POLISH_CHANGED,
 	POLISH_EMPTY_TEXT,
 	POLISH_IDLE_MS,
+	type PolishBox,
 	type PolishSettings,
 	polishBlockReason,
+	polishClickAllowed,
 	polishSettingsFromStorage,
 	polishStorageKeys,
 } from '../personalPolish';
@@ -32,6 +34,8 @@ let statusNode: HTMLDivElement;
 let previewNode: HTMLDivElement;
 let acceptButton: HTMLButtonElement;
 let dismissButton: HTMLButtonElement;
+/** Boxes measured the last time the bar was laid out. A later stretch does not count. */
+const placedBoxes = new Map<HTMLElement, PolishBox>();
 
 /** Mount the selection polish bar. Call this only from the lint page, and only on a personal build. */
 export function startPersonalPolish(): void {
@@ -105,9 +109,9 @@ function mount(): void {
 	acceptButton = actionButton('harper-polish-accept', 'Replace', onAccept);
 	dismissButton = actionButton('harper-polish-dismiss', 'Dismiss', dismiss);
 	region.append(goButton, statusNode, previewNode, acceptButton, dismissButton);
-	setDisplayed(goButton, false);
-	setDisplayed(acceptButton, false);
-	setDisplayed(dismissButton, false);
+	lockButton(goButton, false);
+	lockButton(acceptButton, false);
+	lockButton(dismissButton, false);
 	setDisplayed(previewNode, false);
 	document.documentElement.append(region);
 }
@@ -126,6 +130,20 @@ function actionButton(id: string, label: string, action: () => void): HTMLButton
 		}
 		event.preventDefault();
 		event.stopPropagation();
+		const live = button.getBoundingClientRect();
+		if (
+			!polishClickAllowed({
+				trusted: true,
+				clientX: event.clientX,
+				clientY: event.clientY,
+				live,
+				placed: placedBoxes.get(button) ?? null,
+			})
+		) {
+			// The page moved or stretched this control. Put it back and do not send text.
+			layout();
+			return;
+		}
 		action();
 	});
 	return button;
@@ -269,18 +287,22 @@ function layout(): void {
 	const showGo = selection != null && pending == null;
 	const showResult = pending != null;
 	const showStatus = (statusNode.textContent ?? '').length > 0;
-	setDisplayed(goButton, showGo);
+	lockButton(goButton, showGo);
 	setDisplayed(previewNode, showResult);
-	setDisplayed(acceptButton, showResult);
-	setDisplayed(dismissButton, showResult || showStatus);
+	lockButton(acceptButton, showResult);
+	lockButton(dismissButton, showResult || showStatus);
 	const editor = focusedEditor();
 	if (showGo || showResult || showStatus) {
 		region.style.setProperty('display', 'flex', 'important');
 		if (editor) {
 			place(editor);
 		}
+		rememberControl(goButton);
+		rememberControl(acceptButton);
+		rememberControl(dismissButton);
 		return;
 	}
+	placedBoxes.clear();
 	region.style.setProperty('display', 'none', 'important');
 }
 
@@ -297,12 +319,64 @@ function place(editor: HTMLElement): void {
 		top = Math.max(8, rect.top - 48);
 	}
 	const left = Math.max(8, Math.min(rect.left, window.innerWidth - width - 8));
-	region.style.top = `${top}px`;
-	region.style.left = `${left}px`;
+	const style = region.style;
+	style.setProperty('position', 'fixed', 'important');
+	style.setProperty('inset', 'auto', 'important');
+	style.setProperty('top', `${top}px`, 'important');
+	style.setProperty('left', `${left}px`, 'important');
+	style.setProperty('width', `${width}px`, 'important');
+	style.setProperty('height', 'auto', 'important');
+	style.setProperty('max-width', `${width}px`, 'important');
+	style.setProperty('max-height', '240px', 'important');
+	style.setProperty('margin', '0', 'important');
+	style.setProperty('opacity', '1', 'important');
+	style.setProperty('visibility', 'visible', 'important');
+	style.setProperty('transform', 'none', 'important');
+	style.setProperty('filter', 'none', 'important');
+	style.setProperty('zoom', '1', 'important');
+	style.setProperty('clip-path', 'none', 'important');
+	style.setProperty('pointer-events', 'auto', 'important');
+}
+
+function rememberControl(element: HTMLElement): void {
+	if (element.style.display === 'none') {
+		placedBoxes.delete(element);
+		return;
+	}
+	const rect = element.getBoundingClientRect();
+	placedBoxes.set(element, {
+		left: rect.left,
+		top: rect.top,
+		width: rect.width,
+		height: rect.height,
+	});
 }
 
 function setDisplayed(element: HTMLElement, shown: boolean): void {
 	element.style.setProperty('display', shown ? 'flex' : 'none', 'important');
+}
+
+/** Page CSS and page script can restyle a button in the document. Pin the box on each layout. */
+function lockButton(button: HTMLButtonElement, shown: boolean): void {
+	const style = button.style;
+	style.setProperty('display', shown ? 'inline-flex' : 'none', 'important');
+	style.setProperty('position', 'static', 'important');
+	style.setProperty('inset', 'auto', 'important');
+	style.setProperty('width', 'auto', 'important');
+	style.setProperty('height', 'auto', 'important');
+	style.setProperty('max-width', '100%', 'important');
+	style.setProperty('max-height', '48px', 'important');
+	style.setProperty('min-width', '0', 'important');
+	style.setProperty('min-height', '0', 'important');
+	style.setProperty('margin', '0', 'important');
+	style.setProperty('opacity', '1', 'important');
+	style.setProperty('visibility', 'visible', 'important');
+	style.setProperty('transform', 'none', 'important');
+	style.setProperty('filter', 'none', 'important');
+	style.setProperty('zoom', '1', 'important');
+	style.setProperty('clip-path', 'none', 'important');
+	style.setProperty('z-index', 'auto', 'important');
+	style.setProperty('pointer-events', shown ? 'auto' : 'none', 'important');
 }
 
 function currentSelection(): ValueSnap | RangeSnap | null {

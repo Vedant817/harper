@@ -208,6 +208,67 @@ export function polishBlockReason(settings: PolishSettings, text: string): strin
 	return null;
 }
 
+/** A Polish control is at most the width of the bar and one line tall. */
+export const POLISH_BUTTON_MAX_WIDTH = 280;
+export const POLISH_BUTTON_MAX_HEIGHT = 64;
+
+export type PolishBox = {
+	left: number;
+	top: number;
+	width: number;
+	height: number;
+};
+
+/**
+ * A real click counts only when it lands on the button we placed.
+ * A page can stretch that button over the viewport. The click is still trusted,
+ * so the geometry has to match the box measured when the bar was last laid out.
+ */
+export function polishClickAllowed(input: {
+	trusted: boolean;
+	clientX: number;
+	clientY: number;
+	live: PolishBox;
+	placed: PolishBox | null;
+}): boolean {
+	const placed = input.placed;
+	if (
+		!input.trusted ||
+		placed == null ||
+		!polishBoxIsCompact(placed) ||
+		!polishBoxIsCompact(input.live)
+	) {
+		return false;
+	}
+	if (!polishBoxesMatch(input.live, placed)) {
+		return false;
+	}
+	return (
+		input.clientX >= placed.left &&
+		input.clientX <= placed.left + placed.width &&
+		input.clientY >= placed.top &&
+		input.clientY <= placed.top + placed.height
+	);
+}
+
+function polishBoxIsCompact(box: PolishBox): boolean {
+	return (
+		box.width > 0 &&
+		box.height > 0 &&
+		box.width <= POLISH_BUTTON_MAX_WIDTH &&
+		box.height <= POLISH_BUTTON_MAX_HEIGHT
+	);
+}
+
+function polishBoxesMatch(live: PolishBox, placed: PolishBox): boolean {
+	return (
+		Math.abs(live.left - placed.left) <= 1 &&
+		Math.abs(live.top - placed.top) <= 1 &&
+		Math.abs(live.width - placed.width) <= 1 &&
+		Math.abs(live.height - placed.height) <= 1
+	);
+}
+
 export function polishReplyText(value: unknown): string | null {
 	if (value == null || typeof value !== 'object') {
 		return null;

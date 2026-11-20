@@ -17,6 +17,7 @@ import {
 	POLISH_TOO_LONG,
 	type PolishSettings,
 	polishBlockReason,
+	polishClickAllowed,
 	polishEndpointKind,
 	polishOriginPattern,
 	polishReplyText,
@@ -203,5 +204,55 @@ describe('polish stays on this device until the user allows it', () => {
 			},
 		);
 		assert.deepEqual(dropped, { ok: false, text: POLISH_NO_ANSWER });
+	});
+});
+
+describe('a stretched Polish button does not take the click', () => {
+	const placed = { left: 20, top: 40, width: 140, height: 32 };
+
+	it('accepts a trusted click on the button that was laid out', () => {
+		assert.equal(
+			polishClickAllowed({
+				trusted: true,
+				clientX: 24,
+				clientY: 48,
+				live: placed,
+				placed,
+			}),
+			true,
+		);
+	});
+
+	it('rejects a scripted click and a click on a button stretched over the page', () => {
+		assert.equal(
+			polishClickAllowed({
+				trusted: false,
+				clientX: 24,
+				clientY: 48,
+				live: placed,
+				placed,
+			}),
+			false,
+		);
+		assert.equal(
+			polishClickAllowed({
+				trusted: true,
+				clientX: 4,
+				clientY: 4,
+				live: { left: 0, top: 0, width: 1200, height: 800 },
+				placed,
+			}),
+			false,
+		);
+		assert.equal(
+			polishClickAllowed({
+				trusted: true,
+				clientX: 4,
+				clientY: 4,
+				live: { left: 0, top: 0, width: 1200, height: 800 },
+				placed: { left: 0, top: 0, width: 1200, height: 800 },
+			}),
+			false,
+		);
 	});
 });

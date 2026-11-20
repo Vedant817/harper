@@ -75,6 +75,29 @@ test('An empty model address does not phone home', async ({ page, context }) => 
 	});
 	await expect(page.locator('#harper-polish-status')).toHaveText('');
 	expect(leaked).toEqual([]);
+
+	// A page can stretch the button over the viewport. The next real click must not send text.
+	await go.evaluate((element) => {
+		const button = element as HTMLButtonElement;
+		button.style.setProperty('position', 'fixed', 'important');
+		button.style.setProperty('inset', '0', 'important');
+		button.style.setProperty('width', '100vw', 'important');
+		button.style.setProperty('height', '100vh', 'important');
+		button.style.setProperty('max-width', 'none', 'important');
+		button.style.setProperty('max-height', 'none', 'important');
+		button.style.setProperty('opacity', '0', 'important');
+		button.style.setProperty('z-index', '2147483647', 'important');
+	});
+	await page.mouse.click(4, 4);
+	await expect(page.locator('#harper-polish-status')).toHaveText('');
+	expect(leaked).toEqual([]);
+
+	await box.evaluate((element) => {
+		const editor = element as HTMLTextAreaElement;
+		editor.focus();
+		editor.setSelectionRange(0, editor.value.length);
+	});
+	await expect(go).toBeVisible();
 	await go.click();
 	await expect(page.locator('#harper-polish-status')).toHaveText(POLISH_EMPTY_ENDPOINT);
 	expect(leaked).toEqual([]);
