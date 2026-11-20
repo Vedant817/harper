@@ -6,9 +6,11 @@ import {
 	POLISH_EMPTY_TEXT,
 	POLISH_IDLE_MS,
 	type PolishBox,
+	type PolishControlStyle,
 	type PolishSettings,
 	polishBlockReason,
 	polishClickAllowed,
+	polishControlStyleAllowed,
 	polishSettingsFromStorage,
 	polishStorageKeys,
 } from '../personalPolish';
@@ -138,7 +140,9 @@ function actionButton(id: string, label: string, action: () => void): HTMLButton
 				clientY: event.clientY,
 				live,
 				placed: placedBoxes.get(button) ?? null,
-			})
+			}) ||
+			!polishControlStyleAllowed(readControlStyle(button)) ||
+			!polishControlStyleAllowed(readControlStyle(region))
 		) {
 			// The page moved or stretched this control. Put it back and do not send text.
 			layout();
@@ -329,9 +333,18 @@ function place(editor: HTMLElement): void {
 	style.setProperty('max-width', `${width}px`, 'important');
 	style.setProperty('max-height', '240px', 'important');
 	style.setProperty('margin', '0', 'important');
+	style.setProperty('padding', '8px', 'important');
+	style.setProperty('border-width', '1px', 'important');
+	style.setProperty('border-style', 'solid', 'important');
+	style.setProperty('box-sizing', 'border-box', 'important');
+	style.setProperty('gap', '6px', 'important');
+	style.setProperty('flex-direction', 'column', 'important');
 	style.setProperty('opacity', '1', 'important');
 	style.setProperty('visibility', 'visible', 'important');
 	style.setProperty('transform', 'none', 'important');
+	style.setProperty('translate', 'none', 'important');
+	style.setProperty('rotate', 'none', 'important');
+	style.setProperty('scale', 'none', 'important');
 	style.setProperty('filter', 'none', 'important');
 	style.setProperty('zoom', '1', 'important');
 	style.setProperty('clip-path', 'none', 'important');
@@ -369,14 +382,33 @@ function lockButton(button: HTMLButtonElement, shown: boolean): void {
 	style.setProperty('min-width', '0', 'important');
 	style.setProperty('min-height', '0', 'important');
 	style.setProperty('margin', '0', 'important');
+	style.setProperty('padding', '0', 'important');
+	style.setProperty('border-width', '0', 'important');
+	style.setProperty('box-sizing', 'border-box', 'important');
+	style.setProperty('order', '0', 'important');
 	style.setProperty('opacity', '1', 'important');
 	style.setProperty('visibility', 'visible', 'important');
 	style.setProperty('transform', 'none', 'important');
+	style.setProperty('translate', 'none', 'important');
+	style.setProperty('rotate', 'none', 'important');
+	style.setProperty('scale', 'none', 'important');
 	style.setProperty('filter', 'none', 'important');
 	style.setProperty('zoom', '1', 'important');
 	style.setProperty('clip-path', 'none', 'important');
 	style.setProperty('z-index', 'auto', 'important');
 	style.setProperty('pointer-events', shown ? 'auto' : 'none', 'important');
+}
+
+function readControlStyle(element: HTMLElement): PolishControlStyle {
+	const style = getComputedStyle(element);
+	return {
+		opacity: style.opacity,
+		visibility: style.visibility,
+		transform: style.transform,
+		translate: style.getPropertyValue('translate'),
+		rotate: style.getPropertyValue('rotate'),
+		scale: style.getPropertyValue('scale'),
+	};
 }
 
 function currentSelection(): ValueSnap | RangeSnap | null {

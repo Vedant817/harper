@@ -219,10 +219,20 @@ export type PolishBox = {
 	height: number;
 };
 
+export type PolishControlStyle = {
+	opacity: string;
+	visibility: string;
+	transform: string;
+	translate: string;
+	rotate: string;
+	scale: string;
+};
+
 /**
  * A real click counts only when it lands on the button we placed.
- * A page can stretch that button over the viewport. The click is still trusted,
- * so the geometry has to match the box measured when the bar was last laid out.
+ * A page can stretch that button over the viewport, or park the same compact
+ * box on another control. The click is still trusted, so the geometry has to
+ * match the box measured when the bar was last laid out.
  */
 export function polishClickAllowed(input: {
 	trusted: boolean;
@@ -266,6 +276,18 @@ function polishBoxesMatch(live: PolishBox, placed: PolishBox): boolean {
 		Math.abs(live.top - placed.top) <= 1 &&
 		Math.abs(live.width - placed.width) <= 1 &&
 		Math.abs(live.height - placed.height) <= 1
+	);
+}
+
+/** Opacity and the individual transform properties can move a compact button without stretching it. */
+export function polishControlStyleAllowed(style: PolishControlStyle): boolean {
+	return (
+		style.opacity === '1' &&
+		style.visibility === 'visible' &&
+		style.transform === 'none' &&
+		style.translate === 'none' &&
+		style.rotate === 'none' &&
+		style.scale === 'none'
 	);
 }
 

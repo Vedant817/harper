@@ -18,6 +18,7 @@ import {
 	type PolishSettings,
 	polishBlockReason,
 	polishClickAllowed,
+	polishControlStyleAllowed,
 	polishEndpointKind,
 	polishOriginPattern,
 	polishReplyText,
@@ -254,5 +255,31 @@ describe('a stretched Polish button does not take the click', () => {
 			}),
 			false,
 		);
+		const parked = { left: placed.left + 340, top: placed.top + 280, width: 104, height: 24 };
+		assert.equal(
+			polishClickAllowed({
+				trusted: true,
+				clientX: parked.left + 4,
+				clientY: parked.top + 4,
+				live: parked,
+				placed,
+			}),
+			false,
+		);
+	});
+
+	it('rejects a compact button that was translated or faded', () => {
+		const clear = {
+			opacity: '1',
+			visibility: 'visible',
+			transform: 'none',
+			translate: 'none',
+			rotate: 'none',
+			scale: 'none',
+		};
+		assert.equal(polishControlStyleAllowed(clear), true);
+		assert.equal(polishControlStyleAllowed({ ...clear, opacity: '0' }), false);
+		assert.equal(polishControlStyleAllowed({ ...clear, translate: '340px 280px' }), false);
+		assert.equal(polishControlStyleAllowed({ ...clear, scale: '1.5' }), false);
 	});
 });

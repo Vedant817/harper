@@ -92,6 +92,35 @@ test('An empty model address does not phone home', async ({ page, context }) => 
 	await expect(page.locator('#harper-polish-status')).toHaveText('');
 	expect(leaked).toEqual([]);
 
+	// A compact move still hits the button. translate, padding, and border must not send text.
+	for (const shift of ['translate', 'padding', 'border'] as const) {
+		await box.evaluate((element) => {
+			const editor = element as HTMLTextAreaElement;
+			editor.focus();
+			editor.setSelectionRange(0, editor.value.length);
+		});
+		await expect(go).toBeVisible();
+		await go.evaluate((element, kind) => {
+			const button = element as HTMLButtonElement;
+			const region = document.getElementById('harper-polish');
+			if (kind === 'translate') {
+				button.style.setProperty('translate', '80px 60px', 'important');
+				button.style.setProperty('opacity', '0', 'important');
+			} else if (kind === 'padding' && region) {
+				region.style.setProperty('padding-top', '80px', 'important');
+			} else if (region) {
+				region.style.setProperty('border-top-width', '80px', 'important');
+			}
+		}, shift);
+		const parked = await go.boundingBox();
+		if (parked == null) {
+			throw new Error('Polish button has no box');
+		}
+		await page.mouse.click(parked.x + parked.width / 2, parked.y + parked.height / 2);
+		await expect(page.locator('#harper-polish-status')).toHaveText('');
+		expect(leaked).toEqual([]);
+	}
+
 	await box.evaluate((element) => {
 		const editor = element as HTMLTextAreaElement;
 		editor.focus();
