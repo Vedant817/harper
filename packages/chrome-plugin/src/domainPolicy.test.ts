@@ -57,6 +57,19 @@ describe('domain policy', () => {
 		);
 	});
 
+	it('lets a canonical pause beat an allowlisted site when both defaults are on', () => {
+		assert.equal(
+			resolveDomainEnabled({
+				host: 'www.linkedin.com',
+				stored: { 'domainStatus linkedin.com': false },
+				defaultHosts: defaults,
+				defaultEnable: true,
+				personal: true,
+			}),
+			false,
+		);
+	});
+
 	it('matches the default list through either host form', () => {
 		assert.equal(
 			resolveDomainEnabled({
