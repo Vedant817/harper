@@ -251,6 +251,11 @@ export default class ProtocolClient {
 		return response.preset;
 	}
 
+	/** Drop cached lints in this realm. Other pages keep their own cache until storage changes. */
+	public static invalidateLintCache(): void {
+		this.lintCache.clear();
+	}
+
 	public static async setPersonalPreset(preset: PersonalPresetId): Promise<void> {
 		this.lintCache.clear();
 		await chrome.runtime.sendMessage({ kind: 'setPersonalPreset', preset });

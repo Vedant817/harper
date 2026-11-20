@@ -13,7 +13,9 @@ import {
 	resolveDomainEnabled,
 	storedDomainStatus,
 } from '../domainPolicy';
+import { linterStorageKeys } from '../linterStorageKeys';
 import type { PopupState } from '../PopupState';
+import { packRulesToRestore } from '../packRules';
 import { HARPER_PERSONAL } from '../personal';
 import { overlayLintConfig, parsePersonalPreset } from '../personalPreset';
 import { buildPresetFiles } from '../personalWeir';
@@ -125,15 +127,8 @@ let linter: LocalLinter;
 /** Rule config last saved by the user. Preset overlays are not written here. */
 let baselineLintConfigJson: string | null = null;
 const WEIRPACKS_KEY = 'weirpacks';
-const linterStorageKeys = [
-	'dialect',
-	'ignoredLints',
-	'lintConfig',
-	WEIRPACKS_KEY,
-	'userDictionary',
-	'personalPreset',
-];
 let linterHasPersistedState = false;
+let linterTicket = 0;
 const defaultEnabledDomains = [
 	'old.reddit.com',
 	'sh.reddit.com',
@@ -229,15 +224,41 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
  */
 function ensureLinterReady(): Promise<void> {
 	if (linterReady == null) {
-		linterReady = getDialect()
+		let pending: Promise<void>;
+		pending = getDialect()
 			.then((dialect) => initializeLinter(dialect))
-			.catch((err) => {
-				linterReady = null;
+			.catch((err: unknown) => {
+				if (linterReady === pending) {
+					linterReady = null;
+				}
 				throw err;
 			});
+		linterReady = pending;
 	}
 
 	return linterReady;
+}
+
+/**
+ * Swap the running engine. Lints that arrive while this runs wait for the new engine.
+ * A failed build is forgotten so the next lint can try again.
+ */
+function replaceLinter(work: () => Promise<void>): Promise<void> {
+	const ticket = ++linterTicket;
+	const previous = linterReady;
+	const pending = (async () => {
+		if (previous) {
+			await previous.catch(() => undefined);
+		}
+		await work();
+	})().catch((err: unknown) => {
+		if (linterTicket === ticket) {
+			linterReady = null;
+		}
+		throw err;
+	});
+	linterReady = pending;
+	return pending;
 }
 
 async function enableDefaultDomains() {
@@ -707,24 +728,34 @@ async function handleAddWeirpack(req: AddWeirpackRequest): Promise<UnitResponse>
 
 async function handleRemoveWeirpack(req: RemoveWeirpackRequest): Promise<UnitResponse> {
 	await ensureLinterReady();
+	const dialect = await linter.getDialect();
 	const current = await getStoredWeirpacks();
 	const next = current.filter((item) => item.id !== req.id);
-	await setStoredWeirpacks(next);
-
-	initializeLinter(await linter.getDialect());
+	await replaceLinter(async () => {
+		await setStoredWeirpacks(next);
+		await initializeLinter(dialect);
+	});
 	return createUnitResponse();
 }
 
-/** Set the lint configuration inside the global `linter` and in permanent storage. */
+/**
+ * Save the user's rule config, then turn pack rules back on in the running engine.
+ * The saved JSON stays the user's config. Open pages are notified only after that.
+ */
 async function setLintConfig(lintConfig: LintConfig): Promise<void> {
+	const previous = JSON.parse(await linter.getLintConfigAsJSON()) as LintConfig;
 	await linter.setLintConfig(lintConfig);
 	linterHasPersistedState = true;
 
 	const json = await linter.getLintConfigAsJSON();
 	baselineLintConfigJson = json;
-
-	await chrome.storage.local.set({ lintConfig: json });
+	const saved = JSON.parse(json) as LintConfig;
+	const restored = { ...saved, ...packRulesToRestore(previous, saved) };
+	if (Object.keys(restored).length !== Object.keys(saved).length) {
+		await linter.setLintConfig(restored);
+	}
 	await applyPersonalPresetOverlay();
+	await chrome.storage.local.set({ lintConfig: json });
 }
 
 /** Get the saved lint configuration. A preset overlay is not part of this value. */
@@ -791,15 +822,10 @@ async function handleSetPersonalPreset(req: SetPersonalPresetRequest): Promise<U
 	if ((await readPersonalPreset()) === preset) {
 		return createUnitResponse();
 	}
-	await chrome.storage.local.set({ personalPreset: preset });
-	if (linterReady != null) {
-		await linterReady.catch(() => undefined);
-	}
-	linterReady = initializeLinter(await getDialect()).catch((err) => {
-		linterReady = null;
-		throw err;
+	await replaceLinter(async () => {
+		await chrome.storage.local.set({ personalPreset: preset });
+		await initializeLinter(await getDialect());
 	});
-	await linterReady;
 	return createUnitResponse();
 }
 
@@ -896,15 +922,10 @@ async function initializeLinter(dialect: Dialect) {
 
 async function setDialect(dialect: Dialect) {
 	linterHasPersistedState = true;
-	await chrome.storage.local.set({ dialect });
-	if (linterReady != null) {
-		await linterReady.catch(() => undefined);
-	}
-	linterReady = initializeLinter(dialect).catch((err) => {
-		linterReady = null;
-		throw err;
+	await replaceLinter(async () => {
+		await initializeLinter(dialect);
+		await chrome.storage.local.set({ dialect });
 	});
-	await linterReady;
 }
 
 async function setDelay(delay: number) {
@@ -985,9 +1006,12 @@ async function isDomainSet(domain: string): Promise<boolean> {
 
 /** Reset the persistent user dictionary. */
 async function resetDictionary(): Promise<void> {
-	await chrome.storage.local.set({ userDictionary: null });
-
-	initializeLinter(await linter.getDialect());
+	await ensureLinterReady();
+	const dialect = await linter.getDialect();
+	await replaceLinter(async () => {
+		await chrome.storage.local.set({ userDictionary: null });
+		await initializeLinter(dialect);
+	});
 }
 
 /** Add words to the persistent user dictionary. */
@@ -996,10 +1020,8 @@ async function addToDictionary(words: string[]): Promise<void> {
 	exported.push(...words);
 	linterHasPersistedState = true;
 
-	await Promise.all([
-		linter.importWords(exported),
-		chrome.storage.local.set({ userDictionary: exported }),
-	]);
+	await linter.importWords(exported);
+	await chrome.storage.local.set({ userDictionary: exported });
 }
 
 /** Grab the user dictionary from persistent storage. */

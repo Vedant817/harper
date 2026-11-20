@@ -62,20 +62,29 @@ build-harper-editor: build-lint-framework build-components
   pnpm install --engine-strict=false
   pnpm build
 
-# Build the WebAssembly module
+# Build the WebAssembly module.
+# The slim file must import `./harper_wasm_bg.js`, the same module the shared glue provides.
+# `--out-name harper_wasm_slim` writes that other name into the binary and every personal lint fails.
 build-wasm:
   #!/usr/bin/env bash
+  set -euo pipefail
 
   export CARGO_TERM_QUIET=true
 
   cd "{{justfile_directory()}}/harper-wasm"
+  full=(--target web --out-name harper_wasm --out-dir pkg)
+  slim=(--target web --out-name harper_wasm --no-default-features --out-dir pkg-slim)
   if [ "${DISABLE_WASM_OPT:-0}" -eq 1 ]; then
-    wasm-pack build --target web --no-opt --out-name harper_wasm
-    wasm-pack build --target web --no-opt --out-name harper_wasm_slim --no-default-features 
-  else
-    wasm-pack build --target web --out-name harper_wasm
-    wasm-pack build --target web --out-name harper_wasm_slim --no-default-features 
+    full+=(--no-opt)
+    slim+=(--no-opt)
   fi
+
+  wasm-pack build "${full[@]}"
+  rm -rf pkg-slim
+  wasm-pack build "${slim[@]}"
+  cp pkg-slim/harper_wasm_bg.wasm pkg/harper_wasm_slim_bg.wasm
+  node check-wasm-import.mjs pkg/harper_wasm_bg.wasm
+  node check-wasm-import.mjs pkg/harper_wasm_slim_bg.wasm
 
 # Build `harper.js` with all size optimizations available.
 alias build-harper-js := build-harperjs
@@ -85,7 +94,6 @@ build-harperjs: build-wasm
 
   # Removes a duplicate copy of the WASM binary if Vite is left to its devices.
   perl -pi -e 's/new URL\(.*\)/new URL()/g' "{{justfile_directory()}}/harper-wasm/pkg/harper_wasm.js"
-  perl -pi -e 's/new URL\(.*\)/new URL()/g' "{{justfile_directory()}}/harper-wasm/pkg/harper_wasm_slim.js"
 
   cd "{{justfile_directory()}}/packages/harper.js"
   pnpm install

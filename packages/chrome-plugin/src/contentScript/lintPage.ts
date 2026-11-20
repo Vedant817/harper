@@ -8,6 +8,7 @@ import {
 } from 'lint-framework';
 import isSubstack from '../isSubstack';
 import isWordPress from '../isWordPress';
+import { linterStorageKeys } from '../linterStorageKeys';
 import ProtocolClient from '../ProtocolClient';
 import {
 	editorHostFromNode,
@@ -66,8 +67,17 @@ async function bootLintPage() {
 	});
 	fw.setOpenSuggestionsOnHover(pageOpenSuggestionsOnHover());
 	chrome.storage.onChanged.addListener((changes, area) => {
-		if (area === 'local' && changes.openSuggestionsOnHover) {
+		if (area !== 'local') {
+			return;
+		}
+
+		if (changes.openSuggestionsOnHover) {
 			fw.setOpenSuggestionsOnHover(changes.openSuggestionsOnHover.newValue === true);
+		}
+
+		if (linterStorageKeys.some((key) => changes[key] != null)) {
+			ProtocolClient.invalidateLintCache();
+			fw.update();
 		}
 	});
 	syncGoogleDocsBridge = createGoogleDocsBridgeSync(fw);
