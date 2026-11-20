@@ -809,10 +809,43 @@ import { GoogleDocsBridgeRequestHandler } from './google-docs-bridge-request-han
 		{ passive: true, capture: true },
 	);
 
-	void syncText();
-	bindLayoutObservers();
-	window.setInterval(() => {
+	let pollTimer = 0;
+
+	function stopPoll() {
+		window.clearTimeout(pollTimer);
+		pollTimer = 0;
+	}
+
+	function schedulePoll() {
+		stopPoll();
+		if (document.hidden) {
+			return;
+		}
+
+		pollTimer = window.setTimeout(() => {
+			pollTimer = 0;
+			if (document.hidden) {
+				return;
+			}
+
+			void syncText();
+			bindLayoutObservers();
+			schedulePoll();
+		}, POLL_INTERVAL_MS);
+	}
+
+	document.addEventListener('visibilitychange', () => {
+		if (document.hidden) {
+			stopPoll();
+			return;
+		}
+
 		void syncText();
 		bindLayoutObservers();
-	}, POLL_INTERVAL_MS);
+		schedulePoll();
+	});
+
+	void syncText();
+	bindLayoutObservers();
+	schedulePoll();
 })();

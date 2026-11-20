@@ -54,14 +54,43 @@ function padWithContext(source: string, start: number, end: number, contextLengt
 	return source.slice(contextStart, contextEnd);
 }
 
-const keepAliveCallback = () => {
-	ProtocolClient.lint('', 'example.com', {});
-	void syncGoogleDocsBridge();
+/**
+ * Google Docs is not a contenteditable. Retry the bridge only while the tab is visible.
+ * A hidden tab does not schedule another attempt.
+ */
+let docsSyncTimer = 0;
 
-	setTimeout(keepAliveCallback, 400);
-};
+function scheduleDocsSync() {
+	if (!isGoogleDocsPage() || document.hidden || docsSyncTimer !== 0) {
+		return;
+	}
 
-keepAliveCallback();
+	const tick = () => {
+		docsSyncTimer = 0;
+		if (!isGoogleDocsPage() || document.hidden) {
+			return;
+		}
+
+		void syncGoogleDocsBridge();
+		docsSyncTimer = window.setTimeout(tick, 1000);
+	};
+
+	tick();
+}
+
+document.addEventListener('visibilitychange', () => {
+	if (document.hidden) {
+		window.clearTimeout(docsSyncTimer);
+		docsSyncTimer = 0;
+		return;
+	}
+
+	scheduleDocsSync();
+});
+
+if (isGoogleDocsPage()) {
+	scheduleDocsSync();
+}
 
 /**
  * Returns the reasons Harper should skip this textarea while scanning for targets.
