@@ -102,7 +102,7 @@ test('An empty model address does not phone home', async ({ page, context }) => 
 		await expect(go).toBeVisible();
 		await go.evaluate((element, kind) => {
 			const button = element as HTMLButtonElement;
-			const region = document.getElementById('harper-polish');
+			const region = element.parentElement;
 			if (kind === 'translate') {
 				button.style.setProperty('translate', '80px 60px', 'important');
 				button.style.setProperty('opacity', '0', 'important');
@@ -120,6 +120,79 @@ test('An empty model address does not phone home', async ({ page, context }) => 
 		await expect(page.locator('#harper-polish-status')).toHaveText('');
 		expect(leaked).toEqual([]);
 	}
+
+	await box.evaluate((element) => {
+		const editor = element as HTMLTextAreaElement;
+		editor.focus();
+		editor.setSelectionRange(0, editor.value.length);
+	});
+	await expect(go).toBeVisible();
+	const parked = await go.evaluate((element) => {
+		const button = element as HTMLButtonElement;
+		const path = 'path("M 0 180")';
+		button.style.setProperty('offset-path', path, 'important');
+		document.addEventListener(
+			'mouseup',
+			() => {
+				button.style.setProperty('offset-path', path, 'important');
+			},
+			{ capture: false, once: true },
+		);
+		const rect = button.getBoundingClientRect();
+		return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+	});
+	await page.mouse.click(parked.x, parked.y);
+	await expect(page.locator('#harper-polish-status')).toHaveText('');
+	expect(leaked).toEqual([]);
+
+	await go.evaluate((element) => {
+		const root = element.getRootNode() as ShadowRoot;
+		const style = document.createElement('style');
+		style.id = 'harper-qa-before';
+		style.textContent =
+			'#harper-polish::before{content:""!important;display:block!important;height:160px!important;}';
+		root.append(style);
+	});
+	await box.evaluate((element) => {
+		const editor = element as HTMLTextAreaElement;
+		editor.focus();
+		editor.setSelectionRange(0, 1);
+		editor.setSelectionRange(0, editor.value.length);
+	});
+	const pushed = await go.boundingBox();
+	if (pushed == null) {
+		throw new Error('Polish button has no box');
+	}
+	await page.mouse.click(pushed.x + pushed.width / 2, pushed.y + pushed.height / 2);
+	await expect(page.locator('#harper-polish-status')).toHaveText('');
+	expect(leaked).toEqual([]);
+	await go.evaluate((element) => {
+		const root = element.getRootNode() as ShadowRoot;
+		root.getElementById('harper-qa-before')?.remove();
+	});
+
+	await page.evaluate(() => {
+		document.documentElement.style.setProperty('translate', '0 150px', 'important');
+	});
+	await box.evaluate((element) => {
+		const editor = element as HTMLTextAreaElement;
+		editor.focus();
+		editor.setSelectionRange(0, editor.value.length);
+	});
+	await expect(go).toBeVisible();
+	const editorBox = await box.boundingBox();
+	const buttonBox = await go.boundingBox();
+	if (editorBox == null || buttonBox == null) {
+		throw new Error('Polish button has no box');
+	}
+	expect(buttonBox.y).toBeGreaterThan(editorBox.y + editorBox.height);
+	expect(buttonBox.y).toBeLessThan(editorBox.y + editorBox.height + 80);
+	await page.mouse.click(buttonBox.x + buttonBox.width / 2, buttonBox.y + 150);
+	await expect(page.locator('#harper-polish-status')).toHaveText('');
+	expect(leaked).toEqual([]);
+	await page.evaluate(() => {
+		document.documentElement.style.removeProperty('translate');
+	});
 
 	await box.evaluate((element) => {
 		const editor = element as HTMLTextAreaElement;

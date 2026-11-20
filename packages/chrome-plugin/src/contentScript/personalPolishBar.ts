@@ -2,6 +2,7 @@ import ProtocolClient from '../ProtocolClient';
 import { HARPER_PERSONAL } from '../personal';
 import {
 	defaultPolishSettings,
+	POLISH_BAR_GAP,
 	POLISH_CHANGED,
 	POLISH_EMPTY_TEXT,
 	POLISH_IDLE_MS,
@@ -11,6 +12,8 @@ import {
 	polishBlockReason,
 	polishClickAllowed,
 	polishControlStyleAllowed,
+	polishFixedInset,
+	polishPlacedButtonBox,
 	polishSettingsFromStorage,
 	polishStorageKeys,
 } from '../personalPolish';
@@ -30,7 +33,9 @@ let settings: PolishSettings = defaultPolishSettings();
 let generation = 0;
 let idleTimer = 0;
 let pending: Pending | null = null;
+let host: HTMLDivElement;
 let region: HTMLDivElement;
+let originProbe: HTMLDivElement;
 let goButton: HTMLButtonElement;
 let statusNode: HTMLDivElement;
 let previewNode: HTMLDivElement;
@@ -79,6 +84,27 @@ export function startPersonalPolish(): void {
 }
 
 function mount(): void {
+	host = document.createElement('div');
+	host.id = 'harper-polish-host';
+	const shadow = host.attachShadow({ mode: 'open' });
+	const reset = document.createElement('style');
+	reset.textContent =
+		'::before,::after{content:none!important;display:none!important}*{box-sizing:border-box}';
+	shadow.append(reset);
+
+	originProbe = document.createElement('div');
+	originProbe.style.position = 'fixed';
+	originProbe.style.top = '0';
+	originProbe.style.left = '0';
+	originProbe.style.width = '0';
+	originProbe.style.height = '0';
+	originProbe.style.margin = '0';
+	originProbe.style.padding = '0';
+	originProbe.style.border = '0';
+	originProbe.style.visibility = 'hidden';
+	originProbe.style.pointerEvents = 'none';
+	pinMotion(originProbe.style);
+
 	region = document.createElement('div');
 	region.id = 'harper-polish';
 	region.style.position = 'fixed';
@@ -115,7 +141,22 @@ function mount(): void {
 	lockButton(acceptButton, false);
 	lockButton(dismissButton, false);
 	setDisplayed(previewNode, false);
-	document.documentElement.append(region);
+	shadow.append(originProbe, region);
+	host.style.setProperty('position', 'fixed', 'important');
+	host.style.setProperty('inset', 'auto', 'important');
+	host.style.setProperty('top', '0', 'important');
+	host.style.setProperty('left', '0', 'important');
+	host.style.setProperty('width', '0', 'important');
+	host.style.setProperty('height', '0', 'important');
+	host.style.setProperty('margin', '0', 'important');
+	host.style.setProperty('padding', '0', 'important');
+	host.style.setProperty('border', '0', 'important');
+	host.style.setProperty('overflow', 'visible', 'important');
+	host.style.setProperty('pointer-events', 'none', 'important');
+	host.style.setProperty('opacity', '1', 'important');
+	host.style.setProperty('visibility', 'visible', 'important');
+	pinMotion(host.style);
+	document.documentElement.append(host);
 }
 
 function actionButton(id: string, label: string, action: () => void): HTMLButtonElement {
@@ -142,7 +183,8 @@ function actionButton(id: string, label: string, action: () => void): HTMLButton
 				placed: placedBoxes.get(button) ?? null,
 			}) ||
 			!polishControlStyleAllowed(readControlStyle(button)) ||
-			!polishControlStyleAllowed(readControlStyle(region))
+			!polishControlStyleAllowed(readControlStyle(region)) ||
+			!regionPseudosQuiet()
 		) {
 			// The page moved or stretched this control. Put it back and do not send text.
 			layout();
@@ -323,11 +365,12 @@ function place(editor: HTMLElement): void {
 		top = Math.max(8, rect.top - 48);
 	}
 	const left = Math.max(8, Math.min(rect.left, window.innerWidth - width - 8));
+	const origin = originProbe.getBoundingClientRect();
 	const style = region.style;
 	style.setProperty('position', 'fixed', 'important');
 	style.setProperty('inset', 'auto', 'important');
-	style.setProperty('top', `${top}px`, 'important');
-	style.setProperty('left', `${left}px`, 'important');
+	style.setProperty('top', `${polishFixedInset(top, origin.top)}px`, 'important');
+	style.setProperty('left', `${polishFixedInset(left, origin.left)}px`, 'important');
 	style.setProperty('width', `${width}px`, 'important');
 	style.setProperty('height', 'auto', 'important');
 	style.setProperty('max-width', `${width}px`, 'important');
@@ -341,13 +384,7 @@ function place(editor: HTMLElement): void {
 	style.setProperty('flex-direction', 'column', 'important');
 	style.setProperty('opacity', '1', 'important');
 	style.setProperty('visibility', 'visible', 'important');
-	style.setProperty('transform', 'none', 'important');
-	style.setProperty('translate', 'none', 'important');
-	style.setProperty('rotate', 'none', 'important');
-	style.setProperty('scale', 'none', 'important');
-	style.setProperty('filter', 'none', 'important');
-	style.setProperty('zoom', '1', 'important');
-	style.setProperty('clip-path', 'none', 'important');
+	pinMotion(style);
 	style.setProperty('pointer-events', 'auto', 'important');
 }
 
@@ -356,13 +393,40 @@ function rememberControl(element: HTMLElement): void {
 		placedBoxes.delete(element);
 		return;
 	}
-	const rect = element.getBoundingClientRect();
-	placedBoxes.set(element, {
-		left: rect.left,
-		top: rect.top,
-		width: rect.width,
-		height: rect.height,
-	});
+	const regionRect = region.getBoundingClientRect();
+	placedBoxes.set(
+		element,
+		polishPlacedButtonBox({
+			regionLeft: regionRect.left,
+			regionTop: regionRect.top,
+			before: stackedBefore(element),
+			width: element.offsetWidth,
+			height: element.offsetHeight,
+		}),
+	);
+}
+
+/** Height of the visible rows above this button. A ::before is not one of them. */
+function stackedBefore(button: HTMLElement): number {
+	let before = 0;
+	let seen = 0;
+	for (const child of region.children) {
+		if (child === button) {
+			break;
+		}
+		if (!(child instanceof HTMLElement) || child.style.display === 'none') {
+			continue;
+		}
+		if (seen > 0) {
+			before += POLISH_BAR_GAP;
+		}
+		before += child.offsetHeight;
+		seen += 1;
+	}
+	if (seen > 0) {
+		before += POLISH_BAR_GAP;
+	}
+	return before;
 }
 
 function setDisplayed(element: HTMLElement, shown: boolean): void {
@@ -388,15 +452,24 @@ function lockButton(button: HTMLButtonElement, shown: boolean): void {
 	style.setProperty('order', '0', 'important');
 	style.setProperty('opacity', '1', 'important');
 	style.setProperty('visibility', 'visible', 'important');
+	pinMotion(style);
+	style.setProperty('z-index', 'auto', 'important');
+	style.setProperty('pointer-events', shown ? 'auto' : 'none', 'important');
+}
+
+function pinMotion(style: CSSStyleDeclaration): void {
 	style.setProperty('transform', 'none', 'important');
 	style.setProperty('translate', 'none', 'important');
 	style.setProperty('rotate', 'none', 'important');
 	style.setProperty('scale', 'none', 'important');
+	style.setProperty('offset-path', 'none', 'important');
+	style.setProperty('offset-position', 'normal', 'important');
+	style.setProperty('offset-distance', '0px', 'important');
+	style.setProperty('offset-rotate', 'auto', 'important');
+	style.setProperty('offset-anchor', 'auto', 'important');
 	style.setProperty('filter', 'none', 'important');
 	style.setProperty('zoom', '1', 'important');
 	style.setProperty('clip-path', 'none', 'important');
-	style.setProperty('z-index', 'auto', 'important');
-	style.setProperty('pointer-events', shown ? 'auto' : 'none', 'important');
 }
 
 function readControlStyle(element: HTMLElement): PolishControlStyle {
@@ -408,7 +481,19 @@ function readControlStyle(element: HTMLElement): PolishControlStyle {
 		translate: style.getPropertyValue('translate'),
 		rotate: style.getPropertyValue('rotate'),
 		scale: style.getPropertyValue('scale'),
+		offsetPath: style.getPropertyValue('offset-path'),
+		offsetPosition: style.getPropertyValue('offset-position'),
 	};
+}
+
+function regionPseudosQuiet(): boolean {
+	for (const pseudo of ['::before', '::after']) {
+		const content = getComputedStyle(region, pseudo).content;
+		if (content !== 'none' && content !== 'normal') {
+			return false;
+		}
+	}
+	return true;
 }
 
 function currentSelection(): ValueSnap | RangeSnap | null {

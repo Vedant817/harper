@@ -226,7 +226,38 @@ export type PolishControlStyle = {
 	translate: string;
 	rotate: string;
 	scale: string;
+	offsetPath: string;
+	offsetPosition: string;
 };
+
+/** The bar's own border and padding. A page ::before is not part of this box. */
+export const POLISH_BAR_BORDER = 1;
+export const POLISH_BAR_PADDING = 8;
+export const POLISH_BAR_GAP = 6;
+
+/**
+ * `position: fixed` is relative to a transformed ancestor, including `html`.
+ * Subtract that ancestor's viewport origin so the bar lands on `desired`.
+ */
+export function polishFixedInset(desired: number, containingBlockOrigin: number): number {
+	return desired - containingBlockOrigin;
+}
+
+/** Where a button sits inside the bar we placed. Previous siblings add height and one gap each. */
+export function polishPlacedButtonBox(input: {
+	regionLeft: number;
+	regionTop: number;
+	before: number;
+	width: number;
+	height: number;
+}): PolishBox {
+	return {
+		left: input.regionLeft + POLISH_BAR_BORDER + POLISH_BAR_PADDING,
+		top: input.regionTop + POLISH_BAR_BORDER + POLISH_BAR_PADDING + input.before,
+		width: input.width,
+		height: input.height,
+	};
+}
 
 /**
  * A real click counts only when it lands on the button we placed.
@@ -287,7 +318,11 @@ export function polishControlStyleAllowed(style: PolishControlStyle): boolean {
 		style.transform === 'none' &&
 		style.translate === 'none' &&
 		style.rotate === 'none' &&
-		style.scale === 'none'
+		style.scale === 'none' &&
+		style.offsetPath === 'none' &&
+		(style.offsetPosition === 'normal' ||
+			style.offsetPosition === 'auto' ||
+			style.offsetPosition === 'none')
 	);
 }
 

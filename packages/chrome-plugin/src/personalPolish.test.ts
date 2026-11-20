@@ -20,7 +20,9 @@ import {
 	polishClickAllowed,
 	polishControlStyleAllowed,
 	polishEndpointKind,
+	polishFixedInset,
 	polishOriginPattern,
+	polishPlacedButtonBox,
 	polishReplyText,
 	polishSettingsFromStorage,
 } from './personalPolish.ts';
@@ -276,10 +278,36 @@ describe('a stretched Polish button does not take the click', () => {
 			translate: 'none',
 			rotate: 'none',
 			scale: 'none',
+			offsetPath: 'none',
+			offsetPosition: 'normal',
 		};
 		assert.equal(polishControlStyleAllowed(clear), true);
 		assert.equal(polishControlStyleAllowed({ ...clear, opacity: '0' }), false);
 		assert.equal(polishControlStyleAllowed({ ...clear, translate: '340px 280px' }), false);
 		assert.equal(polishControlStyleAllowed({ ...clear, scale: '1.5' }), false);
+		assert.equal(polishControlStyleAllowed({ ...clear, offsetPath: 'path("M 0 250")' }), false);
+	});
+
+	it('keeps the placed box next to the editor when html is shifted', () => {
+		assert.equal(polishFixedInset(264, 150), 114);
+		const placed = polishPlacedButtonBox({
+			regionLeft: 20,
+			regionTop: 264,
+			before: 0,
+			width: 140,
+			height: 24,
+		});
+		assert.deepEqual(placed, { left: 29, top: 273, width: 140, height: 24 });
+		const pushed = { ...placed, top: placed.top + 160 };
+		assert.equal(
+			polishClickAllowed({
+				trusted: true,
+				clientX: pushed.left + 4,
+				clientY: pushed.top + 4,
+				live: pushed,
+				placed,
+			}),
+			false,
+		);
 	});
 });
