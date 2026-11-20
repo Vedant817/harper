@@ -44,6 +44,10 @@ export default defineConfig(({ mode }) => {
 						src: '../harper.js/dist/harper_wasm_bg.wasm',
 						dest: './public/wasm',
 					},
+					{
+						src: '../harper.js/dist/harper_wasm_slim_bg.wasm',
+						dest: './public/wasm',
+					},
 				],
 			}) as unknown as PluginOption,
 			tailwindcss(),

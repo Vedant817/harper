@@ -334,6 +334,11 @@ async function handleLint(
 		return { kind: 'lints', lints: {} };
 	}
 
+	// Slim WASM panics on Typst. The personal build never sends that language to the engine.
+	if (HARPER_PERSONAL && req.options?.language === 'typst') {
+		return { kind: 'lints', lints: {} };
+	}
+
 	await ensureLinterReady();
 	await resetLinterIfPersistedStateWasCleared();
 
@@ -777,7 +782,11 @@ async function initializeLinter(dialect: Dialect) {
 	}
 
 	linter = new LocalLinter({
-		binary: createBinaryModuleFromUrl(chrome.runtime.getURL('./wasm/harper_wasm_bg.wasm')),
+		binary: createBinaryModuleFromUrl(
+			chrome.runtime.getURL(
+				HARPER_PERSONAL ? './wasm/harper_wasm_slim_bg.wasm' : './wasm/harper_wasm_bg.wasm',
+			),
+		),
 		dialect,
 	});
 
