@@ -30,6 +30,9 @@ export default defineConfig(({ mode }) => {
 		build: {
 			minify: false,
 			outDir: 'build',
+			// Vite's modulepreload links resolve on the host page and 404. The content
+			// script imports extension chunks directly.
+			modulePreload: false,
 			rollupOptions: {
 				output: {
 					chunkFileNames: 'assets/chunk-[hash].js',
