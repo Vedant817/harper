@@ -78,10 +78,10 @@ const objectCase = rule(`
 expr prep [between, with, for, to, from, without, about]
 expr person [you, him, her, them, us, PROPN, NOUN]
 expr punct <(@prep @person and I[., ?]), (I)>
-expr verb <(@prep @person and I [is, was, has, does]), (I)>
+expr verb <(@prep @person and I [is, has, does]), (I)>
 expr main [@punct, @verb]
 let message "Use me when this is the object."
-let description "Corrects object-case and I after a preposition. A following verb that can take I as its subject, such as left, is left alone."
+let description "Corrects object-case and I after a preposition. I was and I left are left alone, because those verbs can take I as a subject."
 let kind "Grammar"
 let becomes "me"
 let strategy "Exact"
@@ -93,6 +93,7 @@ test "Is this between you and I?" "Is this between you and me?"
 test "The bond between you and I is strong." "The bond between you and me is strong."
 allows "Sarah and I went to the meeting."
 allows "I went with Sarah and I left."
+allows "I stood between you and I was stuck."
 `);
 
 const lessFewer = rule(`
@@ -243,9 +244,9 @@ allows "The hawk was just circling back toward the nest."
 `);
 
 const wantedToReachOut = rule(`
-expr main <((just wanted to reach out) ![and]), (just wanted to reach out)>
+expr main <((just wanted to reach out) [about, regarding]), (just wanted to reach out)>
 let message "Say this in a plainer way."
-let description "Flags just wanted to reach out. A literal reach out and is left alone. On only for the email preset."
+let description "Flags just wanted to reach out about or regarding. Reaching out a window is left alone. On only for the email preset."
 let kind "Style"
 let becomes "wanted to write"
 let strategy "MatchCase"
@@ -253,6 +254,7 @@ let strategy "MatchCase"
 test "Just wanted to reach out about the role." "Wanted to write about the role."
 test "I just wanted to reach out about the role." "I wanted to write about the role."
 allows "I just wanted to reach out and shake your hand."
+allows "The intern just wanted to reach out the window."
 `);
 
 const SOURCES: Record<string, string> = {

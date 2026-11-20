@@ -1,6 +1,6 @@
 import { expect, type Locator, type Page } from '@playwright/test';
 import { test } from './fixtures';
-import { clickHarperHighlight, openExtensionPage } from './testUtils';
+import { clickHarperHighlight, openExtensionPage, skipUnlessPersonalControl } from './testUtils';
 
 const PAGE = 'http://localhost:8081/simple_textarea.html';
 
@@ -18,11 +18,7 @@ test('Personal presets change style rules and leave installed packs alone', asyn
 	}
 
 	const preset = page.locator('#harper-preset');
-	const hasPreset = await preset
-		.waitFor({ state: 'visible', timeout: 20000 })
-		.then(() => true)
-		.catch(() => false);
-	test.skip(!hasPreset, 'This build has no personal preset control');
+	await skipUnlessPersonalControl(page, preset, 'This build has no personal preset control');
 
 	const packsBefore = await background.evaluate(async () => {
 		const stored = await chrome.storage.local.get('weirpacks');

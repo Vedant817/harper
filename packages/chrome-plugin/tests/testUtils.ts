@@ -33,6 +33,28 @@ export async function openExtensionPage(
 	await page.goto(`chrome-extension://${extensionId}/${path}`);
 }
 
+/**
+ * Public builds skip when a personal control is absent.
+ * A personal build that loses the control fails instead of skipping.
+ */
+export async function skipUnlessPersonalControl(
+	page: Page,
+	control: Locator,
+	reason: string,
+): Promise<void> {
+	const visible = await control
+		.waitFor({ state: 'visible', timeout: 20000 })
+		.then(() => true)
+		.catch(() => false);
+	if (visible) {
+		return;
+	}
+
+	const personal = await page.locator('#harper-build').getAttribute('data-personal');
+	expect(personal, 'A personal build must show this control.').not.toBe('true');
+	test.skip(true, reason);
+}
+
 export async function getStoredLintConfig(context: BrowserContext): Promise<LintConfig> {
 	const background = await getBackground(context);
 	return await background.evaluate(async () => {

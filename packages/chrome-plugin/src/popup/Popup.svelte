@@ -85,6 +85,8 @@ $effect(() => {
 </script>
 
 <div
+    id="harper-build"
+    data-personal={HARPER_PERSONAL ? 'true' : 'false'}
     style="width: {WIDTH_PX}px; height: {heightPx}px;"
     class="font-sans flex flex-col select-none overflow-hidden rounded-xl border border-gray-200 dark:border-slate-800 dark:text-slate-100"
 >
