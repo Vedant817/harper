@@ -28,14 +28,26 @@ export default class ProtocolClient {
 		options?: LintOptions,
 	): Promise<UnpackedLintGroups> {
 		const key = this.cacheKey(text, domain, options);
-		let p = this.lintCache.get(key);
-		if (!p) {
-			p = chrome.runtime
-				.sendMessage({ kind: 'lint', text, domain, options })
-				.then((r) => r.lints as UnpackedLintGroups);
-			this.lintCache.set(key, p);
+		const cached = this.lintCache.get(key);
+		if (cached) {
+			return cached;
 		}
-		return p;
+
+		const pending = chrome.runtime
+			.sendMessage({ kind: 'lint', text, domain, options })
+			.then((response: { lints?: UnpackedLintGroups } | undefined) => {
+				if (response == null || response.lints == null) {
+					throw new Error('Harper did not return lints');
+				}
+				return response.lints;
+			});
+		this.lintCache.set(key, pending);
+		void pending.catch(() => {
+			if (this.lintCache.get(key) === pending) {
+				this.lintCache.delete(key);
+			}
+		});
+		return pending;
 	}
 
 	public static async getLintConfig(): Promise<LintConfig> {
