@@ -45,7 +45,6 @@ export default class Highlights {
 	private insertHighlightStyle(tag: string, lint: UnpackedLint) {
 		const color = lintKindColor(lint.lint_kind);
 		const textDecor = `underline ${color} solid 2px`;
-		const backgroundColor = `${color}22`;
 
 		const styleId = `harper-highlight-style-${lint.lint_kind}`;
 		// Check for our own element rather than the id: edited content can carry an element with the
@@ -58,7 +57,6 @@ export default class Highlights {
 		style.textContent = `
       ::highlight(${tag}) {
         text-decoration: ${textDecor};
-        background-color: ${backgroundColor};
       }
     `;
 		document.head.appendChild(style);
@@ -254,7 +252,7 @@ export default class Highlights {
 						height: `${box.height / scale.y}px`,
 						pointerEvents: 'none',
 						borderBottom: `2px solid ${lintKindColor(box.lint.lint_kind)}`,
-						backgroundColor: `${lintKindColor(box.lint.lint_kind)}22`,
+						backgroundColor: 'transparent',
 					},
 					id: 'harper-highlight',
 					attributes: {

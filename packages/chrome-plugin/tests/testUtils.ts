@@ -370,6 +370,7 @@ export async function testCanIgnoreSuggestion(
 					requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
 				),
 		);
+		await page.getByTitle('More actions').click();
 		await page.getByTitle('Ignore this lint').click();
 
 		// Wait for highlights to disappear after ignoring.
@@ -401,6 +402,7 @@ export async function testCanBlockRuleSuggestion(
 		const opened = await clickHarperHighlight(page);
 		expect(opened).toBe(true);
 
+		await page.getByTitle('More actions').click();
 		await page.getByTitle('Disable the ModalOf rule').click();
 
 		await assertHarperHighlightBoxes(page, []);

@@ -9,6 +9,8 @@ export type UnpackedSpan = {
 export type UnpackedLint = {
 	span: UnpackedSpan;
 	message_html: string;
+	/** Plain explanation. The card must not render `message_html`. */
+	message: string;
 	problem_text: string;
 	lint_kind: LintKind;
 	lint_kind_pretty: string;
@@ -37,6 +39,7 @@ export default async function unpackLint(
 	return {
 		span: unpackedSpan,
 		message_html: lint.message_html(),
+		message: lint.message(),
 		problem_text: lint.get_problem_text(),
 		lint_kind: lint.lint_kind() as LintKind,
 		lint_kind_pretty: lint.lint_kind_pretty(),

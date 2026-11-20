@@ -4,6 +4,7 @@ import type { UnpackedLint } from '../types.js';
 export const exampleLint: UnpackedLint = {
 	span: { start: 4, end: 7 },
 	message_html: 'Did you mean <code>the</code>?',
+	message: 'Did you mean the?',
 	problem_text: 'teh',
 	lint_kind: 'Spelling',
 	lint_kind_pretty: 'Spelling',

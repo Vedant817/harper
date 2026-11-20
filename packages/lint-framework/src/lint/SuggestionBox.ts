@@ -1,13 +1,9 @@
-import { icon } from '@fortawesome/fontawesome-svg-core';
-import { faSliders } from '@fortawesome/free-solid-svg-icons';
 import { SuggestionKind } from 'harper.js';
-import { h, type VNode } from 'virtual-dom';
-import bookDownSvg from '../assets/bookDownSvg';
+import { h } from 'virtual-dom';
 import type { Box, IgnorableLintBox } from './Box';
 import { type LintKind, lintKindColor } from './lintKindColor';
 import type { UnpackedLint, UnpackedSuggestion } from './unpackLint';
 
-const settingsIconSvg = icon(faSliders).html.join('');
 const PANEL_GAP = 6;
 const VIEWPORT_MARGIN = 8;
 
@@ -133,19 +129,24 @@ function domHook(setup: (node: HTMLElement) => () => void) {
 function popupHook(props: Parameters<typeof SuggestionBox>[0], refocusClose: () => void) {
 	return domHook((node) => {
 		const list = node.querySelector<HTMLElement>('.harper-container')!;
-		const flyout = node.querySelector<HTMLElement>('.harper-flyout')!;
+		const flyout = node.querySelector<HTMLElement>('.harper-flyout');
 		const measure = () => {
 			if (!node.isConnected) return;
 			const position = popupPosition(
 				props.box,
 				{ width: window.innerWidth, height: window.innerHeight },
 				{ width: list.offsetWidth, height: list.offsetHeight },
-				{ width: flyout.offsetWidth, height: flyout.offsetHeight },
+				{
+					width: flyout?.offsetWidth ?? 0,
+					height: flyout?.offsetHeight ?? 0,
+				},
 			);
 			node.style.top = `${position.top}px`;
 			node.style.left = `${position.left}px`;
-			flyout.style.left = `${position.flyoutLeft}px`;
-			flyout.style.top = `${position.flyoutTop}px`;
+			if (flyout) {
+				flyout.style.left = `${position.flyoutLeft}px`;
+				flyout.style.top = `${position.flyoutTop}px`;
+			}
 			node.style.transformOrigin = `${position.flipped ? 'bottom' : 'top'} ${position.opensLeft ? 'right' : 'left'}`;
 			node.style.visibility = 'visible';
 		};
@@ -166,7 +167,7 @@ function popupHook(props: Parameters<typeof SuggestionBox>[0], refocusClose: () 
 		};
 		const observer = new ResizeObserver(measure);
 		observer.observe(list);
-		observer.observe(flyout);
+		if (flyout) observer.observe(flyout);
 		window.addEventListener('resize', measure);
 		window.addEventListener('keydown', onEscape);
 		return () => {
@@ -225,21 +226,7 @@ function button(label: string, onClick: () => void, props: Record<string, unknow
 	);
 }
 
-function hintDrawer(hint: string | null): VNode | undefined {
-	if (!hint) return undefined;
-	return h(
-		'div',
-		{ className: 'harper-hint-drawer', attributes: { role: 'note', 'aria-live': 'polite' } },
-		[
-			h('div', { className: 'harper-hint-content' }, [
-				h('div', { className: 'harper-hint-icon', attributes: { 'aria-hidden': 'true' } }, '💡'),
-				h('div', {}, [h('div', { className: 'harper-hint-title' }, 'Tip'), h('div', {}, hint)]),
-			]),
-		],
-	);
-}
-
-/** Render one replacement, or a non-applying details row when there are no replacements. */
+/** Render one alternate replacement inside the ··· menu. */
 function suggestionRow(
 	suggestion: UnpackedSuggestion | undefined,
 	index: number,
@@ -269,8 +256,6 @@ function suggestionRow(
 			tabIndex: selected ? 0 : -1,
 			attributes: {
 				role: 'menuitem',
-				'aria-controls': 'harper-flyout',
-				'aria-expanded': String(selected),
 			},
 			title: suggestion
 				? suggestionTitle(suggestion, box.lint.problem_text)
@@ -295,118 +280,6 @@ function suggestionRow(
 	);
 }
 
-/** Show the lint's explanation and secondary actions; applying belongs to the suggestion rows. */
-function flyoutPanel(
-	box: IgnorableLintBox,
-	actions: Parameters<typeof SuggestionBox>[0]['actions'],
-	runAndClose: (action: () => void | Promise<void>) => void,
-) {
-	const lint = box.lint;
-	const color = lintKindColor(lint.lint_kind);
-	const ignore = box.ignoreLint;
-	const children = [
-		h(
-			'div',
-			{ id: 'harper-kind', className: 'harper-kind', style: { borderBottomColor: color } },
-			lint.lint_kind_pretty,
-		),
-		h('div', { className: 'harper-body', innerHTML: lint.message_html }, []),
-		h('div', { className: 'harper-actions' }, [
-			...(ignore
-				? [
-						button('Dismiss', () => runAndClose(ignore), {
-							className: 'harper-btn harper-dismiss',
-							title: 'Ignore this lint',
-						}),
-					]
-				: []),
-			...(lint.lint_kind === 'Spelling' && actions.addToUserDictionary
-				? [
-						button('', () => runAndClose(() => actions.addToUserDictionary!([lint.problem_text])), {
-							title: 'Add word to user dictionary',
-							attributes: { 'aria-label': 'Add word to user dictionary' },
-							innerHTML: bookDownSvg,
-						}),
-					]
-				: []),
-		]),
-	];
-	if (actions.setRuleEnabled && box.rule) {
-		children.push(
-			button(
-				`Disable rule ${box.rule}`,
-				() => runAndClose(() => actions.setRuleEnabled!(box.rule, false)),
-				{
-					className: 'harper-disable',
-					title: `Disable the ${box.rule} rule`,
-				},
-			),
-		);
-	}
-	if (actions.reportError) {
-		children.push(
-			button(
-				'Report',
-				() => {
-					void actions.reportError!(lint, box.rule);
-				},
-				{
-					className: 'harper-report-link',
-					title: 'Report an issue with this lint',
-				},
-			),
-		);
-	}
-	return h(
-		'div',
-		{
-			id: 'harper-flyout',
-			className: 'harper-flyout',
-			attributes: { role: 'group', 'aria-labelledby': 'harper-kind' },
-		},
-		children,
-	);
-}
-
-function listFooter(props: Parameters<typeof SuggestionBox>[0], refocusClose: () => void) {
-	const children = [];
-	if (props.actions.openOptions) {
-		children.push(
-			h(
-				'button',
-				{
-					type: 'button',
-					className: 'harper-footer-row',
-					title: 'Click to go to Harper settings',
-					onclick: () => {
-						void props.actions.openOptions!();
-					},
-				},
-				[
-					h(
-						'span',
-						{
-							className: 'harper-settings-icon',
-							innerHTML: settingsIconSvg,
-							attributes: { 'aria-hidden': 'true' },
-						},
-						[],
-					),
-					'Go to Harper settings',
-				],
-			),
-		);
-	}
-	children.push(
-		button('×', refocusClose, {
-			className: 'harper-close-btn',
-			title: 'Close',
-			attributes: { 'aria-label': 'Close' },
-		}),
-	);
-	return h('div', { className: 'harper-list-footer' }, children);
-}
-
 function styleTag(kind: LintKind) {
 	return h(
 		'style',
@@ -424,7 +297,11 @@ function styleTag(kind: LintKind) {
  box-shadow:0 4px 12px rgba(140,149,159,0.3); pointer-events:auto;
  max-height:min(400px, calc(100vh - 16px)); overflow-y:auto; overscroll-behavior:contain;
 }
-.harper-container { position:relative; width:min(210px, calc(100vw - 16px)); padding:4px 0; }
+.harper-container { position:relative; width:min(280px, calc(100vw - 16px)); padding:8px; }
+.harper-primary { display:block; width:100%; margin-top:8px; padding:8px 10px; border:0; border-radius:6px; background:#1f2328; color:#fff; font-weight:600; text-align:left; }
+.harper-more { margin-top:6px; padding:0 4px; border:0; background:transparent; color:#57606a; font-size:16px; line-height:16px; }
+.harper-more-menu { display:flex; flex-direction:column; margin-top:4px; }
+.harper-more-menu[hidden] { display:none !important; }
 .harper-flyout { position:absolute; width:min(190px, calc(100vw - 16px)); overflow-x:hidden; }
 .harper-row {
  display:flex; align-items:center; gap:8px; height:30px; width:100%;
@@ -493,12 +370,15 @@ function styleTag(kind: LintKind) {
  .harper-hint-icon { background:#3a2f0b; color:#f2cc60; }
  .harper-report-link { color:#58a6ff; }
  .harper-popup button:focus-visible { outline-color:#58a6ff; }
+ .harper-primary { background:#e6edf3; color:#0d1117; }
 }
 `,
 	);
 }
 
-/** Render a single lint's replacements and a details flyout; the caller owns selection. */
+const moreMenuOpen = new WeakMap<object, boolean>();
+
+/** One panel: kind, plain explanation, primary replacement, and a ··· menu. */
 export default function SuggestionBox(props: {
 	box: IgnorableLintBox;
 	selectedIndex: number;
@@ -515,9 +395,7 @@ export default function SuggestionBox(props: {
 	hint: string | null;
 	close: () => void;
 }) {
-	const { box, selectedIndex, actions, close } = props;
-	const suggestions = box.lint.suggestions.length ? box.lint.suggestions : [undefined];
-	const selected = suggestions[selectedIndex];
+	const { box, actions, close } = props;
 	const refocusClose = () => {
 		restoreCursorState();
 		close();
@@ -535,32 +413,83 @@ export default function SuggestionBox(props: {
 			.finally(close);
 	};
 	const onKeyDown = (event: KeyboardEvent) => {
-		const target = event.target as HTMLElement;
+		if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
 		const root = event.currentTarget as HTMLElement;
-		const inList = target.closest('.harper-row') != null;
-		if (event.key === 'ArrowLeft' && target.closest('.harper-flyout')) {
-			event.preventDefault();
-			event.stopPropagation();
-			focusRow(root, selectedIndex);
-		} else if (inList && ['ArrowDown', 'ArrowUp', 'ArrowRight', 'Enter'].includes(event.key)) {
-			event.preventDefault();
-			event.stopPropagation();
-			if (event.key === 'Enter') apply(selected);
-			else if (event.key === 'ArrowRight')
-				root.querySelector<HTMLElement>('.harper-flyout button')?.focus({ preventScroll: true });
-			else {
-				const index =
-					(selectedIndex + (event.key === 'ArrowDown' ? 1 : -1) + suggestions.length) %
-					suggestions.length;
-				props.onSelect(index);
-				focusRow(root, index);
-			}
-		}
+		const target = event.target as HTMLElement;
+		const visible = [...root.querySelectorAll<HTMLButtonElement>('button')].filter((item) => {
+			const menu = item.closest('.harper-more-menu');
+			return menu == null || !(menu as HTMLElement).hidden;
+		});
+		const index = visible.indexOf(target as HTMLButtonElement);
+		if (index < 0) return;
+		event.preventDefault();
+		event.stopPropagation();
+		const next =
+			visible[(index + (event.key === 'ArrowDown' ? 1 : -1) + visible.length) % visible.length];
+		next?.focus({ preventScroll: true });
 	};
-	const rowNodes = suggestions.map((suggestion, index) =>
-		suggestionRow(suggestion, index, props, () => apply(suggestion)),
-	);
-	const hint = hintDrawer(props.hint);
+	const primary = box.lint.suggestions[0];
+	const alternates = box.lint.suggestions.slice(1);
+	const explanation = box.lint.message || box.lint.message_html.replace(/<[^>]*>/g, '');
+	const toggleMore = (event: Event) => {
+		event.preventDefault();
+		event.stopPropagation();
+		const open = moreMenuOpen.get(box) !== true;
+		moreMenuOpen.set(box, open);
+		const menu = (event.currentTarget as HTMLElement).parentElement?.querySelector(
+			'.harper-more-menu',
+		);
+		if (menu instanceof HTMLElement) menu.hidden = !open;
+	};
+	const menuOpen = moreMenuOpen.get(box) === true;
+	const menuItems = [
+		...alternates.map((suggestion, index) =>
+			suggestionRow(suggestion, index + 1, props, () => apply(suggestion)),
+		),
+	];
+	if (box.ignoreLint) {
+		menuItems.push(
+			button('Ignore', () => runAndClose(box.ignoreLint!), {
+				className: 'harper-btn harper-dismiss',
+				title: 'Ignore this lint',
+			}),
+		);
+	}
+	if (box.lint.lint_kind === 'Spelling' && actions.addToUserDictionary) {
+		menuItems.push(
+			button(
+				'Add to dictionary',
+				() => runAndClose(() => actions.addToUserDictionary!([box.lint.problem_text])),
+				{
+					title: 'Add word to user dictionary',
+				},
+			),
+		);
+	}
+	if (actions.setRuleEnabled && box.rule) {
+		menuItems.push(
+			button(
+				`Disable rule ${box.rule}`,
+				() => runAndClose(() => actions.setRuleEnabled!(box.rule, false)),
+				{ className: 'harper-disable', title: `Disable the ${box.rule} rule` },
+			),
+		);
+	}
+	if (actions.reportError) {
+		menuItems.push(
+			button('Report', () => void actions.reportError!(box.lint, box.rule), {
+				className: 'harper-report-link',
+				title: 'Report an issue with this lint',
+			}),
+		);
+	}
+	if (actions.openOptions) {
+		menuItems.push(
+			button('Settings', () => void actions.openOptions!(), {
+				title: 'Click to go to Harper settings',
+			}),
+		);
+	}
 	return h(
 		'div',
 		{
@@ -572,21 +501,35 @@ export default function SuggestionBox(props: {
 		[
 			styleTag(box.lint.lint_kind),
 			h('div', { className: 'harper-container' }, [
+				h('div', { id: 'harper-kind', className: 'harper-kind' }, box.lint.lint_kind_pretty),
+				h('p', { className: 'harper-body' }, explanation),
+				...(primary
+					? [
+							button(suggestionLabel(primary), () => apply(primary), {
+								id: 'harper-suggestion-0',
+								className: 'harper-primary',
+								title: suggestionTitle(primary, box.lint.problem_text),
+								tabIndex: 0,
+							}),
+						]
+					: []),
+				button('···', toggleMore, {
+					className: 'harper-more',
+					title: 'More actions',
+					attributes: { 'aria-label': 'More actions' },
+				}),
 				h(
 					'div',
 					{
+						className: 'harper-more-menu',
 						attributes: {
 							role: 'menu',
-							'aria-label': 'Suggestions for this lint',
-							'aria-activedescendant': `harper-suggestion-${selectedIndex}`,
+							...(menuOpen ? {} : { hidden: 'hidden' }),
 						},
 					},
-					rowNodes,
+					menuItems,
 				),
-				listFooter(props, refocusClose),
-				...(hint ? [hint] : []),
 			]),
-			flyoutPanel(box, actions, runAndClose),
 		],
 	);
 }
