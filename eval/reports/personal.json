@@ -1,334 +1,383 @@
 {
-	"generatedAt": "2026-11-21T13:22:37.549Z",
-	"cases": [
-		{
-			"id": "comma-splice",
-			"text": "I have a meeting at 3, I will be late.",
-			"preset": "casual",
-			"pass": true,
-			"observed": [
-				{
-					"rule": "PersonalCommaSplice",
-					"suggestions": [". ", "; "]
-				}
-			]
-		},
-		{
-			"id": "direct-question",
-			"text": "What time is the call",
-			"preset": "casual",
-			"pass": false,
-			"observed": [],
-			"reason": "expected PersonalDirectQuestion -> \"?\""
-		},
-		{
-			"id": "greeting-comma",
-			"text": "Hi Priya I sent the note.",
-			"preset": "casual",
-			"pass": true,
-			"observed": [
-				{
-					"rule": "PersonalGreetingCommaI",
-					"suggestions": [", I"]
-				},
-				{
-					"rule": "SpellCheck",
-					"suggestions": ["Pica", "Pray", "Prey"]
-				}
-			]
-		},
-		{
-			"id": "object-case",
-			"text": "Send it to Sarah and I.",
-			"preset": "casual",
-			"pass": true,
-			"observed": [
-				{
-					"rule": "PersonalObjectCase",
-					"suggestions": ["me"]
-				}
-			]
-		},
-		{
-			"id": "less-fewer",
-			"text": "We need less meetings.",
-			"preset": "casual",
-			"pass": true,
-			"observed": [
-				{
-					"rule": "PersonalLessFewer",
-					"suggestions": ["fewer"]
-				}
-			]
-		},
-		{
-			"id": "due-to-fact",
-			"text": "I waited due to the fact that the file was open.",
-			"preset": "casual",
-			"pass": true,
-			"observed": [
-				{
-					"rule": "PersonalDueToTheFact",
-					"suggestions": ["because"]
-				}
-			]
-		},
-		{
-			"id": "in-order-to",
-			"text": "I sent the note in order to close the loop.",
-			"preset": "casual",
-			"pass": true,
-			"observed": [
-				{
-					"rule": "PersonalInOrderTo",
-					"suggestions": ["to"]
-				}
-			]
-		},
-		{
-			"id": "at-this-point",
-			"text": "Nothing is blocked at this point in time.",
-			"preset": "casual",
-			"pass": true,
-			"observed": [
-				{
-					"rule": "PersonalAtThisPoint",
-					"suggestions": ["now"]
-				}
-			]
-		},
-		{
-			"id": "in-the-event",
-			"text": "Call me in the event that the draft changes.",
-			"preset": "casual",
-			"pass": true,
-			"observed": [
-				{
-					"rule": "PersonalInTheEvent",
-					"suggestions": ["if"]
-				}
-			]
-		},
-		{
-			"id": "could-care-less",
-			"text": "I could care less.",
-			"preset": "casual",
-			"pass": true,
-			"observed": [
-				{
-					"rule": "PersonalCouldCareLess",
-					"suggestions": ["couldn't care less"]
-				}
-			]
-		},
-		{
-			"id": "irregardless",
-			"text": "I will send it irregardless.",
-			"preset": "casual",
-			"pass": true,
-			"observed": [
-				{
-					"rule": "PersonalIrregardless",
-					"suggestions": ["regardless"]
-				}
-			]
-		},
-		{
-			"id": "urgent-marks",
-			"text": "urgent!!!",
-			"preset": "core",
-			"pass": false,
-			"observed": [],
-			"reason": "expected a suggestion containing \"urgent!\""
-		},
-		{
-			"id": "what-marks",
-			"text": "What???",
-			"preset": "core",
-			"pass": false,
-			"observed": [],
-			"reason": "expected a suggestion containing \"What?\""
-		},
-		{
-			"id": "an-test",
-			"text": "This is an test.",
-			"preset": "core",
-			"pass": true,
-			"observed": [
-				{
-					"rule": "AnA",
-					"suggestions": ["a"]
-				}
-			]
-		},
-		{
-			"id": "could-of",
-			"text": "I could of sent it.",
-			"preset": "core",
-			"pass": true,
-			"observed": [
-				{
-					"rule": "ModalOf",
-					"suggestions": ["could have"]
-				}
-			]
-		},
-		{
-			"id": "hope-well",
-			"text": "Hope you're well.",
-			"preset": "email",
-			"pass": true,
-			"observed": [
-				{
-					"rule": "PersonalHopeYoureWell",
-					"suggestions": ["I hope you're well"]
-				}
-			]
-		},
-		{
-			"id": "wanted-follow-up",
-			"text": "Wanted to follow up on the draft.",
-			"preset": "email",
-			"pass": true,
-			"observed": [
-				{
-					"rule": "PersonalWantedToFollowUp",
-					"suggestions": ["I wanted to follow up"]
-				}
-			]
-		},
-		{
-			"id": "per-last-email",
-			"text": "Per my last email, the draft is ready.",
-			"preset": "email",
-			"pass": true,
-			"observed": [
-				{
-					"rule": "PersonalPerMyLastEmail",
-					"suggestions": ["As I mentioned"]
-				}
-			]
-		},
-		{
-			"id": "circling-back",
-			"text": "Just circling back on the draft.",
-			"preset": "email",
-			"pass": true,
-			"observed": [
-				{
-					"rule": "PersonalCirclingBack",
-					"suggestions": ["Following up"]
-				}
-			]
-		},
-		{
-			"id": "reach-out",
-			"text": "Just wanted to reach out about the role.",
-			"preset": "email",
-			"pass": true,
-			"observed": [
-				{
-					"rule": "PersonalWantedToReachOut",
-					"suggestions": ["Wanted to write"]
-				}
-			]
-		},
-		{
-			"id": "greeting-ok",
-			"text": "Hi Priya, thanks for the note.",
-			"preset": "casual",
-			"pass": true,
-			"observed": [
-				{
-					"rule": "SpellCheck",
-					"suggestions": ["Pica", "Pray", "Prey"]
-				}
-			]
-		},
-		{
-			"id": "sounds-good",
-			"text": "Sounds good.",
-			"preset": "casual",
-			"pass": true,
-			"observed": []
-		},
-		{
-			"id": "wait-for-it",
-			"text": "Wait for it...",
-			"preset": "casual",
-			"pass": true,
-			"observed": [
-				{
-					"rule": "UseEllipsisCharacter",
-					"suggestions": ["…"]
-				}
-			]
-		},
-		{
-			"id": "suspect",
-			"text": "I suspect...",
-			"preset": "casual",
-			"pass": true,
-			"observed": [
-				{
-					"rule": "UseEllipsisCharacter",
-					"suggestions": ["…"]
-				}
-			]
-		},
-		{
-			"id": "imagine",
-			"text": "I imagine...",
-			"preset": "casual",
-			"pass": true,
-			"observed": [
-				{
-					"rule": "UseEllipsisCharacter",
-					"suggestions": ["…"]
-				}
-			]
-		},
-		{
-			"id": "never-due",
-			"text": "The delay was never due to the fact that the file was open.",
-			"preset": "casual",
-			"pass": true,
-			"observed": []
-		},
-		{
-			"id": "seems-due",
-			"text": "The delay seems due to the fact that the server was down.",
-			"preset": "casual",
-			"pass": true,
-			"observed": []
-		},
-		{
-			"id": "care-less-comparison",
-			"text": "I could care less about the title than the work.",
-			"preset": "casual",
-			"pass": true,
-			"observed": []
-		},
-		{
-			"id": "reach-out-mile",
-			"text": "I just wanted to reach out about a mile.",
-			"preset": "email",
-			"pass": true,
-			"observed": []
-		},
-		{
-			"id": "about-hour",
-			"text": "I just wanted to reach out about an hour before lunch.",
-			"preset": "email",
-			"pass": true,
-			"observed": []
-		},
-		{
-			"id": "stock-off",
-			"text": "Just circling back on the draft.",
-			"preset": "casual",
-			"pass": true,
-			"observed": []
-		}
-	]
+  "generatedAt": "2026-11-21T14:02:40.760Z",
+  "cases": [
+    {
+      "id": "comma-splice",
+      "text": "I have a meeting at 3, I will be late.",
+      "preset": "casual",
+      "pass": true,
+      "observed": [
+        {
+          "rule": "PersonalCommaSplice",
+          "suggestions": [
+            ". ",
+            "; "
+          ]
+        }
+      ]
+    },
+    {
+      "id": "direct-question",
+      "text": "What time is the call",
+      "preset": "casual",
+      "pass": false,
+      "observed": [],
+      "reason": "expected PersonalDirectQuestion -> \"?\""
+    },
+    {
+      "id": "greeting-comma",
+      "text": "Hi Priya I sent the note.",
+      "preset": "casual",
+      "pass": true,
+      "observed": [
+        {
+          "rule": "PersonalGreetingCommaI",
+          "suggestions": [
+            ", I"
+          ]
+        },
+        {
+          "rule": "SpellCheck",
+          "suggestions": [
+            "Pica",
+            "Pray",
+            "Prey"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "object-case",
+      "text": "Send it to Sarah and I.",
+      "preset": "casual",
+      "pass": true,
+      "observed": [
+        {
+          "rule": "PersonalObjectCase",
+          "suggestions": [
+            "me"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "less-fewer",
+      "text": "We need less meetings.",
+      "preset": "casual",
+      "pass": true,
+      "observed": [
+        {
+          "rule": "PersonalLessFewer",
+          "suggestions": [
+            "fewer"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "due-to-fact",
+      "text": "I waited due to the fact that the file was open.",
+      "preset": "casual",
+      "pass": true,
+      "observed": [
+        {
+          "rule": "PersonalDueToTheFact",
+          "suggestions": [
+            "because"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "in-order-to",
+      "text": "I sent the note in order to close the loop.",
+      "preset": "casual",
+      "pass": true,
+      "observed": [
+        {
+          "rule": "PersonalInOrderTo",
+          "suggestions": [
+            "to"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "at-this-point",
+      "text": "Nothing is blocked at this point in time.",
+      "preset": "casual",
+      "pass": true,
+      "observed": [
+        {
+          "rule": "PersonalAtThisPoint",
+          "suggestions": [
+            "now"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "in-the-event",
+      "text": "Call me in the event that the draft changes.",
+      "preset": "casual",
+      "pass": true,
+      "observed": [
+        {
+          "rule": "PersonalInTheEvent",
+          "suggestions": [
+            "if"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "could-care-less",
+      "text": "I could care less.",
+      "preset": "casual",
+      "pass": true,
+      "observed": [
+        {
+          "rule": "PersonalCouldCareLess",
+          "suggestions": [
+            "couldn't care less"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "irregardless",
+      "text": "I will send it irregardless.",
+      "preset": "casual",
+      "pass": true,
+      "observed": [
+        {
+          "rule": "PersonalIrregardless",
+          "suggestions": [
+            "regardless"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "urgent-marks",
+      "text": "urgent!!!",
+      "preset": "core",
+      "pass": false,
+      "observed": [],
+      "reason": "expected a suggestion containing \"urgent!\""
+    },
+    {
+      "id": "what-marks",
+      "text": "What???",
+      "preset": "core",
+      "pass": false,
+      "observed": [],
+      "reason": "expected a suggestion containing \"What?\""
+    },
+    {
+      "id": "an-test",
+      "text": "This is an test.",
+      "preset": "core",
+      "pass": true,
+      "observed": [
+        {
+          "rule": "AnA",
+          "suggestions": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "could-of",
+      "text": "I could of sent it.",
+      "preset": "core",
+      "pass": true,
+      "observed": [
+        {
+          "rule": "ModalOf",
+          "suggestions": [
+            "could have"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hope-well",
+      "text": "Hope you're well.",
+      "preset": "email",
+      "pass": true,
+      "observed": [
+        {
+          "rule": "PersonalHopeYoureWell",
+          "suggestions": [
+            "I hope you're well"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wanted-follow-up",
+      "text": "Wanted to follow up on the draft.",
+      "preset": "email",
+      "pass": true,
+      "observed": [
+        {
+          "rule": "PersonalWantedToFollowUp",
+          "suggestions": [
+            "I wanted to follow up"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "per-last-email",
+      "text": "Per my last email, the draft is ready.",
+      "preset": "email",
+      "pass": true,
+      "observed": [
+        {
+          "rule": "PersonalPerMyLastEmail",
+          "suggestions": [
+            "As I mentioned"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "circling-back",
+      "text": "Just circling back on the draft.",
+      "preset": "email",
+      "pass": true,
+      "observed": [
+        {
+          "rule": "PersonalCirclingBack",
+          "suggestions": [
+            "Following up"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reach-out",
+      "text": "Just wanted to reach out about the role.",
+      "preset": "email",
+      "pass": true,
+      "observed": [
+        {
+          "rule": "PersonalWantedToReachOut",
+          "suggestions": [
+            "Wanted to write"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "greeting-ok",
+      "text": "Hi Priya, thanks for the note.",
+      "preset": "casual",
+      "pass": true,
+      "observed": [
+        {
+          "rule": "SpellCheck",
+          "suggestions": [
+            "Pica",
+            "Pray",
+            "Prey"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sounds-good",
+      "text": "Sounds good.",
+      "preset": "casual",
+      "pass": true,
+      "observed": []
+    },
+    {
+      "id": "wait-for-it",
+      "text": "Wait for it...",
+      "preset": "casual",
+      "pass": true,
+      "observed": [
+        {
+          "rule": "UseEllipsisCharacter",
+          "suggestions": [
+            "…"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "suspect",
+      "text": "I suspect...",
+      "preset": "casual",
+      "pass": true,
+      "observed": [
+        {
+          "rule": "UseEllipsisCharacter",
+          "suggestions": [
+            "…"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "imagine",
+      "text": "I imagine...",
+      "preset": "casual",
+      "pass": true,
+      "observed": [
+        {
+          "rule": "UseEllipsisCharacter",
+          "suggestions": [
+            "…"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "never-due",
+      "text": "The delay was never due to the fact that the file was open.",
+      "preset": "casual",
+      "pass": true,
+      "observed": []
+    },
+    {
+      "id": "seems-due",
+      "text": "The delay seems due to the fact that the server was down.",
+      "preset": "casual",
+      "pass": true,
+      "observed": []
+    },
+    {
+      "id": "care-less-comparison",
+      "text": "I could care less about the title than the work.",
+      "preset": "casual",
+      "pass": true,
+      "observed": []
+    },
+    {
+      "id": "reach-out-mile",
+      "text": "I just wanted to reach out about a mile.",
+      "preset": "email",
+      "pass": true,
+      "observed": []
+    },
+    {
+      "id": "about-hour",
+      "text": "I just wanted to reach out about an hour before lunch.",
+      "preset": "email",
+      "pass": true,
+      "observed": []
+    },
+    {
+      "id": "stock-off",
+      "text": "Just circling back on the draft.",
+      "preset": "casual",
+      "pass": true,
+      "observed": []
+    }
+  ]
 }

@@ -1,78 +1,78 @@
 {
-	"passed": true,
-	"metrics": {
-		"cardOpenMs": 32,
-		"cardWidthPx": 265.99999237060547,
-		"dialogCalls": [],
-		"fullDraftTailUnderlined": true,
-		"fullDraftWords": 142,
-		"gmailLoadMs": 205,
-		"highlightInShadowRoot": true,
-		"linkedinPasteMs": 9,
-		"openDialogElements": 0,
-		"pasteUnderlineMs": 15,
-		"shadowEditorUnderlined": true
-	},
-	"checks": [
-		{
-			"check": "paste underline <= 700 ms",
-			"observed": 15,
-			"pass": true,
-			"limit": 700
-		},
-		{
-			"check": "full draft tail underlined",
-			"observed": true,
-			"pass": true,
-			"limit": true
-		},
-		{
-			"check": "highlight in shadow root",
-			"observed": true,
-			"pass": true,
-			"limit": true
-		},
-		{
-			"check": "shadow-root editor linted",
-			"observed": true,
-			"pass": true,
-			"limit": true
-		},
-		{
-			"check": "LinkedIn dialog paste <= 700 ms",
-			"observed": 9,
-			"pass": true,
-			"limit": 700
-		},
-		{
-			"check": "Gmail prefilled draft <= 700 ms",
-			"observed": 205,
-			"pass": true,
-			"limit": 700
-		},
-		{
-			"check": "card width <= 280 px",
-			"observed": 265.99999237060547,
-			"pass": true,
-			"limit": 280
-		},
-		{
-			"check": "card opens <= 300 ms",
-			"observed": 32,
-			"pass": true,
-			"limit": 300
-		},
-		{
-			"check": "no dialog calls",
-			"observed": [],
-			"pass": true,
-			"limit": []
-		},
-		{
-			"check": "no open dialog elements",
-			"observed": 0,
-			"pass": true,
-			"limit": 0
-		}
-	]
+  "passed": true,
+  "metrics": {
+    "cardOpenMs": 28,
+    "cardWidthPx": 266.09532928466797,
+    "dialogCalls": [],
+    "fullDraftTailUnderlined": true,
+    "fullDraftWords": 142,
+    "gmailLoadMs": 201,
+    "highlightInShadowRoot": true,
+    "linkedinPasteMs": 9,
+    "openDialogElements": 0,
+    "pasteUnderlineMs": 16,
+    "shadowEditorUnderlined": true
+  },
+  "checks": [
+    {
+      "check": "paste underline <= 700 ms",
+      "observed": 16,
+      "pass": true,
+      "limit": 700
+    },
+    {
+      "check": "full draft tail underlined",
+      "observed": true,
+      "pass": true,
+      "limit": true
+    },
+    {
+      "check": "highlight in shadow root",
+      "observed": true,
+      "pass": true,
+      "limit": true
+    },
+    {
+      "check": "shadow-root editor linted",
+      "observed": true,
+      "pass": true,
+      "limit": true
+    },
+    {
+      "check": "LinkedIn dialog paste <= 700 ms",
+      "observed": 9,
+      "pass": true,
+      "limit": 700
+    },
+    {
+      "check": "Gmail prefilled draft <= 700 ms",
+      "observed": 201,
+      "pass": true,
+      "limit": 700
+    },
+    {
+      "check": "card width <= 280 px",
+      "observed": 266.09532928466797,
+      "pass": true,
+      "limit": 280
+    },
+    {
+      "check": "card opens <= 300 ms",
+      "observed": 28,
+      "pass": true,
+      "limit": 300
+    },
+    {
+      "check": "no dialog calls",
+      "observed": [],
+      "pass": true,
+      "limit": []
+    },
+    {
+      "check": "no open dialog elements",
+      "observed": 0,
+      "pass": true,
+      "limit": 0
+    }
+  ]
 }

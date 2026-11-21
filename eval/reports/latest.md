@@ -1,6 +1,6 @@
 # Harper evaluation report
 
-- Generated: 2026-11-21T13:47:32Z
+- Generated: 2026-11-21T14:02:56Z
 - Engine commit: `e0c2101d`
 - Extension results include the local shadow-root fixes on top of that commit.
 - Scope: spelling, grammar, punctuation, and usage only.
@@ -369,14 +369,14 @@ Sources: codespell (64966 pairs), wikipedia (4276 pairs), typos-cli (95923 pairs
 
 | gate                            | observed           | limit | result |
 | ------------------------------- | ------------------ | ----- | ------ |
-| paste underline <= 700 ms       | 15                 | 700   | PASS   |
+| paste underline <= 700 ms       | 16                 | 700   | PASS   |
 | full draft tail underlined      | True               | True  | PASS   |
 | highlight in shadow root        | True               | True  | PASS   |
 | shadow-root editor linted       | True               | True  | PASS   |
 | LinkedIn dialog paste <= 700 ms | 9                  | 700   | PASS   |
-| Gmail prefilled draft <= 700 ms | 205                | 700   | PASS   |
-| card width <= 280 px            | 265.99999237060547 | 280   | PASS   |
-| card opens <= 300 ms            | 32                 | 300   | PASS   |
+| Gmail prefilled draft <= 700 ms | 201                | 700   | PASS   |
+| card width <= 280 px            | 266.09532928466797 | 280   | PASS   |
+| card opens <= 300 ms            | 28                 | 300   | PASS   |
 | no dialog calls                 | []                 | []    | PASS   |
 | no open dialog elements         | 0                  | 0     | PASS   |
 
