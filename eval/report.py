@@ -356,6 +356,165 @@ def round3_section() -> str:
     )
 
 
+def round4_section() -> str:
+    rows = [
+        [
+            "0 baseline",
+            "personal 28/31; extension 9 pass + 1 fixme",
+            "fresh runs",
+            "28/31; extension table below",
+            "run_personal.py; run_extension.py",
+            "PASS",
+        ],
+        [
+            "1 Weir probe",
+            "round 3 probed with a space before ???",
+            "adjacent-token probes for ??? and !!!, plus known-good pack",
+            "? loads but produces no lint; ! is a parser error",
+            "harper-cli --weirpacks",
+            "PASS (measurement)",
+        ],
+        [
+            "2 SpellCheck counterfactual",
+            "1,189 / 1,250 / 838 SpellCheck gold FPs",
+            "eval/run_gec.py, run_spelling.py, report.py compute suppression scenarios",
+            "counterfactual table and top-20 below; real GEC unchanged",
+            "run_gec.py; run_spelling.py; report.py",
+            "PASS",
+        ],
+        [
+            "3a repeated punctuation",
+            "urgent/what failed (core preset)",
+            "Rust RepeatedPunctuation in harper-core, curated default on",
+            "both pass; personal 30/31; GEC precision -0.06 max",
+            "cargo test; run_personal.py; run_gec.py",
+            "PASS",
+        ],
+        [
+            "3b direct question",
+            "direct-question failed (casual preset)",
+            "STOPPED: default-OFF core rule cannot reach personalCases.test.ts, which does not apply the preset overlay",
+            "still fails; personal 30/31",
+            "run_personal.py",
+            "STOPPED",
+        ],
+        [
+            "4 unfocused draft",
+            "Gmail without focus was fixme",
+            "host-limited arming/discovery; routed Gmail gate; localhost negative gate",
+            "unfocused 355 ms; localhost 0; all gates pass",
+            "run_extension.py",
+            "PASS",
+        ],
+        [
+            "5 LanguageTool",
+            "not installed",
+            "skipped by switch (ALLOW_LT_DOWNLOAD=no)",
+            "not measured",
+            "none",
+            "SKIPPED-BY-SWITCH",
+        ],
+        [
+            "6 regressions",
+            "pending",
+            "cargo tests, chrome checks, tsc, 12 specs",
+            "all pass; 12 specs 22/11/1, same as round 3",
+            "step 6 commands",
+            "PASS",
+        ],
+    ]
+    probes = [
+        [
+            "known-good",
+            "expr main (alpha beta)",
+            "alpha beta",
+            "lint KnownGood -> gamma",
+            "yes",
+        ],
+        [
+            "three question marks",
+            "expr main (What???)",
+            "What???",
+            '{"lint_count":0,"lints":[]}',
+            "no",
+        ],
+        [
+            "three bangs",
+            "expr main (urgent!!!)",
+            "urgent!!!",
+            "Reached the end of the input token stream prematurely.",
+            "no",
+        ],
+        [
+            "escaped bangs",
+            r"expr main (urgent \!\!\!)",
+            "urgent!!!",
+            "Reached the end of the input token stream prematurely.",
+            "no",
+        ],
+        [
+            "sentence scope on question",
+            "expr main (What???) + let scope \"Sentence\"",
+            "What???",
+            "Expected a valid keyword. Got:",
+            "no",
+        ],
+    ]
+    return "\n".join(
+        [
+            "## Round 4",
+            "",
+            markdown_table(
+                ["item", "evidence before", "change", "result after", "acceptance", "status"],
+                rows,
+            ),
+            "",
+            "### Step 1 Weir punctuation probe",
+            "",
+            markdown_table(["probe", "rule", "input", "exact output", "works"], probes),
+            "",
+            "The known-good pack proves the loader; adding the `?` or `!` rules does not produce "
+            "a usable match. Step 3a therefore used a Rust linter.",
+            "",
+            "### Step 2 counterfactual and spelling recall",
+            "",
+            "The counterfactual table and top-20 lowercase list appear in the GEC section below; "
+            "the spelling suppression table appears in the spelling section. Real GEC scores are "
+            "unchanged by Step 2.",
+            "",
+            "### Step 3 personal cases: 28/31 -> 30/31",
+            "",
+            "`urgent!!!` and `What???` are fixed by `RepeatedPunctuation`. `direct-question` is "
+            "stopped: a default-OFF core rule cannot run in `personalCases.test.ts` because that "
+            "test does not apply `overlayLintConfig`; enabling it by default would violate the "
+            "step and change GEC. GEC precision moved at most 0.06 points (GMEG FCE).",
+            "",
+            "### Step 4 extension gates",
+            "",
+            "Unfocused Gmail draft: 355 ms. Localhost unfocused: 0 highlights. All executable "
+            "gates pass; there is no FIXME row this round.",
+            "",
+            "### Known failures",
+            "",
+            "- `direct-question` remains failing; see 3b above.",
+            "- The 11 chrome-plugin environment failures remain; the 12-spec run after Steps 3-4 "
+            "is 22 passed / 11 failed / 1 skipped, identical to Round 3.",
+            "",
+            "### Switches",
+            "",
+            "- ALLOW_LT_DOWNLOAD=no: Step 5 skipped by switch.",
+            "- ALLOW_CORE_LINTERS=yes: Step 3a implemented; Step 3b stopped for the harness reason.",
+            "- FIX_UNFOCUSED_DRAFTS=yes: Step 4 implemented and verified.",
+            "",
+            "### Still not measured",
+            "",
+            "ErAConD, FCE and CoNLL-2013 scoring, JFLEG, TETRA, LanguageTool rule tests, "
+            "`just dogfood`, and tone/clarity.",
+            "",
+        ]
+    )
+
+
 def gec_section(payload) -> str:
     lines = ["## Public GEC corpora (ERRANT, token-level)", ""]
     if payload is None:
@@ -839,6 +998,7 @@ def main(argv: list[str] | None = None) -> int:
         personal_section(personal),
         followup_section(),
         round3_section(),
+        round4_section(),
         gec_section(gec),
         spelling_section(spelling),
         extension_section(extension),
