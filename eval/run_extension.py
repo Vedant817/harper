@@ -49,6 +49,7 @@ def check(metrics: dict[str, object]) -> list[dict]:
         ("LinkedIn combobox paste <= 700 ms", metrics.get("linkedinComboboxMs"), 700),
         ("Gmail prefilled draft <= 700 ms", metrics.get("gmailLoadMs"), 700),
         ("Gmail pre-filled without focus", metrics.get("gmailUnfocusedMs"), 700),
+        ("LinkedIn pre-filled without focus", metrics.get("linkedinUnfocusedMs"), 700),
         ("Gmail localhost unfocused no highlight", metrics.get("localhostUnfocusedHighlights"), 0),
         ("card width <= 280 px", metrics.get("cardWidthPx"), 280),
         ("card opens <= 300 ms", metrics.get("cardOpenMs"), 300),
