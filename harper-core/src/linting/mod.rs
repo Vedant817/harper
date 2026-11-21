@@ -252,6 +252,7 @@ mod oxymorons;
 mod pale_by_comparison;
 mod passionate_about;
 mod pay_for_price;
+mod personal_direct_question;
 mod phrasal_verb_as_compound_noun;
 mod phrase_set_corrections;
 mod pique_interest;

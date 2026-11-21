@@ -1850,6 +1850,13 @@
 						},
 						{
 							"Bool": {
+								"name": "PersonalDirectQuestion",
+								"state": false,
+								"label": "Personal Direct Question"
+							}
+						},
+						{
+							"Bool": {
 								"name": "PortAuPrince",
 								"state": true,
 								"label": "Port Au Prince"
