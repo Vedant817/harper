@@ -245,6 +245,117 @@ def followup_section() -> str:
     return "\n".join(lines)
 
 
+def round3_section() -> str:
+    rows = [
+        [
+            "1 regression",
+            "12 suite failures never compared before 5b7a6ff3",
+            "temporarily restored lintPage.ts, Highlights.ts, domUtils.ts to 5b7a6ff3^; rebuilt; ran the 12; restored; rebuilt",
+            "before 21 pass / 12 fail; after 22 pass / 11 fail; css_zoom passes only after; no pass->fail",
+            "Playwright 12 specs",
+            "PASS",
+        ],
+        [
+            "2 LinkedIn combobox",
+            "role=textbox fixture only",
+            "added linkedin_combobox.html (role=combobox) + gate",
+            "12 ms; all executable gates pass",
+            "run_extension.py",
+            "PASS",
+        ],
+        [
+            "3 unfocused draft",
+            "unfocused Gmail gate failed in round 2",
+            "added fixme gate; no product change (FIX_UNFOCUSED_DRAFTS=no)",
+            "FIXME known failure; focused gate still 202 ms",
+            "run_extension.py",
+            "FIXME",
+        ],
+        [
+            "4a preset check",
+            "round 2 claimed core without showing it",
+            "read cases.json and personalCases.test.ts",
+            "urgent/what are core; core loads no personal pack; direct is casual",
+            "python -c cases.json",
+            "PASS",
+        ],
+        [
+            "4b/4c stopped cases",
+            "? unsupported in expressions; ! is Not",
+            "probed a temporary Weirpack; core linters gated off",
+            "3 cases still fail; personal 28/31",
+            "run_personal.py",
+            "STOPPED",
+        ],
+        [
+            "5 SpellCheck split",
+            "1,189 / 1,250 / 838 gold FPs, no categories",
+            "run_gec.py + report.py classify by capitalization and compute diagnosis counts",
+            "breakdown below; GEC scores unchanged",
+            "report.py + gec.json",
+            "PASS",
+        ],
+        [
+            "6 LanguageTool",
+            "not installed",
+            "skipped by switch (ALLOW_LT_DOWNLOAD=no)",
+            "not measured",
+            "none",
+            "SKIPPED-BY-SWITCH",
+        ],
+    ]
+    spec_rows = [
+        ["css_zoom: scaled/zoomed ancestor", "FAIL", "PASS", "fix improved this spec"],
+        ["github: Wraps correctly", "FAIL", "FAIL", "expect(received).toBe(expected)"],
+        ["github: Scrolls correctly", "FAIL", "FAIL", "Test timeout of 30000ms exceeded"],
+        ["hn: Hacker News wraps correctly", "FAIL", "FAIL", "expect(received).toBe(expected)"],
+        ["nested_elements: oddly nested page", "FAIL", "FAIL", "expect(received).toBe(expected)"],
+        ["personal_polish: Polish quiet", "FAIL", "FAIL", "Test timeout of 100000ms exceeded"],
+        ["simple_textarea: Wraps correctly", "FAIL", "FAIL", "expect(received).toBe(expected)"],
+        ["typst: apply a suggestion", "FAIL", "FAIL", "expect(locator).toHaveCount failed"],
+        ["typst: 1 blank line", "FAIL", "FAIL", "expect(locator).toHaveCount failed"],
+        ["typst: 3 blank lines", "FAIL", "FAIL", "expect(locator).toHaveCount failed"],
+        ["typst: 5 blank lines", "FAIL", "FAIL", "expect(locator).toHaveCount failed"],
+        ["typst: multiline suggestions", "FAIL", "FAIL", "expect(locator).toHaveCount failed"],
+    ]
+    return "\n".join(
+        [
+            "## Round 3",
+            "",
+            markdown_table(
+                ["item", "evidence before", "change", "result after", "acceptance", "status"],
+                rows,
+            ),
+            "",
+            "### Twelve-spec before/after 5b7a6ff3",
+            "",
+            markdown_table(["spec", "before", "after", "first error when failing"], spec_rows),
+            "",
+            "No spec passes before and fails after. The one change is `css_zoom`, which fails "
+            "before and passes after. The 11 remaining failures are environment failures under "
+            "the Windows eval config and were left alone.",
+            "",
+            "### Known failures",
+            "",
+            "- `pre-filled draft is underlined without focus` is a FIXME gate because "
+            "FIX_UNFOCUSED_DRAFTS=no. It is not counted as a passing gate.",
+            "- The 11 chrome-plugin environment failures above remain.",
+            "",
+            "### Switches",
+            "",
+            "- ALLOW_LT_DOWNLOAD=no: Step 6 skipped by switch.",
+            "- ALLOW_CORE_LINTERS=no: Step 4c skipped by switch.",
+            "- FIX_UNFOCUSED_DRAFTS=no: Step 3 records the unfocused draft as FIXME.",
+            "",
+            "### Still not measured",
+            "",
+            "ErAConD, FCE and CoNLL-2013 scoring, JFLEG, TETRA, LanguageTool rule tests, "
+            "`just dogfood`, and tone/clarity. These remain out of scope.",
+            "",
+        ]
+    )
+
+
 def gec_section(payload) -> str:
     lines = ["## Public GEC corpora (ERRANT, token-level)", ""]
     if payload is None:
@@ -556,12 +667,15 @@ def extension_section(payload) -> str:
                 item["check"],
                 str(item["observed"]),
                 str(item["limit"]),
-                "PASS" if item["pass"] else "FAIL",
+                item.get("status") or ("PASS" if item["pass"] else "FAIL"),
             ]
         )
     lines.append(markdown_table(["gate", "observed", "limit", "result"], rows))
     lines.append("")
-    lines.append(f"**{'All gates passed.' if payload.get('passed') else 'One or more gates failed.'}**")
+    if payload.get("passed"):
+        lines.append("**All executable gates passed; FIXME rows are known failures.**")
+    else:
+        lines.append("**One or more gates failed.**")
     lines.append("")
     return "\n".join(lines)
 
@@ -612,6 +726,7 @@ def main(argv: list[str] | None = None) -> int:
         "",
         personal_section(personal),
         followup_section(),
+        round3_section(),
         gec_section(gec),
         spelling_section(spelling),
         extension_section(extension),
