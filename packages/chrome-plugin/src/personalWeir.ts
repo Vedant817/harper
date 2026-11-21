@@ -201,6 +201,20 @@ allows "The delay remains due to the fact that the server was down."
 allows "The delay became due to the fact that the server was down."
 `);
 
+const inOrderTo = rule(`
+expr main (in order to)
+let message "Use to."
+let description "Shortens in order to to to. The phrase in order of is left alone."
+let kind "WordChoice"
+let becomes "to"
+let strategy "MatchCase"
+
+test "I sent the note in order to close the loop." "I sent the note to close the loop."
+test "In order to close the loop, I sent the note." "To close the loop, I sent the note."
+allows "Sort the list in order of priority."
+allows "The names are in order of appearance."
+`);
+
 const atThisPoint = rule(`
 expr main <((at this point in time).), (at this point in time)>
 let message "Use now."
@@ -386,6 +400,7 @@ const SOURCES: Record<string, string> = {
 	PersonalObjectCase: objectCase,
 	PersonalLessFewer: lessFewer,
 	PersonalDueToTheFact: dueToTheFact,
+	PersonalInOrderTo: inOrderTo,
 	PersonalAtThisPoint: atThisPoint,
 	PersonalInTheEvent: inTheEvent,
 	PersonalIrregardless: irregardless,

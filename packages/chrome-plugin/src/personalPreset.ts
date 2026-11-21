@@ -56,6 +56,7 @@ export const CORE_RULES = [
 	'PersonalObjectCase',
 	'PersonalLessFewer',
 	'PersonalDueToTheFact',
+	'PersonalInOrderTo',
 	'PersonalAtThisPoint',
 	'PersonalInTheEvent',
 	'PersonalIrregardless',
