@@ -44,6 +44,8 @@ def check(metrics: dict[str, object]) -> list[dict]:
         ("full draft tail underlined", metrics.get("fullDraftTailUnderlined"), True),
         ("highlight in shadow root", metrics.get("highlightInShadowRoot"), True),
         ("shadow-root editor linted", metrics.get("shadowEditorUnderlined"), True),
+        ("LinkedIn dialog paste <= 700 ms", metrics.get("linkedinPasteMs"), 700),
+        ("Gmail prefilled draft <= 700 ms", metrics.get("gmailLoadMs"), 700),
         ("card width <= 280 px", metrics.get("cardWidthPx"), 280),
         ("card opens <= 300 ms", metrics.get("cardOpenMs"), 300),
         ("no dialog calls", metrics.get("dialogCalls"), []),

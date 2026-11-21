@@ -165,6 +165,67 @@ test.describe('personal extension acceptance', () => {
 		).toBeLessThanOrEqual(300);
 	});
 
+	test('LinkedIn-like dialog composer is underlined within 700 ms', async ({ page }) => {
+		test.setTimeout(120000);
+		await page.goto('http://localhost:8081/linkedin_dm.html');
+		const box = page.locator('#dm-editor');
+		const highlight = page.locator('#harper-highlight[data-problem-text="an"]');
+		await box.click();
+
+		// Warm up the content script, then measure a paste into the already-open dialog.
+		await box.fill('This is an test.');
+		await highlight.waitFor({ state: 'visible', timeout: 90000 });
+		await box.fill('');
+		await page.waitForTimeout(100);
+
+		const started = Date.now();
+		await page.evaluate(() => {
+			const data = new DataTransfer();
+			data.setData('text/plain', 'This is an test.');
+			document.getElementById('dm-editor')?.dispatchEvent(
+				new ClipboardEvent('paste', {
+					clipboardData: data,
+					bubbles: true,
+					cancelable: true,
+				}),
+			);
+		});
+		await highlight.waitFor({ state: 'visible', timeout: 10000 });
+		const elapsed = Date.now() - started;
+
+		record('linkedinPasteMs', elapsed);
+		expect(
+			elapsed,
+			'A paste into a role=textbox, spellcheck=false dialog should underline within 700 ms.',
+		).toBeLessThanOrEqual(700);
+	});
+
+	test('a pre-filled Gmail-like draft is underlined within 700 ms', async ({ page }) => {
+		test.setTimeout(120000);
+		// Warm the extension on the ordinary textarea page first.
+		const box = getTextarea(page);
+		await box.fill('This is an test');
+		await page
+			.locator('#harper-highlight[data-problem-text="an"]')
+			.waitFor({ state: 'visible', timeout: 90000 });
+
+		await page.goto('http://localhost:8081/gmail_draft.html');
+		// Gmail opens compose with the caret in the body. Focus the existing draft,
+		// but do not type or paste, so only pre-existing content is linted.
+		await page.locator('#gmail-editor').click();
+		const started = Date.now();
+		await page
+			.locator('#harper-highlight[data-problem-text="an"]')
+			.waitFor({ state: 'visible', timeout: 10000 });
+		const elapsed = Date.now() - started;
+
+		record('gmailLoadMs', elapsed);
+		expect(
+			elapsed,
+			'An already-filled Gmail-like draft should underline within 700 ms of load.',
+		).toBeLessThanOrEqual(700);
+	});
+
 	test('pasting opens no dialog and shows no alert', async ({ page }) => {
 		test.setTimeout(60000);
 		await page.evaluate(() => {

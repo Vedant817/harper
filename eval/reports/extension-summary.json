@@ -1,12 +1,14 @@
 {
   "passed": true,
   "metrics": {
-    "cardOpenMs": 20,
-    "cardWidthPx": 266.10274505615234,
+    "cardOpenMs": 29,
+    "cardWidthPx": 266.10533905029297,
     "dialogCalls": [],
     "fullDraftTailUnderlined": true,
     "fullDraftWords": 142,
+    "gmailLoadMs": 208,
     "highlightInShadowRoot": true,
+    "linkedinPasteMs": 10,
     "openDialogElements": 0,
     "pasteUnderlineMs": 11,
     "shadowEditorUnderlined": true
@@ -37,14 +39,26 @@
       "limit": true
     },
     {
+      "check": "LinkedIn dialog paste <= 700 ms",
+      "observed": 10,
+      "pass": true,
+      "limit": 700
+    },
+    {
+      "check": "Gmail prefilled draft <= 700 ms",
+      "observed": 208,
+      "pass": true,
+      "limit": 700
+    },
+    {
       "check": "card width <= 280 px",
-      "observed": 266.10274505615234,
+      "observed": 266.10533905029297,
       "pass": true,
       "limit": 280
     },
     {
       "check": "card opens <= 300 ms",
-      "observed": 20,
+      "observed": 29,
       "pass": true,
       "limit": 300
     },
