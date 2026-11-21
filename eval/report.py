@@ -288,11 +288,33 @@ def gec_section(payload) -> str:
     lines.append("")
     lines.extend(per_type_section(payload))
     lines.extend(fp_rule_section(payload))
-    lines.extend(fp_diagnosis_section())
+    lines.extend(fp_diagnosis_section(payload))
+    lines.extend(spellcheck_breakdown_section(payload))
     return "\n".join(lines)
 
 
-def fp_diagnosis_section() -> list[str]:
+def _rule_counts(payload, rule: str) -> list[int]:
+    counts = []
+    for corpus in ("cweb-s-dev", "cweb-g-dev", "gmeg-wiki"):
+        result = payload.get("corpora", {}).get(corpus, {})
+        entry = (result.get("gold_fp_by_rule") or {}).get(rule, {})
+        counts.append(int(entry.get("count", 0)))
+    return counts
+
+
+def fp_diagnosis_section(payload) -> list[str]:
+    spell = _rule_counts(payload, "SpellCheck")
+    long_sentences = _rule_counts(payload, "LongSentences")
+    split_words = _rule_counts(payload, "SplitWords")
+    oxford = _rule_counts(payload, "OxfordComma")
+    quotes = _rule_counts(payload, "UnclosedQuotes")
+    en_dash = _rule_counts(payload, "NumericRangeEnDash")
+    dashes = _rule_counts(payload, "Dashes")
+    prefixes = _rule_counts(payload, "DisjointPrefixes")
+    mass = _rule_counts(payload, "MassNouns")
+    orthographic = _rule_counts(payload, "OrthographicConsistency")
+    compounds = _rule_counts(payload, "CompoundNouns")
+    capitalization = _rule_counts(payload, "SentenceCapitalization")
     return [
         "### False-positive diagnosis",
         "",
@@ -300,33 +322,76 @@ def fp_diagnosis_section() -> list[str]:
         "corpus-level policy or a spellcheck allowlist that is broader than one rule or one data "
         "file, and a global SpellCheck change risks recall.",
         "",
-        "- `SpellCheck` (1,189 CWEB-S, 1,250 CWEB-G, 838 GMEG wiki): proper nouns, acronyms, "
-        "and technical terms are unknown to the curated dictionary. Examples include Udaipur, "
-        "Jodhpur, Jaisalmer, Havelis, CSA, and Paloukia. Proposed: a separate proper-noun/acronym "
-        "allowlist or a name-aware spellcheck path, not a global suppression.",
-        "- `LongSentences` (148 / 72 / 44): a style rule firing on naturally long website and "
-        "encyclopedia sentences. It is not a grammar edit and should be excluded from a GEC "
-        "precision gate or reported separately.",
-        "- `SplitWords` (88 / 61 / 13): compound-word policy disagreements such as oversample, "
-        "microcapsules, and defenseman. Proposed: extend the compound dictionary rather than "
-        "loosen the splitter.",
-        "- `OxfordComma` (64 / 97): inserts a serial comma where the reference text omits it. "
-        "This is a style preference, not a grammatical error; keep it out of the GEC gate.",
-        "- `UnclosedQuotes` (56 / 46): quotes embedded in long, sometimes malformed source text. "
-        "Needs a quote-balance analysis before changing the rule.",
-        "- `NumericRangeEnDash` (30) and `Dashes` (28 / 34): typographic preferences (hyphen vs "
-        "en dash, doubled hyphen). Style-only for this gate.",
-        "- `DisjointPrefixes` (17 / 27 / 19): prefers closed forms such as reimagining, antiwar, "
-        "and nonprofit. Policy disagreement; proposed dictionary review.",
-        "- `MassNouns` (16 / 21): over-applies mass-noun corrections such as `One might` to "
-        "`One piece of might`; rule-specific and needs its own test corpus.",
-        "- `OrthographicConsistency` (13): flags `Ph` in `Ph.D.` as `pH`; a narrow capitalization "
-        "fix is possible but was not attempted because it needs rule-level tests and a decision "
-        "on degree abbreviations.",
-        "- `CompoundNouns` (32) and `SentenceCapitalization` (24): closed-compound and "
-        "sentence-start policy disagreements; no narrow fix.",
+        f"- `SpellCheck` ({spell[0]:,} CWEB-S, {spell[1]:,} CWEB-G, {spell[2]:,} GMEG wiki): "
+        "proper nouns, acronyms, and technical terms are unknown to the curated dictionary. "
+        "Examples include Udaipur, Jodhpur, Jaisalmer, Havelis, CSA, and Paloukia. Proposed: a "
+        "separate proper-noun/acronym allowlist or a name-aware spellcheck path, not a global "
+        "suppression.",
+        f"- `LongSentences` ({long_sentences[0]} / {long_sentences[1]} / {long_sentences[2]}): "
+        "a style rule firing on naturally long website and encyclopedia sentences. It is not a "
+        "grammar edit and should be excluded from a GEC precision gate or reported separately.",
+        f"- `SplitWords` ({split_words[0]} / {split_words[1]} / {split_words[2]}): "
+        "compound-word policy disagreements such as oversample, microcapsules, and defenseman. "
+        "Proposed: extend the compound dictionary rather than loosen the splitter.",
+        f"- `OxfordComma` ({oxford[0]} / {oxford[1]}): inserts a serial comma where the "
+        "reference text omits it. This is a style preference, not a grammatical error; keep it "
+        "out of the GEC gate.",
+        f"- `UnclosedQuotes` ({quotes[0]} / {quotes[1]}): quotes embedded in long, sometimes "
+        "malformed source text. Needs a quote-balance analysis before changing the rule.",
+        f"- `NumericRangeEnDash` ({en_dash[0]}) and `Dashes` ({dashes[0]} / {dashes[1]}): "
+        "typographic preferences (hyphen vs en dash, doubled hyphen). Style-only for this gate.",
+        f"- `DisjointPrefixes` ({prefixes[0]} / {prefixes[1]} / {prefixes[2]}): prefers closed "
+        "forms such as reimagining, antiwar, and nonprofit. Policy disagreement; proposed "
+        "dictionary review.",
+        f"- `MassNouns` ({mass[0]} / {mass[1]}): over-applies mass-noun corrections such as "
+        "`One might` to `One piece of might`; rule-specific and needs its own test corpus.",
+        f"- `OrthographicConsistency` ({orthographic[0]}): flags `Ph` in `Ph.D.` as `pH`; a "
+        "narrow capitalization fix is possible but was not attempted because it needs rule-level "
+        "tests and a decision on degree abbreviations.",
+        f"- `CompoundNouns` ({compounds[0]}) and `SentenceCapitalization` "
+        f"({capitalization[0]}): closed-compound and sentence-start policy disagreements; no "
+        "narrow fix.",
         "",
     ]
+
+
+def spellcheck_breakdown_section(payload) -> list[str]:
+    lines = ["### SpellCheck false-positive breakdown", ""]
+    categories = ["sentence_initial", "acronym", "capitalized_mid", "lowercase", "other"]
+    rows = []
+    for corpus in ("cweb-s-dev", "cweb-g-dev", "gmeg-wiki"):
+        result = payload.get("corpora", {}).get(corpus, {})
+        data = result.get("spellcheck_fp_categories") or {}
+        total = int(data.get("total", 0))
+        counts = data.get("categories") or {}
+        row = [corpus, str(total)]
+        for category in categories:
+            count = int(counts.get(category, 0))
+            share = (100.0 * count / total) if total else 0.0
+            row.append(f"{count} ({share:.1f}%)")
+        rows.append(row)
+    if not rows:
+        return lines + ["Not measured.", ""]
+    lines.append(
+        markdown_table(
+            [
+                "corpus",
+                "SpellCheck FPs",
+                "sentence-initial",
+                "ALL-CAPS acronym",
+                "capitalized mid",
+                "lowercase",
+                "other",
+            ],
+            rows,
+        )
+    )
+    lines.append("")
+    lines.append(
+        "The breakdown is measurement only; no SpellCheck or dictionary change was made."
+    )
+    lines.append("")
+    return lines
 
 
 def _cell(text, limit: int = 160) -> str:

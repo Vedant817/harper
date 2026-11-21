@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-11-21T13:16:05Z",
-  "commit": "e0c2101d",
+  "generatedAt": "2026-11-21T14:54:25Z",
+  "commit": "8233db7a",
   "method": {
     "suggestions": "first suggestion per lint, non-overlapping, applied by token span",
     "edits": "ERRANT 3 annotation of tokenized source vs. Harper output",
@@ -1096,6 +1096,15 @@
               "suggestion": "will add"
             }
           ]
+        }
+      },
+      "spellcheck_fp_categories": {
+        "total": 1189,
+        "categories": {
+          "acronym": 309,
+          "lowercase": 246,
+          "capitalized_mid": 534,
+          "sentence_initial": 100
         }
       }
     },
@@ -2583,6 +2592,15 @@
             }
           ]
         }
+      },
+      "spellcheck_fp_categories": {
+        "total": 1250,
+        "categories": {
+          "capitalized_mid": 715,
+          "acronym": 195,
+          "sentence_initial": 102,
+          "lowercase": 238
+        }
       }
     },
     "gmeg-wiki": {
@@ -3536,6 +3554,15 @@
             }
           ]
         }
+      },
+      "spellcheck_fp_categories": {
+        "total": 838,
+        "categories": {
+          "capitalized_mid": 584,
+          "lowercase": 113,
+          "sentence_initial": 67,
+          "acronym": 74
+        }
       }
     },
     "gmeg-fce": {
@@ -4309,6 +4336,15 @@
               "suggestion": "you're"
             }
           ]
+        }
+      },
+      "spellcheck_fp_categories": {
+        "total": 38,
+        "categories": {
+          "capitalized_mid": 25,
+          "acronym": 6,
+          "lowercase": 5,
+          "sentence_initial": 2
         }
       }
     },
@@ -5516,6 +5552,15 @@
               "suggestion": "who"
             }
           ]
+        }
+      },
+      "spellcheck_fp_categories": {
+        "total": 168,
+        "categories": {
+          "capitalized_mid": 12,
+          "lowercase": 151,
+          "sentence_initial": 3,
+          "acronym": 2
         }
       }
     },
@@ -7195,6 +7240,15 @@
               "suggestion": "distill"
             }
           ]
+        }
+      },
+      "spellcheck_fp_categories": {
+        "total": 1096,
+        "categories": {
+          "lowercase": 725,
+          "capitalized_mid": 295,
+          "acronym": 33,
+          "sentence_initial": 43
         }
       }
     }

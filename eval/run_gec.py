@@ -20,6 +20,7 @@ import re
 import shutil
 import sys
 import time
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Sequence
@@ -411,6 +412,22 @@ def score_edits(predicted: Sequence[Edit], gold: Sequence[Edit]) -> dict:
     }
 
 
+def spellcheck_category(word: str, sentence: str) -> str:
+    """Classify a SpellCheck false positive without changing the product rule."""
+    cleaned = word.strip(".,;:!?()[]{}'\"")
+    tokens = re.findall(r"[A-Za-z][A-Za-z'\u2019-]*", sentence)
+    first = tokens[0] if tokens else ""
+    if cleaned and cleaned.lower() == first.lower() and cleaned[:1].isupper():
+        return "sentence_initial"
+    if len(cleaned) >= 2 and cleaned.isupper():
+        return "acronym"
+    if cleaned[:1].isupper():
+        return "capitalized_mid"
+    if cleaned[:1].islower():
+        return "lowercase"
+    return "other"
+
+
 def run_corpus(name: str, examples: list[Example], annotator) -> dict:
     sources = [example.source for example in examples]
     lints = lint_texts(sources)
@@ -450,8 +467,14 @@ def run_corpus(name: str, examples: list[Example], annotator) -> dict:
             1000.0 * len(gold_lints) / result["gold_words"] if result["gold_words"] else 0.0
         )
         fp_by_rule: dict[str, dict] = {}
+        spellcheck_counts: Counter[str] = Counter()
         for lint in gold_lints:
             rule = lint.get("rule") or "unknown"
+            if rule == "SpellCheck":
+                word = lint.get("matched_text") or ""
+                spellcheck_counts[
+                    spellcheck_category(word, gold_texts[lint["index"]])
+                ] += 1
             entry = fp_by_rule.setdefault(rule, {"count": 0, "examples": []})
             entry["count"] += 1
             if len(entry["examples"]) >= 3:
@@ -471,6 +494,10 @@ def run_corpus(name: str, examples: list[Example], annotator) -> dict:
         result["gold_fp_by_rule"] = dict(
             sorted(fp_by_rule.items(), key=lambda item: (-item[1]["count"], item[0]))
         )
+        result["spellcheck_fp_categories"] = {
+            "total": sum(spellcheck_counts.values()),
+            "categories": dict(spellcheck_counts),
+        }
     else:
         result["gold_false_positives"] = None
 
