@@ -198,6 +198,40 @@ test.describe('personal extension acceptance', () => {
 		).toBeLessThanOrEqual(700);
 	});
 
+	test('LinkedIn combobox composer is underlined within 700 ms', async ({ page }) => {
+		test.setTimeout(120000);
+		await page.goto('http://localhost:8081/linkedin_combobox.html');
+		const box = page.locator('#dm-editor');
+		const highlight = page.locator('#harper-highlight[data-problem-text="an"]');
+		await box.click();
+
+		await box.fill('This is an test.');
+		await highlight.waitFor({ state: 'visible', timeout: 90000 });
+		await box.fill('');
+		await page.waitForTimeout(100);
+
+		const started = Date.now();
+		await page.evaluate(() => {
+			const data = new DataTransfer();
+			data.setData('text/plain', 'This is an test.');
+			document.getElementById('dm-editor')?.dispatchEvent(
+				new ClipboardEvent('paste', {
+					clipboardData: data,
+					bubbles: true,
+					cancelable: true,
+				}),
+			);
+		});
+		await highlight.waitFor({ state: 'visible', timeout: 10000 });
+		const elapsed = Date.now() - started;
+
+		record('linkedinComboboxMs', elapsed);
+		expect(
+			elapsed,
+			'A paste into a role=combobox, spellcheck=false dialog should underline within 700 ms.',
+		).toBeLessThanOrEqual(700);
+	});
+
 	test('a pre-filled Gmail-like draft is underlined within 700 ms', async ({ page }) => {
 		test.setTimeout(120000);
 		// Warm the extension on the ordinary textarea page first.
