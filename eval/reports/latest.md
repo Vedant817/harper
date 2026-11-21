@@ -1,48 +1,48 @@
 # Harper evaluation report
 
-- Generated: 2026-11-21T14:56:32Z
-- Engine commit: `8233db7a`
+- Generated: 2026-11-21T16:30:29Z
+- Engine commit: `06a2933a`
 - Extension results include the local shadow-root fixes on top of that commit.
 - Scope: spelling, grammar, punctuation, and usage only.
 - This is an evaluation harness, not a claim of Grammarly Premium parity.
 
 ## Personal acceptance cases
 
-| case                 | preset | result | reason                                     |
-| -------------------- | ------ | ------ | ------------------------------------------ |
-| comma-splice         | casual | PASS   |                                            |
-| direct-question      | casual | FAIL   | expected PersonalDirectQuestion -> "?"     |
-| greeting-comma       | casual | PASS   |                                            |
-| object-case          | casual | PASS   |                                            |
-| less-fewer           | casual | PASS   |                                            |
-| due-to-fact          | casual | PASS   |                                            |
-| in-order-to          | casual | PASS   |                                            |
-| at-this-point        | casual | PASS   |                                            |
-| in-the-event         | casual | PASS   |                                            |
-| could-care-less      | casual | PASS   |                                            |
-| irregardless         | casual | PASS   |                                            |
-| urgent-marks         | core   | FAIL   | expected a suggestion containing "urgent!" |
-| what-marks           | core   | FAIL   | expected a suggestion containing "What?"   |
-| an-test              | core   | PASS   |                                            |
-| could-of             | core   | PASS   |                                            |
-| hope-well            | email  | PASS   |                                            |
-| wanted-follow-up     | email  | PASS   |                                            |
-| per-last-email       | email  | PASS   |                                            |
-| circling-back        | email  | PASS   |                                            |
-| reach-out            | email  | PASS   |                                            |
-| greeting-ok          | casual | PASS   |                                            |
-| sounds-good          | casual | PASS   |                                            |
-| wait-for-it          | casual | PASS   |                                            |
-| suspect              | casual | PASS   |                                            |
-| imagine              | casual | PASS   |                                            |
-| never-due            | casual | PASS   |                                            |
-| seems-due            | casual | PASS   |                                            |
-| care-less-comparison | casual | PASS   |                                            |
-| reach-out-mile       | email  | PASS   |                                            |
-| about-hour           | email  | PASS   |                                            |
-| stock-off            | casual | PASS   |                                            |
+| case                 | preset | result | reason                                 |
+| -------------------- | ------ | ------ | -------------------------------------- |
+| comma-splice         | casual | PASS   |                                        |
+| direct-question      | casual | FAIL   | expected PersonalDirectQuestion -> "?" |
+| greeting-comma       | casual | PASS   |                                        |
+| object-case          | casual | PASS   |                                        |
+| less-fewer           | casual | PASS   |                                        |
+| due-to-fact          | casual | PASS   |                                        |
+| in-order-to          | casual | PASS   |                                        |
+| at-this-point        | casual | PASS   |                                        |
+| in-the-event         | casual | PASS   |                                        |
+| could-care-less      | casual | PASS   |                                        |
+| irregardless         | casual | PASS   |                                        |
+| urgent-marks         | core   | PASS   |                                        |
+| what-marks           | core   | PASS   |                                        |
+| an-test              | core   | PASS   |                                        |
+| could-of             | core   | PASS   |                                        |
+| hope-well            | email  | PASS   |                                        |
+| wanted-follow-up     | email  | PASS   |                                        |
+| per-last-email       | email  | PASS   |                                        |
+| circling-back        | email  | PASS   |                                        |
+| reach-out            | email  | PASS   |                                        |
+| greeting-ok          | casual | PASS   |                                        |
+| sounds-good          | casual | PASS   |                                        |
+| wait-for-it          | casual | PASS   |                                        |
+| suspect              | casual | PASS   |                                        |
+| imagine              | casual | PASS   |                                        |
+| never-due            | casual | PASS   |                                        |
+| seems-due            | casual | PASS   |                                        |
+| care-less-comparison | casual | PASS   |                                        |
+| reach-out-mile       | email  | PASS   |                                        |
+| about-hour           | email  | PASS   |                                        |
+| stock-off            | casual | PASS   |                                        |
 
-**28/31 passed.** A failure here means the browser build does not meet the stated personal contract.
+**30/31 passed.** A failure here means the browser build does not meet the stated personal contract.
 
 ## Follow-up changes
 
@@ -144,9 +144,9 @@ ErAConD, FCE and CoNLL-2013 scoring, JFLEG, TETRA, LanguageTool rule tests, `jus
 | cweb-s-dev | 2862 | 5.93%  | 8.80%  | 6.35%  | 28.66      | n/a          |
 | cweb-g-dev | 3867 | 10.04% | 10.71% | 10.17% | 26.29      | n/a          |
 | gmeg-wiki  | 992  | 18.76% | 11.77% | 16.77% | 42.49      | n/a          |
-| gmeg-fce   | 968  | 36.15% | 7.38%  | 20.32% | 12.16      | n/a          |
+| gmeg-fce   | 968  | 36.09% | 7.38%  | 20.30% | 12.23      | n/a          |
 | conll2014  | 1312 | 56.65% | 7.20%  | 23.87% | 18.75      | n/a          |
-| bea19      | 4384 | 27.77% | 8.87%  | 19.47% | 29.63      | n/a          |
+| bea19      | 4384 | 27.77% | 8.87%  | 19.47% | 29.67      | n/a          |
 
 LanguageTool: not measured — No local LanguageTool command found. The 252 MB LanguageTool-stable.zip was not downloaded.
 
@@ -373,6 +373,94 @@ No false-positive fix was implemented in this round. The top rules need either a
 
 The breakdown is measurement only; no SpellCheck or dictionary change was made.
 
+### SpellCheck suppression counterfactual
+
+| corpus     | metric     | actual | suppress cap mid | suppress ALL-CAPS 2-5 | suppress both |
+| ---------- | ---------- | ------ | ---------------- | --------------------- | ------------- |
+| cweb-s-dev | P          | 5.93%  | 8.94%            | 7.31%                 | 12.15%        |
+| cweb-s-dev | R          | 8.80%  | 8.71%            | 8.80%                 | 8.43%         |
+| cweb-s-dev | F0.5       | 6.35%  | 8.89%            | 7.57%                 | 11.17%        |
+| cweb-s-dev | gold FP/1k | 28.66  | 19.89            | 23.80                 | 15.04         |
+| cweb-g-dev | P          | 10.04% | 16.07%           | 11.25%                | 19.53%        |
+| cweb-g-dev | R          | 10.71% | 10.41%           | 10.71%                | 10.41%        |
+| cweb-g-dev | F0.5       | 10.17% | 14.50%           | 11.14%                | 16.62%        |
+| cweb-g-dev | gold FP/1k | 26.29  | 16.07            | 23.66                 | 13.44         |
+| gmeg-wiki  | P          | 18.76% | 29.40%           | 19.78%                | 32.24%        |
+| gmeg-wiki  | R          | 11.77% | 10.85%           | 11.77%                | 10.85%        |
+| gmeg-wiki  | F0.5       | 16.77% | 21.91%           | 17.41%                | 23.13%        |
+| gmeg-wiki  | gold FP/1k | 42.49  | 17.78            | 39.49                 | 14.77         |
+| gmeg-fce   | P          | 36.09% | 37.43%           | 36.55%                | 37.93%        |
+| gmeg-fce   | R          | 7.38%  | 7.27%            | 7.38%                 | 7.27%         |
+| gmeg-fce   | F0.5       | 20.30% | 20.46%           | 20.41%                | 20.58%        |
+| gmeg-fce   | gold FP/1k | 12.23  | 10.58            | 11.90                 | 10.25         |
+
+Counterfactual only: SpellCheck lints in the named category are dropped before suggestion application and gold false-positive counting. Product code is unchanged.
+
+### Top lowercase SpellCheck false positives
+
+| corpus     | word            | count |
+| ---------- | --------------- | ----- |
+| cweb-s-dev | `s`             | 6     |
+| cweb-s-dev | `analyses`      | 6     |
+| cweb-s-dev | `podia`         | 6     |
+| cweb-s-dev | `ampulla`       | 5     |
+| cweb-s-dev | `clinicals`     | 4     |
+| cweb-s-dev | `ins`           | 4     |
+| cweb-s-dev | `ro`            | 4     |
+| cweb-s-dev | `nucleosomal`   | 3     |
+| cweb-s-dev | `saturations`   | 3     |
+| cweb-s-dev | `madreporite`   | 3     |
+| cweb-s-dev | `r`             | 3     |
+| cweb-s-dev | `cysteine`      | 3     |
+| cweb-s-dev | `visuomotor`    | 3     |
+| cweb-s-dev | `executory`     | 3     |
+| cweb-s-dev | `telepathology` | 3     |
+| cweb-s-dev | `ptot`          | 3     |
+| cweb-s-dev | `behavioural`   | 2     |
+| cweb-s-dev | `behaviour`     | 2     |
+| cweb-s-dev | `lis`           | 2     |
+| cweb-s-dev | `pendens`       | 2     |
+| cweb-g-dev | `s`             | 10    |
+| cweb-g-dev | `vc`            | 6     |
+| cweb-g-dev | `inulin`        | 4     |
+| cweb-g-dev | `scenics`       | 3     |
+| cweb-g-dev | `décor`         | 3     |
+| cweb-g-dev | `thingabobber`  | 3     |
+| cweb-g-dev | `permaculture`  | 3     |
+| cweb-g-dev | `ji`            | 3     |
+| cweb-g-dev | `yerjanik`      | 3     |
+| cweb-g-dev | `robux`         | 3     |
+| cweb-g-dev | `fi`            | 2     |
+| cweb-g-dev | `proteinuria`   | 2     |
+| cweb-g-dev | `mohawk`        | 2     |
+| cweb-g-dev | `prioritise`    | 2     |
+| cweb-g-dev | `bonkbuster`    | 2     |
+| cweb-g-dev | `gunpla`        | 2     |
+| cweb-g-dev | `whatchadoer`   | 2     |
+| cweb-g-dev | `colour`        | 2     |
+| cweb-g-dev | `behaviour`     | 2     |
+| cweb-g-dev | `tai`           | 2     |
+| gmeg-wiki  | `s`             | 14    |
+| gmeg-wiki  | `cancelled`     | 3     |
+| gmeg-wiki  | `shel`          | 2     |
+| gmeg-wiki  | `bivy`          | 1     |
+| gmeg-wiki  | `noctule`       | 1     |
+| gmeg-wiki  | `exapted`       | 1     |
+| gmeg-wiki  | `passerines`    | 1     |
+| gmeg-wiki  | `hortative`     | 1     |
+| gmeg-wiki  | `ie`            | 1     |
+| gmeg-wiki  | `varna`         | 1     |
+| gmeg-wiki  | `u`             | 1     |
+| gmeg-wiki  | `polytope`      | 1     |
+| gmeg-wiki  | `uncreated`     | 1     |
+| gmeg-wiki  | `oligopolistic` | 1     |
+| gmeg-wiki  | `vernix`        | 1     |
+| gmeg-wiki  | `samadhi`       | 1     |
+| gmeg-wiki  | `b.g`           | 1     |
+| gmeg-wiki  | `nm`            | 1     |
+| gmeg-wiki  | `transduce`     | 1     |
+| gmeg-wiki  | `krautrock`     | 1     |
+
 ## Spelling and developer writing
 
 | set             | n   | detection/recall | @1     | @3     |
@@ -421,22 +509,34 @@ Clean prose false positives: 23 spelling lints in 2345 words (9.81 per 1k).
 
 Sources: codespell (64966 pairs), wikipedia (4276 pairs), typos-cli (95923 pairs).
 
+### Spelling recall under SpellCheck suppression
+
+| set                | metric    | actual | suppress cap mid | suppress ALL-CAPS 2-5 | suppress both |
+| ------------------ | --------- | ------ | ---------------- | --------------------- | ------------- |
+| word-level         | detection | 96.00% | 95.67%           | 96.00%                | 95.67%        |
+| developer prose    | detection | 85.00% | 85.00%           | 85.00%                | 85.00%        |
+| Birkbeck missp     | detection | 84.50% | 84.50%           | 84.50%                | 84.50%        |
+| Birkbeck holbrook  | detection | 58.00% | 52.00%           | 58.00%                | 52.00%        |
+| Birkbeck aspell    | detection | 91.50% | 91.50%           | 91.50%                | 91.50%        |
+| Birkbeck wikipedia | detection | 93.50% | 92.00%           | 93.50%                | 92.00%        |
+
 ## Extension acceptance (Playwright, headed Chromium)
 
-| gate                                   | observed          | limit         | result |
-| -------------------------------------- | ----------------- | ------------- | ------ |
-| paste underline <= 700 ms              | 16                | 700           | PASS   |
-| full draft tail underlined             | True              | True          | PASS   |
-| highlight in shadow root               | True              | True          | PASS   |
-| shadow-root editor linted              | True              | True          | PASS   |
-| LinkedIn dialog paste <= 700 ms        | 10                | 700           | PASS   |
-| LinkedIn combobox paste <= 700 ms      | 12                | 700           | PASS   |
-| Gmail prefilled draft <= 700 ms        | 202               | 700           | PASS   |
-| Gmail pre-filled without focus (fixme) | fixme             | known failure | FIXME  |
-| card width <= 280 px                   | 266.0990219116211 | 280           | PASS   |
-| card opens <= 300 ms                   | 28                | 300           | PASS   |
-| no dialog calls                        | []                | []            | PASS   |
-| no open dialog elements                | 0                 | 0             | PASS   |
+| gate                                   | observed          | limit | result |
+| -------------------------------------- | ----------------- | ----- | ------ |
+| paste underline <= 700 ms              | 20                | 700   | PASS   |
+| full draft tail underlined             | True              | True  | PASS   |
+| highlight in shadow root               | True              | True  | PASS   |
+| shadow-root editor linted              | True              | True  | PASS   |
+| LinkedIn dialog paste <= 700 ms        | 13                | 700   | PASS   |
+| LinkedIn combobox paste <= 700 ms      | 16                | 700   | PASS   |
+| Gmail prefilled draft <= 700 ms        | 330               | 700   | PASS   |
+| Gmail pre-filled without focus         | 355               | 700   | PASS   |
+| Gmail localhost unfocused no highlight | 0                 | 0     | PASS   |
+| card width <= 280 px                   | 266.0991439819336 | 280   | PASS   |
+| card opens <= 300 ms                   | 34                | 300   | PASS   |
+| no dialog calls                        | []                | []    | PASS   |
+| no open dialog elements                | 0                 | 0     | PASS   |
 
 **All executable gates passed; FIXME rows are known failures.**
 

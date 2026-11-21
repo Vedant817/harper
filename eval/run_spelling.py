@@ -178,6 +178,35 @@ def overlaps(lint: dict, span: tuple[int, int]) -> bool:
     return not (end <= span[0] or start >= span[1])
 
 
+SPELL_POLICIES = ("capitalized_mid", "acronym_2_5", "both")
+
+
+def spell_category(word: str, sentence: str) -> str:
+    cleaned = word.strip(".,;:!?()[]{}'\"")
+    tokens = re.findall(r"[A-Za-z][A-Za-z'\u2019-]*", sentence)
+    first = tokens[0] if tokens else ""
+    if cleaned and cleaned.lower() == first.lower() and cleaned[:1].isupper():
+        return "sentence_initial"
+    if len(cleaned) >= 2 and cleaned.isupper():
+        return "acronym"
+    if cleaned[:1].isupper():
+        return "capitalized_mid"
+    if cleaned[:1].islower():
+        return "lowercase"
+    return "other"
+
+
+def suppressed_lint(lint: dict, sentence: str, policy: str) -> bool:
+    word = (lint.get("matched_text") or "").strip(".,;:!?()[]{}'\"")
+    category = spell_category(word, sentence)
+    acronym = category == "acronym" and 2 <= len(word) <= 5
+    if policy == "capitalized_mid":
+        return category == "capitalized_mid"
+    if policy == "acronym_2_5":
+        return acronym
+    return category == "capitalized_mid" or acronym
+
+
 def suggestion_texts(lints: list[dict]) -> list[str]:
     texts: list[str] = []
     for lint in lints:
@@ -215,6 +244,36 @@ def run_word_level(pairs: list[Pair], limit: int) -> dict:
             misses.append({"typo": pair.typo, "correct": pair.correct, "source": pair.source})
 
     total = len(sample)
+    suppression = {}
+    for policy in SPELL_POLICIES:
+        policy_detected = 0
+        policy_at1 = 0
+        policy_at3 = 0
+        for index, pair in enumerate(sample):
+            span = (
+                texts[index].find(pair.typo),
+                texts[index].find(pair.typo) + len(pair.typo),
+            )
+            hits = [
+                lint
+                for lint in by_index[index]
+                if overlaps(lint, span)
+                and not suppressed_lint(lint, texts[index], policy)
+            ]
+            if not hits:
+                continue
+            policy_detected += 1
+            suggestions = suggestion_texts(hits)
+            if suggestions and suggestions[0].lower() == pair.correct.lower():
+                policy_at1 += 1
+            if any(suggestion.lower() == pair.correct.lower() for suggestion in suggestions[:3]):
+                policy_at3 += 1
+        suppression[policy] = {
+            "detected": policy_detected,
+            "detection": policy_detected / total if total else 0.0,
+            "suggestion_at_1": policy_at1 / total if total else 0.0,
+            "suggestion_at_3": policy_at3 / total if total else 0.0,
+        }
     return {
         "pairs": total,
         "detected": detected,
@@ -222,6 +281,7 @@ def run_word_level(pairs: list[Pair], limit: int) -> dict:
         "suggestion_at_1": at1 / total if total else 0.0,
         "suggestion_at_3": at3 / total if total else 0.0,
         "misses": misses,
+        "suppression": suppression,
     }
 
 
@@ -306,6 +366,35 @@ def run_fixture(pairs: list[Pair], clean: list[str], limit: int) -> dict:
                 "sentence": clean[lint["index"]],
             }
         )
+    fixture_suppression = {}
+    for policy in SPELL_POLICIES:
+        policy_detected = 0
+        policy_at1 = 0
+        policy_at3 = 0
+        for index, (_, correct, span, _) in enumerate(fixtures):
+            if span is None:
+                continue
+            hits = [
+                lint
+                for lint in by_index[index]
+                if overlaps(lint, span)
+                and not suppressed_lint(lint, texts[index], policy)
+            ]
+            if not hits:
+                continue
+            policy_detected += 1
+            suggestions = suggestion_texts(hits)
+            if suggestions and suggestions[0].lower() == correct.lower():
+                policy_at1 += 1
+            if any(suggestion.lower() == correct.lower() for suggestion in suggestions[:3]):
+                policy_at3 += 1
+        fixture_suppression[policy] = {
+            "detected": policy_detected,
+            "recall": policy_detected / len(fixtures) if fixtures else 0.0,
+            "suggestion_at_1": policy_at1 / len(fixtures) if fixtures else 0.0,
+            "suggestion_at_3": policy_at3 / len(fixtures) if fixtures else 0.0,
+        }
+
     return {
         "fixtures": len(fixtures),
         "substituted": sum(1 for fixture in fixtures if fixture[3] == "substituted"),
@@ -320,6 +409,7 @@ def run_fixture(pairs: list[Pair], clean: list[str], limit: int) -> dict:
         "clean_false_positives": len(clean_lints),
         "clean_fp_per_1000_words": 1000.0 * len(clean_lints) / clean_words if clean_words else 0.0,
         "clean_lints": clean_details,
+        "suppression": fixture_suppression,
     }
 
 
@@ -350,10 +440,26 @@ def run_birkbeck(limit: int = 200) -> dict:
             span = (texts[index].find(word), texts[index].find(word) + len(word))
             if any(overlaps(lint, span) for lint in by_index[index]):
                 detected += 1
+        policy_results = {}
+        for policy in SPELL_POLICIES:
+            policy_detected = 0
+            for index, word in enumerate(sample):
+                span = (texts[index].find(word), texts[index].find(word) + len(word))
+                if any(
+                    overlaps(lint, span)
+                    and not suppressed_lint(lint, texts[index], policy)
+                    for lint in by_index[index]
+                ):
+                    policy_detected += 1
+            policy_results[policy] = {
+                "detected": policy_detected,
+                "detection": policy_detected / len(sample) if sample else 0.0,
+            }
         results[name] = {
             "words": len(sample),
             "detected": detected,
             "detection": detected / len(sample) if sample else 0.0,
+            "suppression": policy_results,
         }
     return results
 

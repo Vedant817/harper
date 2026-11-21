@@ -401,6 +401,8 @@ def gec_section(payload) -> str:
     lines.extend(fp_rule_section(payload))
     lines.extend(fp_diagnosis_section(payload))
     lines.extend(spellcheck_breakdown_section(payload))
+    lines.extend(counterfactual_section(payload))
+    lines.extend(lowercase_top_section(payload))
     return "\n".join(lines)
 
 
@@ -501,6 +503,74 @@ def spellcheck_breakdown_section(payload) -> list[str]:
     lines.append(
         "The breakdown is measurement only; no SpellCheck or dictionary change was made."
     )
+    lines.append("")
+    return lines
+
+
+def counterfactual_section(payload) -> list[str]:
+    lines = ["### SpellCheck suppression counterfactual", ""]
+    rows = []
+    policies = (
+        ("capitalized_mid", "capitalized mid"),
+        ("acronym_2_5", "ALL-CAPS 2-5"),
+        ("both", "both"),
+    )
+    for corpus in ("cweb-s-dev", "cweb-g-dev", "gmeg-wiki", "gmeg-fce"):
+        result = payload.get("corpora", {}).get(corpus)
+        if result is None or not result.get("counterfactuals"):
+            continue
+        actual = result
+        counterfactuals = result["counterfactuals"]
+        for label, key in (
+            ("P", "precision"),
+            ("R", "recall"),
+            ("F0.5", "f05"),
+            ("gold FP/1k", "gold_fp_per_1000_words"),
+        ):
+            row = [corpus, label]
+            if key == "gold_fp_per_1000_words":
+                row.append(f"{actual.get(key, 0):.2f}")
+                for policy, _ in policies:
+                    row.append(f"{counterfactuals[policy].get(key, 0):.2f}")
+            else:
+                row.append(f"{actual.get(key, 0) * 100:.2f}%")
+                for policy, _ in policies:
+                    row.append(f"{counterfactuals[policy].get(key, 0) * 100:.2f}%")
+            rows.append(row)
+    if not rows:
+        return lines + ["Not measured.", ""]
+    lines.append(
+        markdown_table(
+            [
+                "corpus",
+                "metric",
+                "actual",
+                "suppress cap mid",
+                "suppress ALL-CAPS 2-5",
+                "suppress both",
+            ],
+            rows,
+        )
+    )
+    lines.append("")
+    lines.append(
+        "Counterfactual only: SpellCheck lints in the named category are dropped before "
+        "suggestion application and gold false-positive counting. Product code is unchanged."
+    )
+    lines.append("")
+    return lines
+
+
+def lowercase_top_section(payload) -> list[str]:
+    lines = ["### Top lowercase SpellCheck false positives", ""]
+    rows = []
+    for corpus in ("cweb-s-dev", "cweb-g-dev", "gmeg-wiki"):
+        result = payload.get("corpora", {}).get(corpus, {})
+        for item in (result.get("spellcheck_lowercase_top") or [])[:20]:
+            rows.append([corpus, f"`{item.get('word')}`", str(item.get("count", 0))])
+    if not rows:
+        return lines + ["Not measured.", ""]
+    lines.append(markdown_table(["corpus", "word", "count"], rows))
     lines.append("")
     return lines
 
@@ -653,7 +723,49 @@ def spelling_section(payload) -> str:
     if sources:
         lines.append("Sources: " + ", ".join(f"{name} ({count})" for name, count in sources.items()) + ".")
         lines.append("")
+    lines.extend(spelling_suppression_section(payload))
     return "\n".join(lines)
+
+
+def spelling_suppression_section(payload) -> list[str]:
+    lines = ["### Spelling recall under SpellCheck suppression", ""]
+    rows = []
+    word = payload.get("word_level", {})
+    fixture = payload.get("developer_fixtures", {})
+    for label, data, metric in (
+        ("word-level", word, "detection"),
+        ("developer prose", fixture, "recall"),
+    ):
+        suppression = data.get("suppression") or {}
+        if not suppression:
+            continue
+        row = [label, "detection"]
+        row.append(f"{data.get(metric, 0) * 100:.2f}%")
+        for policy in ("capitalized_mid", "acronym_2_5", "both"):
+            row.append(f"{suppression.get(policy, {}).get(metric, 0) * 100:.2f}%")
+        rows.append(row)
+    birkbeck = payload.get("birkbeck_detection", {})
+    for name, data in birkbeck.items():
+        if "error" in data:
+            continue
+        suppression = data.get("suppression") or {}
+        if not suppression:
+            continue
+        row = [f"Birkbeck {name}", "detection"]
+        row.append(f"{data.get('detection', 0) * 100:.2f}%")
+        for policy in ("capitalized_mid", "acronym_2_5", "both"):
+            row.append(f"{suppression.get(policy, {}).get('detection', 0) * 100:.2f}%")
+        rows.append(row)
+    if not rows:
+        return lines + ["Not measured.", ""]
+    lines.append(
+        markdown_table(
+            ["set", "metric", "actual", "suppress cap mid", "suppress ALL-CAPS 2-5", "suppress both"],
+            rows,
+        )
+    )
+    lines.append("")
+    return lines
 
 
 def extension_section(payload) -> str:
