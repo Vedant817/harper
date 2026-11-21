@@ -259,17 +259,28 @@ test.describe('personal extension acceptance', () => {
 	});
 
 	test('pre-filled draft is underlined without focus', async ({ page }) => {
-		test.fixme(
-			true,
-			'FIX_UNFOCUSED_DRAFTS=no: the silent scout only arms when an editor has focus.',
-		);
 		test.setTimeout(60000);
-		await page.goto('http://localhost:8081/gmail_draft.html');
+		await page.route('https://mail.google.com/**', (route) =>
+			route.fulfill({
+				path: path.join(import.meta.dirname, 'pages/gmail_draft.html'),
+				contentType: 'text/html',
+			}),
+		);
+		await page.goto('https://mail.google.com/');
 		const started = Date.now();
 		await page
 			.locator('#harper-highlight[data-problem-text="an"]')
 			.waitFor({ state: 'visible', timeout: 10000 });
 		record('gmailUnfocusedMs', Date.now() - started);
+	});
+
+	test('pre-filled draft on localhost gets no highlight before focus', async ({ page }) => {
+		test.setTimeout(60000);
+		await page.goto('http://localhost:8081/gmail_draft.html');
+		await page.waitForTimeout(1000);
+		const count = await page.locator('#harper-highlight').count();
+		record('localhostUnfocusedHighlights', count);
+		expect(count, 'An unfocused draft on localhost must not be underlined.').toBe(0);
 	});
 
 	test('pasting opens no dialog and shows no alert', async ({ page }) => {

@@ -11,6 +11,13 @@ function isGoogleDocsDocument(): boolean {
 	);
 }
 
+/** Mail and LinkedIn drafts stay visible without the caret being in the body. */
+const UNFOCUSED_DRAFT_HOSTS = new Set(['mail.google.com', 'www.linkedin.com', 'linkedin.com']);
+
+function allowsUnfocusedDraft(): boolean {
+	return UNFOCUSED_DRAFT_HOSTS.has(window.location.hostname);
+}
+
 let arming = false;
 
 function frameShouldLint(): boolean {
@@ -18,7 +25,7 @@ function frameShouldLint(): boolean {
 		return false;
 	}
 
-	if (isGoogleDocsDocument()) {
+	if (isGoogleDocsDocument() || allowsUnfocusedDraft()) {
 		return true;
 	}
 
