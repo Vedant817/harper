@@ -156,9 +156,7 @@ test.describe('personal extension acceptance', () => {
 		record('cardOpenMs', openMs);
 		record('cardWidthPx', cardBox!.width);
 
-		expect(cardBox!.width, 'The suggestion card must not exceed 280 px.').toBeLessThanOrEqual(
-			280,
-		);
+		expect(cardBox!.width, 'The suggestion card must not exceed 280 px.').toBeLessThanOrEqual(280);
 		expect(
 			openMs,
 			'The suggestion card should open within 300 ms of the click.',
