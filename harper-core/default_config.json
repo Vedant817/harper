@@ -1892,6 +1892,13 @@
 						},
 						{
 							"Bool": {
+								"name": "RepeatedPunctuation",
+								"state": true,
+								"label": "Repeated Punctuation"
+							}
+						},
+						{
+							"Bool": {
 								"name": "Spaces",
 								"state": true,
 								"label": "Spaces"

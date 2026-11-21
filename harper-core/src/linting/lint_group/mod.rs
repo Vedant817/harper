@@ -265,6 +265,7 @@ use super::redundant_self::RedundantSelf;
 use super::regimen_regiment::RegimenRegiment;
 use super::regionalisms::Regionalisms;
 use super::regular_irregulars::RegularIrregulars;
+use super::repeated_punctuation::RepeatedPunctuation;
 use super::repeated_words::RepeatedWords;
 use super::respond::Respond;
 use super::right_click::RightClick;
@@ -909,6 +910,7 @@ impl LintGroup {
         insert_expr_rule!(RegimenRegiment);
         insert_struct_rule_with_dialect!(Regionalisms);
         insert_expr_rule_with_dict!(RegularIrregulars);
+        insert_struct_rule!(RepeatedPunctuation);
         insert_struct_rule!(RepeatedWords);
         insert_expr_rule!(Respond);
         insert_expr_rule!(RightClick);

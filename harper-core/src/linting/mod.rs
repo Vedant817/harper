@@ -283,6 +283,7 @@ mod redundant_self;
 mod regimen_regiment;
 mod regionalisms;
 mod regular_irregulars;
+mod repeated_punctuation;
 mod repeated_words;
 mod respond;
 mod right_click;
