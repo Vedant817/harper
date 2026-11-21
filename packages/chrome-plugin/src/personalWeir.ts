@@ -251,7 +251,7 @@ allows "The term irregardless is nonstandard."
 const couldCareLess = rule(`
 expr opener [(^could care less), (^[I, You, We, They] could care less)]
 expr span [${repeated('@opener about', '![more, than]', '.', 24)}]
-expr main <@span, (could care less)>
+expr main [<@span, (could care less)>, <(@opener.), (could care less)>]
 let message "The phrase is couldn't care less."
 let description "Corrects could care less about at the start of a sentence. A comparison that uses more or than before the period is left alone. A later if still changes the phrase."
 let kind "Usage"
@@ -260,6 +260,8 @@ let strategy "MatchCase"
 let scope "Sentence"
 
 test "I could care less about the font." "I couldn't care less about the font."
+test "I could care less." "I couldn't care less."
+test "Could care less." "Couldn't care less."
 test "Could care less about the font." "Couldn't care less about the font."
 test "They could care less about the cost if they tried." "They couldn't care less about the cost if they tried."
 allows "I couldn't care less about the font."
