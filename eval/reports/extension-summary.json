@@ -1,64 +1,64 @@
 {
-	"passed": true,
-	"metrics": {
-		"cardOpenMs": 21,
-		"cardWidthPx": 266.1011276245117,
-		"dialogCalls": [],
-		"fullDraftTailUnderlined": true,
-		"fullDraftWords": 142,
-		"highlightInShadowRoot": true,
-		"openDialogElements": 0,
-		"pasteUnderlineMs": 12,
-		"shadowEditorUnderlined": true
-	},
-	"checks": [
-		{
-			"check": "paste underline <= 700 ms",
-			"observed": 12,
-			"pass": true,
-			"limit": 700
-		},
-		{
-			"check": "full draft tail underlined",
-			"observed": true,
-			"pass": true,
-			"limit": true
-		},
-		{
-			"check": "highlight in shadow root",
-			"observed": true,
-			"pass": true,
-			"limit": true
-		},
-		{
-			"check": "shadow-root editor linted",
-			"observed": true,
-			"pass": true,
-			"limit": true
-		},
-		{
-			"check": "card width <= 280 px",
-			"observed": 266.1011276245117,
-			"pass": true,
-			"limit": 280.5
-		},
-		{
-			"check": "card opens <= 300 ms",
-			"observed": 21,
-			"pass": true,
-			"limit": 300
-		},
-		{
-			"check": "no dialog calls",
-			"observed": [],
-			"pass": true,
-			"limit": []
-		},
-		{
-			"check": "no open dialog elements",
-			"observed": 0,
-			"pass": true,
-			"limit": 0
-		}
-	]
+  "passed": true,
+  "metrics": {
+    "cardOpenMs": 20,
+    "cardWidthPx": 266.10274505615234,
+    "dialogCalls": [],
+    "fullDraftTailUnderlined": true,
+    "fullDraftWords": 142,
+    "highlightInShadowRoot": true,
+    "openDialogElements": 0,
+    "pasteUnderlineMs": 11,
+    "shadowEditorUnderlined": true
+  },
+  "checks": [
+    {
+      "check": "paste underline <= 700 ms",
+      "observed": 11,
+      "pass": true,
+      "limit": 700
+    },
+    {
+      "check": "full draft tail underlined",
+      "observed": true,
+      "pass": true,
+      "limit": true
+    },
+    {
+      "check": "highlight in shadow root",
+      "observed": true,
+      "pass": true,
+      "limit": true
+    },
+    {
+      "check": "shadow-root editor linted",
+      "observed": true,
+      "pass": true,
+      "limit": true
+    },
+    {
+      "check": "card width <= 280 px",
+      "observed": 266.10274505615234,
+      "pass": true,
+      "limit": 280
+    },
+    {
+      "check": "card opens <= 300 ms",
+      "observed": 20,
+      "pass": true,
+      "limit": 300
+    },
+    {
+      "check": "no dialog calls",
+      "observed": [],
+      "pass": true,
+      "limit": []
+    },
+    {
+      "check": "no open dialog elements",
+      "observed": 0,
+      "pass": true,
+      "limit": 0
+    }
+  ]
 }

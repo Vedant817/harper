@@ -157,7 +157,7 @@ test.describe('personal extension acceptance', () => {
 		record('cardWidthPx', cardBox!.width);
 
 		expect(cardBox!.width, 'The suggestion card must not exceed 280 px.').toBeLessThanOrEqual(
-			280.5,
+			280,
 		);
 		expect(
 			openMs,
