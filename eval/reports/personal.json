@@ -1,13 +1,17 @@
 {
-	"generatedAt": "2026-11-21T08:28:11.058Z",
+	"generatedAt": "2026-11-21T13:22:37.549Z",
 	"cases": [
 		{
 			"id": "comma-splice",
 			"text": "I have a meeting at 3, I will be late.",
 			"preset": "casual",
-			"pass": false,
-			"observed": [],
-			"reason": "expected PersonalCommaSplice -> \". \""
+			"pass": true,
+			"observed": [
+				{
+					"rule": "PersonalCommaSplice",
+					"suggestions": [". ", "; "]
+				}
+			]
 		},
 		{
 			"id": "direct-question",
@@ -73,9 +77,13 @@
 			"id": "in-order-to",
 			"text": "I sent the note in order to close the loop.",
 			"preset": "casual",
-			"pass": false,
-			"observed": [],
-			"reason": "expected a suggestion containing \"to\""
+			"pass": true,
+			"observed": [
+				{
+					"rule": "PersonalInOrderTo",
+					"suggestions": ["to"]
+				}
+			]
 		},
 		{
 			"id": "at-this-point",
@@ -105,9 +113,13 @@
 			"id": "could-care-less",
 			"text": "I could care less.",
 			"preset": "casual",
-			"pass": false,
-			"observed": [],
-			"reason": "expected PersonalCouldCareLess -> \"couldn't care less\""
+			"pass": true,
+			"observed": [
+				{
+					"rule": "PersonalCouldCareLess",
+					"suggestions": ["couldn't care less"]
+				}
+			]
 		},
 		{
 			"id": "irregardless",
