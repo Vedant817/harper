@@ -8,7 +8,14 @@ import {
 	type PolishSettings,
 	type PolishSource,
 } from './personalPolish';
-import type { ActivationKey, Hotkey, PersonalPresetId, WeirpackMeta } from './protocol';
+import type {
+	ActivationKey,
+	DomainStatus,
+	Hotkey,
+	PersonalPresetId,
+	SetDomainStatusResponse,
+	WeirpackMeta,
+} from './protocol';
 
 export default class ProtocolClient {
 	private static readonly lintCache = new LRUCache<string, Promise<UnpackedLintGroups>>({
@@ -85,6 +92,7 @@ export default class ProtocolClient {
 	}
 
 	public static async setDialect(dialect: Dialect): Promise<void> {
+		this.lintCache.clear();
 		await chrome.runtime.sendMessage({ kind: 'setDialect', dialect });
 	}
 
@@ -116,7 +124,6 @@ export default class ProtocolClient {
 	}
 
 	public static async getDomainEnabled(domain: string): Promise<boolean> {
-		this.lintCache.clear();
 		return (await chrome.runtime.sendMessage({ kind: 'getDomainStatus', domain })).enabled;
 	}
 
@@ -129,16 +136,33 @@ export default class ProtocolClient {
 		enabled: boolean,
 		overrideValue = true,
 	): Promise<void> {
-		await chrome.runtime.sendMessage({
+		const response = (await chrome.runtime.sendMessage({
 			kind: 'setDomainStatus',
 			enabled,
 			domain,
 			overrideValue,
-		});
+		})) as SetDomainStatusResponse;
+
+		if (response.changed) {
+			this.lintCache.clear();
+		}
+	}
+
+	public static async getConfiguredDomains(): Promise<DomainStatus[]> {
+		return (await chrome.runtime.sendMessage({ kind: 'getConfiguredDomains' })).domains;
+	}
+
+	public static async setDefaultDomainsEnabled(enabled: boolean): Promise<void> {
+		this.lintCache.clear();
+		await chrome.runtime.sendMessage({ kind: 'setDefaultDomainsStatus', enabled });
+	}
+
+	public static async resetDomain(domain: string): Promise<void> {
+		this.lintCache.clear();
+		await chrome.runtime.sendMessage({ kind: 'resetDomain', domain });
 	}
 
 	public static async getDefaultEnabled(): Promise<boolean> {
-		this.lintCache.clear();
 		return (await chrome.runtime.sendMessage({ kind: 'getDefaultStatus' })).enabled;
 	}
 
@@ -147,6 +171,7 @@ export default class ProtocolClient {
 	}
 
 	public static async setDefaultEnabled(enabled: boolean): Promise<void> {
+		this.lintCache.clear();
 		await chrome.runtime.sendMessage({ kind: 'setDefaultStatus', enabled });
 	}
 

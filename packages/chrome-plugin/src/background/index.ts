@@ -39,6 +39,7 @@ import {
 	type GetActivationKeyResponse,
 	type GetConfigRequest,
 	type GetConfigResponse,
+	type GetConfiguredDomainsResponse,
 	type GetDefaultStatusResponse,
 	type GetDelayRequest,
 	type GetDelayResponse,
@@ -72,13 +73,16 @@ import {
 	type PostFormDataResponse,
 	type RemoveWeirpackRequest,
 	type Request,
+	type ResetDomainRequest,
 	type Response,
 	type SetActivationKeyRequest,
 	type SetConfigRequest,
+	type SetDefaultDomainsStatusRequest,
 	type SetDefaultStatusRequest,
 	type SetDelayRequest,
 	type SetDialectRequest,
 	type SetDomainStatusRequest,
+	type SetDomainStatusResponse,
 	type SetHotkeyRequest,
 	type SetIsolateEnglishRequest,
 	type SetPersonalPresetRequest,
@@ -214,6 +218,8 @@ const defaultEnabledDomains = [
 	'app.dabblewriter.com',
 ] as const;
 
+const defaultEnabledDomainSet = new Set<string>(defaultEnabledDomains);
+
 let linterReady: Promise<void> | null = null;
 setInstalledOnIfMissing();
 
@@ -306,7 +312,9 @@ async function enableDefaultDomains() {
 	}
 }
 
-enableDefaultDomains();
+const defaultDomainsReady = enableDefaultDomains().catch((err) =>
+	console.error('Failed to enable default domains:', err),
+);
 
 function handleRequest(message: Request, sender?: chrome.runtime.MessageSender): Promise<Response> {
 	console.log(`Handling ${message.kind} request`);
@@ -347,6 +355,12 @@ function handleRequest(message: Request, sender?: chrome.runtime.MessageSender):
 			return handleGetDomainStatus(message);
 		case 'setDomainStatus':
 			return handleSetDomainStatus(message);
+		case 'getConfiguredDomains':
+			return handleGetConfiguredDomains();
+		case 'setDefaultDomainsStatus':
+			return handleSetDefaultDomainsStatus(message);
+		case 'resetDomain':
+			return handleResetDomain(message);
 		case 'addToUserDictionary':
 			return handleAddToUserDictionary(message);
 		case 'clearIgnoredLints':
@@ -568,12 +582,14 @@ async function handleGetDefaultStatus(): Promise<GetDefaultStatusResponse> {
 }
 
 async function handleGetEnabledDomains(): Promise<GetEnabledDomainsResponse> {
-	const all = await chrome.storage.local.get(null);
-	const prefix = formatDomainKey(''); // yields 'domainStatus '
-	const domains = Object.entries(all)
-		.filter(([k, v]) => typeof v === 'boolean' && v === true && k.startsWith(prefix))
-		.map(([k]) => k.substring(prefix.length))
-		.sort((a, b) => a.localeCompare(b));
+	await defaultDomainsReady;
+	const domains = [
+		...new Set(
+			(await getStoredDomainStatuses())
+				.filter((domain) => domain.enabled)
+				.map((domain) => stripWww(domain.domain)),
+		),
+	].sort();
 
 	return { kind: 'getEnabledDomains', domains };
 }
@@ -588,8 +604,72 @@ async function handleGetDomainStatus(
 	};
 }
 
-async function handleSetDomainStatus(req: SetDomainStatusRequest): Promise<UnitResponse> {
-	await setDomainEnable(req.domain, req.enabled, req.overrideValue);
+async function handleGetConfiguredDomains(): Promise<GetConfiguredDomainsResponse> {
+	await defaultDomainsReady;
+
+	// Non-default overrides, deduped so a legacy `www.` key can't shadow the canonical one.
+	const stored = await getStoredDomainStatuses();
+	const bareStoredKeys = new Set(
+		stored.map(({ domain }) => domain).filter((domain) => !domain.startsWith('www.')),
+	);
+	const customByDomain = new Map<string, boolean>();
+	for (const { domain, enabled } of stored) {
+		const normalized = stripWww(domain);
+		if (isDefaultDomain(normalized)) {
+			continue;
+		}
+		if (domain.startsWith('www.') && bareStoredKeys.has(normalized)) {
+			continue;
+		}
+		if (!customByDomain.has(normalized)) {
+			customByDomain.set(normalized, enabled);
+		}
+	}
+
+	const defaultDomains = await Promise.all(
+		defaultEnabledDomains.map(async (domain) => ({
+			domain,
+			enabled: await enabledForDomain(domain),
+			isDefault: true,
+		})),
+	);
+
+	const customDomains = [...customByDomain.entries()]
+		.map(([domain, enabled]) => ({ domain, enabled, isDefault: false }))
+		.sort((a, b) => a.domain.localeCompare(b.domain));
+
+	return {
+		kind: 'getConfiguredDomains',
+		domains: [...defaultDomains, ...customDomains],
+	};
+}
+
+async function handleSetDomainStatus(
+	req: SetDomainStatusRequest,
+): Promise<SetDomainStatusResponse> {
+	await defaultDomainsReady;
+	const changed = await setDomainEnable(req.domain, req.enabled, req.overrideValue);
+
+	return { kind: 'setDomainStatus', changed };
+}
+
+async function handleSetDefaultDomainsStatus(
+	req: SetDefaultDomainsStatusRequest,
+): Promise<UnitResponse> {
+	await defaultDomainsReady;
+	await chrome.storage.local.set(
+		Object.fromEntries(
+			defaultEnabledDomains.map((domain) => [formatDomainKey(stripWww(domain)), req.enabled]),
+		),
+	);
+
+	return createUnitResponse();
+}
+
+async function handleResetDomain(req: ResetDomainRequest): Promise<UnitResponse> {
+	await defaultDomainsReady;
+	const domain = stripWww(req.domain);
+	await chrome.storage.local.remove([formatDomainKey(domain), formatDomainKey(`www.${domain}`)]);
 
 	return createUnitResponse();
 }
@@ -1120,6 +1200,30 @@ function formatDomainKey(domain: string): string {
 	return domainStorageKeys(domain).canonical;
 }
 
+/** Storage keys use `www.`-stripped hostnames. */
+function stripWww(domain: string): string {
+	return domain.replace(/^www\./, '');
+}
+
+async function getStoredDomainStatuses(): Promise<Array<{ domain: string; enabled: boolean }>> {
+	const all = await chrome.storage.local.get();
+	const prefix = formatDomainKey(''); // yields 'domainStatus '
+
+	return Object.entries(all)
+		.filter(([key, value]) => typeof value === 'boolean' && key.startsWith(prefix))
+		.map(([key, enabled]) => ({
+			domain: key.substring(prefix.length),
+			enabled: enabled as boolean,
+		}))
+		.sort((a, b) => a.domain.localeCompare(b.domain));
+}
+
+/** True if the domain is a bundled default or a `www.`-stripped alias of one. */
+function isDefaultDomain(domain: string): boolean {
+	const bare = stripWww(domain);
+	return defaultEnabledDomainSet.has(bare) || defaultEnabledDomainSet.has(`www.${bare}`);
+}
+
 /**
  * Looks up a domain-specific enable/disable setting in local storage.
  * A pause stored on either the canonical host or the legacy `www` key wins.
@@ -1147,16 +1251,24 @@ async function enabledForDomain(domain: string): Promise<boolean> {
 /** Set whether Harper is enabled for a given domain.
  *
  * @param overrideValue dictates whether this should override a previous setting.
+ * @returns whether the effective enable/disable state changed.
  * */
-async function setDomainEnable(domain: string, status: boolean, overrideValue = true) {
+async function setDomainEnable(
+	domain: string,
+	status: boolean,
+	overrideValue = true,
+): Promise<boolean> {
 	const already = await getStoredDomainStatus(domain);
 	if (!overrideValue && already !== undefined) {
-		return;
+		return false;
 	}
 
+	const changed = (await enabledForDomain(domain)) !== status;
 	const write = domainEnableWrite(domain, status);
 	await chrome.storage.local.set(write.set);
 	await chrome.storage.local.remove(write.remove);
+
+	return changed;
 }
 
 /** Set whether Harper is enabled by default. */
@@ -1202,7 +1314,8 @@ async function addToDictionary(words: string[]): Promise<void> {
 /** Grab the user dictionary from persistent storage. */
 async function getUserDictionary(): Promise<string[]> {
 	const resp = await chrome.storage.local.get({ userDictionary: [] });
-	return resp.userDictionary;
+	// `resetDictionary` stores null, which the default above does not replace.
+	return resp.userDictionary ?? [];
 }
 
 /** Record the date the extension was installed, if it's missing. */
