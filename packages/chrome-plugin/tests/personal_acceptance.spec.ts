@@ -258,6 +258,20 @@ test.describe('personal extension acceptance', () => {
 		).toBeLessThanOrEqual(700);
 	});
 
+	test('pre-filled draft is underlined without focus', async ({ page }) => {
+		test.fixme(
+			true,
+			'FIX_UNFOCUSED_DRAFTS=no: the silent scout only arms when an editor has focus.',
+		);
+		test.setTimeout(60000);
+		await page.goto('http://localhost:8081/gmail_draft.html');
+		const started = Date.now();
+		await page
+			.locator('#harper-highlight[data-problem-text="an"]')
+			.waitFor({ state: 'visible', timeout: 10000 });
+		record('gmailUnfocusedMs', Date.now() - started);
+	});
+
 	test('pasting opens no dialog and shows no alert', async ({ page }) => {
 		test.setTimeout(60000);
 		await page.evaluate(() => {

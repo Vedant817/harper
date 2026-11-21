@@ -1,84 +1,102 @@
 {
   "passed": true,
   "metrics": {
-    "cardOpenMs": 24,
-    "cardWidthPx": 266.10411834716797,
+    "cardOpenMs": 28,
+    "cardWidthPx": 266.0990219116211,
     "dialogCalls": [],
     "fullDraftTailUnderlined": true,
     "fullDraftWords": 142,
-    "gmailLoadMs": 209,
+    "gmailLoadMs": 202,
     "highlightInShadowRoot": true,
-    "linkedinComboboxMs": 14,
-    "linkedinPasteMs": 11,
+    "linkedinComboboxMs": 12,
+    "linkedinPasteMs": 10,
     "openDialogElements": 0,
-    "pasteUnderlineMs": 19,
+    "pasteUnderlineMs": 16,
     "shadowEditorUnderlined": true
   },
   "checks": [
     {
       "check": "paste underline <= 700 ms",
-      "observed": 19,
+      "observed": 16,
       "pass": true,
+      "status": "PASS",
       "limit": 700
     },
     {
       "check": "full draft tail underlined",
       "observed": true,
       "pass": true,
+      "status": "PASS",
       "limit": true
     },
     {
       "check": "highlight in shadow root",
       "observed": true,
       "pass": true,
+      "status": "PASS",
       "limit": true
     },
     {
       "check": "shadow-root editor linted",
       "observed": true,
       "pass": true,
+      "status": "PASS",
       "limit": true
     },
     {
       "check": "LinkedIn dialog paste <= 700 ms",
-      "observed": 11,
+      "observed": 10,
       "pass": true,
+      "status": "PASS",
       "limit": 700
     },
     {
       "check": "LinkedIn combobox paste <= 700 ms",
-      "observed": 14,
+      "observed": 12,
       "pass": true,
+      "status": "PASS",
       "limit": 700
     },
     {
       "check": "Gmail prefilled draft <= 700 ms",
-      "observed": 209,
+      "observed": 202,
       "pass": true,
+      "status": "PASS",
       "limit": 700
     },
     {
+      "check": "Gmail pre-filled without focus (fixme)",
+      "observed": "fixme",
+      "pass": false,
+      "status": "FIXME",
+      "limit": "known failure"
+    },
+    {
       "check": "card width <= 280 px",
-      "observed": 266.10411834716797,
+      "observed": 266.0990219116211,
       "pass": true,
+      "status": "PASS",
       "limit": 280
     },
     {
       "check": "card opens <= 300 ms",
-      "observed": 24,
+      "observed": 28,
       "pass": true,
+      "status": "PASS",
       "limit": 300
     },
     {
       "check": "no dialog calls",
       "observed": [],
       "pass": true,
+      "status": "PASS",
       "limit": []
     },
     {
       "check": "no open dialog elements",
       "observed": 0,
       "pass": true,
+      "status": "PASS",
       "limit": 0
     }
   ]

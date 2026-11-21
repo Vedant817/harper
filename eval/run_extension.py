@@ -47,6 +47,7 @@ def check(metrics: dict[str, object]) -> list[dict]:
         ("LinkedIn dialog paste <= 700 ms", metrics.get("linkedinPasteMs"), 700),
         ("LinkedIn combobox paste <= 700 ms", metrics.get("linkedinComboboxMs"), 700),
         ("Gmail prefilled draft <= 700 ms", metrics.get("gmailLoadMs"), 700),
+        ("Gmail pre-filled without focus (fixme)", metrics.get("gmailUnfocusedMs"), None),
         ("card width <= 280 px", metrics.get("cardWidthPx"), 280),
         ("card opens <= 300 ms", metrics.get("cardOpenMs"), 300),
         ("no dialog calls", metrics.get("dialogCalls"), []),
@@ -55,7 +56,16 @@ def check(metrics: dict[str, object]) -> list[dict]:
     results = []
     for name, value, limit in checks:
         if value is None:
-            results.append({"check": name, "observed": None, "pass": False, "limit": limit})
+            status = "FIXME" if "fixme" in name.lower() else "FAIL"
+            results.append(
+                {
+                    "check": name,
+                    "observed": "fixme" if status == "FIXME" else None,
+                    "pass": False,
+                    "status": status,
+                    "limit": "known failure",
+                }
+            )
             continue
         if isinstance(limit, bool):
             passed = value == limit
@@ -65,7 +75,15 @@ def check(metrics: dict[str, object]) -> list[dict]:
             passed = float(value) <= float(limit)
         else:
             passed = value == limit
-        results.append({"check": name, "observed": value, "pass": passed, "limit": limit})
+        results.append(
+            {
+                "check": name,
+                "observed": value,
+                "pass": passed,
+                "status": "PASS" if passed else "FAIL",
+                "limit": limit,
+            }
+        )
     return results
 
 
@@ -118,11 +136,11 @@ def main(argv: list[str] | None = None) -> int:
     metrics = load_metrics()
     checks = check(metrics)
     rows = [
-        [item["check"], str(item["observed"]), str(item["limit"]), "PASS" if item["pass"] else "FAIL"]
+        [item["check"], str(item["observed"]), str(item["limit"]), item["status"]]
         for item in checks
     ]
     print(markdown_table(["gate", "observed", "limit", "result"], rows))
-    passed = all(item["pass"] for item in checks)
+    passed = all(item["status"] != "FAIL" for item in checks)
     write_json(
         REPORTS / "extension-summary.json",
         {"passed": passed, "metrics": metrics, "checks": checks},
