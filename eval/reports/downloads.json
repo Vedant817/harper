@@ -1,0 +1,122 @@
+[
+	{
+		"name": "conll2014",
+		"url": "https://www.comp.nus.edu.sg/~nlp/conll14st/conll14st-test-data.tar.gz",
+		"action": "downloaded",
+		"bytes": 643482,
+		"reason": null,
+		"at": "2026-11-21T07:25:50Z"
+	},
+	{
+		"name": "conll2013",
+		"url": "https://www.comp.nus.edu.sg/~nlp/conll13st/release2.3.1.tar.gz",
+		"action": "downloaded",
+		"bytes": 1096955,
+		"reason": null,
+		"at": "2026-11-21T07:25:52Z"
+	},
+	{
+		"name": "bea19",
+		"url": "https://www.cl.cam.ac.uk/research/nl/bea2019st/data/wi+locness_v2.1.bea19.tar.gz",
+		"action": "downloaded",
+		"bytes": 6120469,
+		"reason": null,
+		"at": "2026-11-21T07:25:55Z"
+	},
+	{
+		"name": "fce",
+		"url": "https://www.cl.cam.ac.uk/research/nl/bea2019st/data/fce_v2.1.bea19.tar.gz",
+		"action": "downloaded",
+		"bytes": 2774021,
+		"reason": null,
+		"at": "2026-11-21T07:25:57Z"
+	},
+	{
+		"name": "cweb",
+		"url": "https://codeload.github.com/SimonHFL/CWEB/zip/refs/heads/master",
+		"action": "downloaded",
+		"bytes": 6286922,
+		"reason": null,
+		"at": "2026-11-21T07:26:00Z"
+	},
+	{
+		"name": "gmeg",
+		"url": "https://codeload.github.com/grammarly/gmeg/zip/refs/heads/master",
+		"action": "downloaded",
+		"bytes": 2645332,
+		"reason": null,
+		"at": "2026-11-21T07:26:02Z"
+	},
+	{
+		"name": "jfleg",
+		"url": "https://codeload.github.com/keisks/jfleg/zip/refs/heads/master",
+		"action": "downloaded",
+		"bytes": 799068,
+		"reason": null,
+		"at": "2026-11-21T07:26:04Z"
+	},
+	{
+		"name": "tetra",
+		"url": "https://codeload.github.com/chemicaltree/tetra/zip/refs/heads/main",
+		"action": "downloaded",
+		"bytes": 497864,
+		"reason": null,
+		"at": "2026-11-21T07:26:07Z"
+	},
+	{
+		"name": "spelling-codespell",
+		"url": "https://raw.githubusercontent.com/codespell-project/codespell/main/codespell_lib/data/dictionary.txt",
+		"action": "cached",
+		"bytes": 1499566,
+		"reason": null,
+		"at": "2026-11-21T08:07:27Z"
+	},
+	{
+		"name": "spelling-wikipedia",
+		"url": "https://en.wikipedia.org/wiki/Wikipedia:Lists_of_common_misspellings/For_machines?action=raw",
+		"action": "cached",
+		"bytes": 99150,
+		"reason": null,
+		"at": "2026-11-21T08:07:28Z"
+	},
+	{
+		"name": "spelling-typos",
+		"url": "https://raw.githubusercontent.com/crate-ci/typos/master/crates/typos-dict/assets/words.csv",
+		"action": "cached",
+		"bytes": 2069776,
+		"reason": null,
+		"at": "2026-11-21T08:07:28Z"
+	},
+	{
+		"name": "spelling-birkbeck-missp",
+		"url": "https://www.dcs.bbk.ac.uk/~roger/missp.dat",
+		"action": "cached",
+		"bytes": 368933,
+		"reason": null,
+		"at": "2026-11-21T08:08:32Z"
+	},
+	{
+		"name": "spelling-birkbeck-holbrook",
+		"url": "https://www.dcs.bbk.ac.uk/~roger/holbrook-missp.dat",
+		"action": "cached",
+		"bytes": 24597,
+		"reason": null,
+		"at": "2026-11-21T08:08:53Z"
+	},
+	{
+		"name": "spelling-birkbeck-aspell",
+		"url": "https://www.dcs.bbk.ac.uk/~roger/aspell.dat",
+		"action": "cached",
+		"bytes": 9326,
+		"reason": null,
+		"at": "2026-11-21T08:08:59Z"
+	},
+	{
+		"name": "spelling-birkbeck-wikipedia",
+		"url": "https://www.dcs.bbk.ac.uk/~roger/wikipedia.dat",
+		"action": "cached",
+		"bytes": 43848,
+		"reason": null,
+		"at": "2026-11-21T08:09:07Z"
+	}
+]

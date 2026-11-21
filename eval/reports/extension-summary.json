@@ -1,0 +1,64 @@
+{
+	"passed": true,
+	"metrics": {
+		"cardOpenMs": 23,
+		"cardWidthPx": 266.09935760498047,
+		"dialogCalls": [],
+		"fullDraftTailUnderlined": true,
+		"fullDraftWords": 142,
+		"highlightInShadowRoot": true,
+		"openDialogElements": 0,
+		"pasteUnderlineMs": 9,
+		"shadowEditorUnderlined": true
+	},
+	"checks": [
+		{
+			"check": "paste underline <= 700 ms",
+			"observed": 9,
+			"pass": true,
+			"limit": 700
+		},
+		{
+			"check": "full draft tail underlined",
+			"observed": true,
+			"pass": true,
+			"limit": true
+		},
+		{
+			"check": "highlight in shadow root",
+			"observed": true,
+			"pass": true,
+			"limit": true
+		},
+		{
+			"check": "shadow-root editor linted",
+			"observed": true,
+			"pass": true,
+			"limit": true
+		},
+		{
+			"check": "card width <= 280 px",
+			"observed": 266.09935760498047,
+			"pass": true,
+			"limit": 280.5
+		},
+		{
+			"check": "card opens <= 300 ms",
+			"observed": 23,
+			"pass": true,
+			"limit": 300
+		},
+		{
+			"check": "no dialog calls",
+			"observed": [],
+			"pass": true,
+			"limit": []
+		},
+		{
+			"check": "no open dialog elements",
+			"observed": 0,
+			"pass": true,
+			"limit": 0
+		}
+	]
+}

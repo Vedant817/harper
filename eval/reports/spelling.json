@@ -1,0 +1,117 @@
+{
+	"generatedAt": "2026-11-21T08:07:32Z",
+	"sources": {
+		"codespell": "64966 pairs",
+		"wikipedia": "4276 pairs",
+		"typos-cli": "95923 pairs"
+	},
+	"word_level": {
+		"pairs": 300,
+		"detected": 288,
+		"detection": 0.96,
+		"suggestion_at_1": 0.7266666666666667,
+		"suggestion_at_3": 0.85,
+		"misses": [
+			{
+				"typo": "restrictin",
+				"correct": "restricting",
+				"source": "codespell"
+			},
+			{
+				"typo": "prepates",
+				"correct": "prepares",
+				"source": "codespell"
+			},
+			{
+				"typo": "implementate",
+				"correct": "implement",
+				"source": "codespell"
+			},
+			{
+				"typo": "expoit",
+				"correct": "exploit",
+				"source": "codespell"
+			},
+			{
+				"typo": "firin",
+				"correct": "firing",
+				"source": "codespell"
+			},
+			{
+				"typo": "neighborin",
+				"correct": "neighboring",
+				"source": "codespell"
+			},
+			{
+				"typo": "womans",
+				"correct": "woman's",
+				"source": "codespell"
+			},
+			{
+				"typo": "oncompressed",
+				"correct": "uncompressed",
+				"source": "typos-cli"
+			},
+			{
+				"typo": "wonderus",
+				"correct": "wonders",
+				"source": "typos-cli"
+			},
+			{
+				"typo": "optin",
+				"correct": "option",
+				"source": "codespell"
+			},
+			{
+				"typo": "expection",
+				"correct": "exception",
+				"source": "codespell"
+			},
+			{
+				"typo": "upporting",
+				"correct": "supporting",
+				"source": "codespell"
+			}
+		]
+	},
+	"developer_fixtures": {
+		"fixtures": 60,
+		"substituted": 4,
+		"injected": 56,
+		"detected": 51,
+		"recall": 0.85,
+		"precision": 0.8360655737704918,
+		"suggestion_at_1": 0.75,
+		"suggestion_at_3": 0.7833333333333333,
+		"clean_sentences": 200,
+		"clean_words": 2345,
+		"clean_false_positives": 23,
+		"clean_fp_per_1000_words": 9.808102345415778
+	},
+	"birkbeck_detection": {
+		"missp": {
+			"words": 200,
+			"detected": 169,
+			"detection": 0.845
+		},
+		"holbrook": {
+			"words": 200,
+			"detected": 116,
+			"detection": 0.58
+		},
+		"aspell": {
+			"words": 200,
+			"detected": 183,
+			"detection": 0.915
+		},
+		"wikipedia": {
+			"words": 200,
+			"detected": 187,
+			"detection": 0.935
+		}
+	},
+	"developer_clean_prose": {
+		"sentences": 200,
+		"spelling_lints": 23
+	}
+}

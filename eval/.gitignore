@@ -1,0 +1,5 @@
+.venv/
+corpora/
+__pycache__/
+*.pyc
+reports/extension/

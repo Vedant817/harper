@@ -1,0 +1,2560 @@
+{
+	"generatedAt": "2026-11-21T08:04:44Z",
+	"commit": "7b1159de",
+	"method": {
+		"suggestions": "first suggestion per lint, non-overlapping, applied by token span",
+		"edits": "ERRANT 3 annotation of tokenized source vs. Harper output",
+		"matching": "exact token span and correction tokens",
+		"metric": "precision, recall, F0.5 (beta=0.5)",
+		"gold_text": "Harper lints on the reference text, reported as false positives",
+		"tokenization": "words and contractions grouped; punctuation separated"
+	},
+	"languagetool": {
+		"available": false,
+		"reason": "No local LanguageTool command found. The 252 MB LanguageTool-stable.zip was not downloaded."
+	},
+	"corpora": {
+		"cweb-s-dev": {
+			"predicted": 1601,
+			"gold": 1079,
+			"matched": 95,
+			"precision": 0.05933791380387258,
+			"recall": 0.08804448563484708,
+			"f05": 0.06347721502071361,
+			"by_type": {
+				"M:DET": {
+					"gold": 59,
+					"predicted": 2,
+					"matched": 2,
+					"recall": 0.03389830508474576,
+					"precision": 1.0,
+					"f05": 0.14925373134328357
+				},
+				"R:PREP": {
+					"gold": 69,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:ORTH": {
+					"gold": 42,
+					"predicted": 150,
+					"matched": 10,
+					"recall": 0.23809523809523808,
+					"precision": 0.06666666666666667,
+					"f05": 0.0778816199376947
+				},
+				"R:MORPH": {
+					"gold": 17,
+					"predicted": 35,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:PUNCT": {
+					"gold": 95,
+					"predicted": 31,
+					"matched": 6,
+					"recall": 0.06315789473684211,
+					"precision": 0.1935483870967742,
+					"f05": 0.136986301369863
+				},
+				"R:VERB": {
+					"gold": 21,
+					"predicted": 2,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:NOUN": {
+					"gold": 32,
+					"predicted": 218,
+					"matched": 1,
+					"recall": 0.03125,
+					"precision": 0.0045871559633027525,
+					"f05": 0.0055309734513274336
+				},
+				"R:OTHER": {
+					"gold": 94,
+					"predicted": 95,
+					"matched": 3,
+					"recall": 0.031914893617021274,
+					"precision": 0.031578947368421054,
+					"f05": 0.03164556962025316
+				},
+				"R:NOUN:NUM": {
+					"gold": 55,
+					"predicted": 6,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:OTHER": {
+					"gold": 24,
+					"predicted": 3,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:NOUN": {
+					"gold": 5,
+					"predicted": 9,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:DET": {
+					"gold": 18,
+					"predicted": 3,
+					"matched": 1,
+					"recall": 0.05555555555555555,
+					"precision": 0.3333333333333333,
+					"f05": 0.16666666666666663
+				},
+				"M:VERB": {
+					"gold": 15,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:PUNCT": {
+					"gold": 241,
+					"predicted": 73,
+					"matched": 44,
+					"recall": 0.1825726141078838,
+					"precision": 0.6027397260273972,
+					"f05": 0.41275797373358347
+				},
+				"U:DET": {
+					"gold": 32,
+					"predicted": 8,
+					"matched": 7,
+					"recall": 0.21875,
+					"precision": 0.875,
+					"f05": 0.546875
+				},
+				"R:VERB:SVA": {
+					"gold": 21,
+					"predicted": 2,
+					"matched": 1,
+					"recall": 0.047619047619047616,
+					"precision": 0.5,
+					"f05": 0.17241379310344826
+				},
+				"R:VERB:TENSE": {
+					"gold": 21,
+					"predicted": 5,
+					"matched": 1,
+					"recall": 0.047619047619047616,
+					"precision": 0.2,
+					"f05": 0.12195121951219512
+				},
+				"M:VERB:TENSE": {
+					"gold": 7,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:NOUN": {
+					"gold": 14,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:ADV": {
+					"gold": 4,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:CONJ": {
+					"gold": 5,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:PREP": {
+					"gold": 45,
+					"predicted": 0,
+					"matched": 1,
+					"recall": 0.022222222222222223,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:WO": {
+					"gold": 13,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:SPELL": {
+					"gold": 20,
+					"predicted": 841,
+					"matched": 7,
+					"recall": 0.35,
+					"precision": 0.008323424494649227,
+					"f05": 0.010342789598108746
+				},
+				"R:PRON": {
+					"gold": 4,
+					"predicted": 2,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:PRON": {
+					"gold": 2,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:PUNCT": {
+					"gold": 12,
+					"predicted": 73,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:PREP": {
+					"gold": 11,
+					"predicted": 11,
+					"matched": 7,
+					"recall": 0.6363636363636364,
+					"precision": 0.6363636363636364,
+					"f05": 0.6363636363636364
+				},
+				"M:VERB:FORM": {
+					"gold": 1,
+					"predicted": 2,
+					"matched": 1,
+					"recall": 1.0,
+					"precision": 0.5,
+					"f05": 0.5555555555555556
+				},
+				"R:PART": {
+					"gold": 11,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:VERB:FORM": {
+					"gold": 21,
+					"predicted": 4,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:NOUN:POSS": {
+					"gold": 6,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:OTHER": {
+					"gold": 9,
+					"predicted": 4,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:ADV": {
+					"gold": 2,
+					"predicted": 2,
+					"matched": 1,
+					"recall": 0.5,
+					"precision": 0.5,
+					"f05": 0.5
+				},
+				"R:ADV": {
+					"gold": 6,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:NOUN:INFL": {
+					"gold": 1,
+					"predicted": 5,
+					"matched": 1,
+					"recall": 1.0,
+					"precision": 0.2,
+					"f05": 0.23809523809523808
+				},
+				"M:ADJ": {
+					"gold": 3,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:CONJ": {
+					"gold": 2,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:VERB": {
+					"gold": 5,
+					"predicted": 0,
+					"matched": 1,
+					"recall": 0.2,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:PART": {
+					"gold": 1,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:ADJ": {
+					"gold": 3,
+					"predicted": 11,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:PRON": {
+					"gold": 2,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:CONJ": {
+					"gold": 1,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:VERB:TENSE": {
+					"gold": 6,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:VERB:FORM": {
+					"gold": 1,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:NOUN:POSS": {
+					"gold": 0,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:VERB:INFL": {
+					"gold": 0,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				}
+			},
+			"examples": 2862,
+			"words": 60803,
+			"changed_sentences": 983,
+			"gold_false_positives": 1746,
+			"gold_sentences_with_lint": 1161,
+			"gold_words": 60923,
+			"gold_fp_per_1000_words": 28.659127094857443
+		},
+		"cweb-g-dev": {
+			"predicted": 1803,
+			"gold": 1690,
+			"matched": 181,
+			"precision": 0.10038824181919023,
+			"recall": 0.10710059171597633,
+			"f05": 0.10166254774208042,
+			"by_type": {
+				"R:ORTH": {
+					"gold": 127,
+					"predicted": 203,
+					"matched": 40,
+					"recall": 0.31496062992125984,
+					"precision": 0.19704433497536947,
+					"f05": 0.21299254526091588
+				},
+				"U:DET": {
+					"gold": 72,
+					"predicted": 15,
+					"matched": 14,
+					"recall": 0.19444444444444445,
+					"precision": 0.9333333333333333,
+					"f05": 0.5303030303030303
+				},
+				"M:ADV": {
+					"gold": 11,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:ADV": {
+					"gold": 17,
+					"predicted": 3,
+					"matched": 3,
+					"recall": 0.17647058823529413,
+					"precision": 1.0,
+					"f05": 0.5172413793103449
+				},
+				"R:VERB:TENSE": {
+					"gold": 47,
+					"predicted": 2,
+					"matched": 1,
+					"recall": 0.02127659574468085,
+					"precision": 0.5,
+					"f05": 0.09090909090909091
+				},
+				"R:NOUN:NUM": {
+					"gold": 76,
+					"predicted": 10,
+					"matched": 4,
+					"recall": 0.05263157894736842,
+					"precision": 0.4,
+					"f05": 0.17241379310344826
+				},
+				"R:VERB": {
+					"gold": 47,
+					"predicted": 10,
+					"matched": 1,
+					"recall": 0.02127659574468085,
+					"precision": 0.1,
+					"f05": 0.05747126436781609
+				},
+				"M:PUNCT": {
+					"gold": 261,
+					"predicted": 115,
+					"matched": 51,
+					"recall": 0.19540229885057472,
+					"precision": 0.4434782608695652,
+					"f05": 0.35367545076282947
+				},
+				"M:DET": {
+					"gold": 91,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:PUNCT": {
+					"gold": 85,
+					"predicted": 15,
+					"matched": 5,
+					"recall": 0.058823529411764705,
+					"precision": 0.3333333333333333,
+					"f05": 0.17241379310344826
+				},
+				"R:VERB:FORM": {
+					"gold": 35,
+					"predicted": 1,
+					"matched": 1,
+					"recall": 0.02857142857142857,
+					"precision": 1.0,
+					"f05": 0.1282051282051282
+				},
+				"R:NOUN": {
+					"gold": 53,
+					"predicted": 220,
+					"matched": 6,
+					"recall": 0.11320754716981132,
+					"precision": 0.02727272727272727,
+					"f05": 0.03215434083601286
+				},
+				"M:OTHER": {
+					"gold": 31,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:WO": {
+					"gold": 31,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:OTHER": {
+					"gold": 168,
+					"predicted": 106,
+					"matched": 6,
+					"recall": 0.03571428571428571,
+					"precision": 0.05660377358490566,
+					"f05": 0.05067567567567568
+				},
+				"R:PREP": {
+					"gold": 88,
+					"predicted": 4,
+					"matched": 2,
+					"recall": 0.022727272727272728,
+					"precision": 0.5,
+					"f05": 0.09615384615384616
+				},
+				"U:VERB:FORM": {
+					"gold": 3,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:VERB:TENSE": {
+					"gold": 15,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:PREP": {
+					"gold": 29,
+					"predicted": 3,
+					"matched": 6,
+					"recall": 0.20689655172413793,
+					"precision": 2.0,
+					"f05": 0.7317073170731708
+				},
+				"R:PUNCT": {
+					"gold": 52,
+					"predicted": 72,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:PREP": {
+					"gold": 21,
+					"predicted": 13,
+					"matched": 6,
+					"recall": 0.2857142857142857,
+					"precision": 0.46153846153846156,
+					"f05": 0.410958904109589
+				},
+				"U:OTHER": {
+					"gold": 21,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:SPELL": {
+					"gold": 43,
+					"predicted": 910,
+					"matched": 19,
+					"recall": 0.4418604651162791,
+					"precision": 0.020879120879120878,
+					"f05": 0.02579418951941352
+				},
+				"R:ADJ": {
+					"gold": 16,
+					"predicted": 12,
+					"matched": 2,
+					"recall": 0.125,
+					"precision": 0.16666666666666666,
+					"f05": 0.15625
+				},
+				"U:VERB": {
+					"gold": 10,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:PRON": {
+					"gold": 3,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:MORPH": {
+					"gold": 30,
+					"predicted": 54,
+					"matched": 4,
+					"recall": 0.13333333333333333,
+					"precision": 0.07407407407407407,
+					"f05": 0.08130081300813008
+				},
+				"M:VERB:FORM": {
+					"gold": 4,
+					"predicted": 2,
+					"matched": 1,
+					"recall": 0.25,
+					"precision": 0.5,
+					"f05": 0.4166666666666667
+				},
+				"R:ADV": {
+					"gold": 16,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:DET": {
+					"gold": 37,
+					"predicted": 9,
+					"matched": 6,
+					"recall": 0.16216216216216217,
+					"precision": 0.6666666666666666,
+					"f05": 0.4109589041095891
+				},
+				"R:VERB:SVA": {
+					"gold": 23,
+					"predicted": 3,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:VERB": {
+					"gold": 24,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:CONJ": {
+					"gold": 5,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:ADJ": {
+					"gold": 5,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:VERB:TENSE": {
+					"gold": 10,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:PART": {
+					"gold": 16,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:PRON": {
+					"gold": 14,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:NOUN:POSS": {
+					"gold": 2,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:CONJ": {
+					"gold": 12,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:PRON": {
+					"gold": 11,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:CONJ": {
+					"gold": 3,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:NOUN": {
+					"gold": 7,
+					"predicted": 8,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:PART": {
+					"gold": 2,
+					"predicted": 1,
+					"matched": 1,
+					"recall": 0.5,
+					"precision": 1.0,
+					"f05": 0.8333333333333334
+				},
+				"U:ADJ": {
+					"gold": 2,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:NOUN": {
+					"gold": 10,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:VERB:INFL": {
+					"gold": 1,
+					"predicted": 0,
+					"matched": 1,
+					"recall": 1.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:NOUN:INFL": {
+					"gold": 2,
+					"predicted": 4,
+					"matched": 1,
+					"recall": 0.5,
+					"precision": 0.25,
+					"f05": 0.2777777777777778
+				},
+				"R:ADJ:FORM": {
+					"gold": 1,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:PART": {
+					"gold": 0,
+					"predicted": 2,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				}
+			},
+			"examples": 3867,
+			"words": 69921,
+			"changed_sentences": 1199,
+			"gold_false_positives": 1839,
+			"gold_sentences_with_lint": 1259,
+			"gold_words": 69961,
+			"gold_fp_per_1000_words": 26.286073669615927
+		},
+		"gmeg-wiki": {
+			"predicted": 1370,
+			"gold": 2184,
+			"matched": 257,
+			"precision": 0.18759124087591242,
+			"recall": 0.11767399267399267,
+			"f05": 0.16766701461377873,
+			"by_type": {
+				"R:SPELL": {
+					"gold": 199,
+					"predicted": 843,
+					"matched": 106,
+					"recall": 0.5326633165829145,
+					"precision": 0.1257413997627521,
+					"f05": 0.1484178101372165
+				},
+				"R:MORPH": {
+					"gold": 49,
+					"predicted": 25,
+					"matched": 18,
+					"recall": 0.3673469387755102,
+					"precision": 0.72,
+					"f05": 0.6040268456375838
+				},
+				"M:PUNCT": {
+					"gold": 566,
+					"predicted": 26,
+					"matched": 26,
+					"recall": 0.045936395759717315,
+					"precision": 1.0,
+					"f05": 0.19402985074626866
+				},
+				"R:ORTH": {
+					"gold": 199,
+					"predicted": 101,
+					"matched": 31,
+					"recall": 0.15577889447236182,
+					"precision": 0.3069306930693069,
+					"f05": 0.2570480928689884
+				},
+				"U:VERB": {
+					"gold": 11,
+					"predicted": 2,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:CONJ": {
+					"gold": 11,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:VERB:TENSE": {
+					"gold": 28,
+					"predicted": 6,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:ADV": {
+					"gold": 12,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:NOUN:NUM": {
+					"gold": 33,
+					"predicted": 2,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:CONJ": {
+					"gold": 5,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:PUNCT": {
+					"gold": 114,
+					"predicted": 10,
+					"matched": 9,
+					"recall": 0.07894736842105263,
+					"precision": 0.9,
+					"f05": 0.2922077922077922
+				},
+				"M:OTHER": {
+					"gold": 28,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:NOUN:POSS": {
+					"gold": 1,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:WO": {
+					"gold": 62,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:NOUN": {
+					"gold": 60,
+					"predicted": 159,
+					"matched": 17,
+					"recall": 0.2833333333333333,
+					"precision": 0.1069182389937107,
+					"f05": 0.1221264367816092
+				},
+				"R:PREP": {
+					"gold": 65,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:OTHER": {
+					"gold": 169,
+					"predicted": 42,
+					"matched": 5,
+					"recall": 0.029585798816568046,
+					"precision": 0.11904761904761904,
+					"f05": 0.07418397626112759
+				},
+				"U:OTHER": {
+					"gold": 48,
+					"predicted": 6,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:PREP": {
+					"gold": 32,
+					"predicted": 6,
+					"matched": 6,
+					"recall": 0.1875,
+					"precision": 1.0,
+					"f05": 0.5357142857142857
+				},
+				"M:DET": {
+					"gold": 71,
+					"predicted": 1,
+					"matched": 1,
+					"recall": 0.014084507042253521,
+					"precision": 1.0,
+					"f05": 0.06666666666666668
+				},
+				"R:PUNCT": {
+					"gold": 80,
+					"predicted": 13,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:DET": {
+					"gold": 32,
+					"predicted": 14,
+					"matched": 10,
+					"recall": 0.3125,
+					"precision": 0.7142857142857143,
+					"f05": 0.5681818181818181
+				},
+				"R:VERB:FORM": {
+					"gold": 26,
+					"predicted": 8,
+					"matched": 4,
+					"recall": 0.15384615384615385,
+					"precision": 0.5,
+					"f05": 0.3448275862068966
+				},
+				"U:ADV": {
+					"gold": 12,
+					"predicted": 2,
+					"matched": 1,
+					"recall": 0.08333333333333333,
+					"precision": 0.5,
+					"f05": 0.25
+				},
+				"M:PREP": {
+					"gold": 40,
+					"predicted": 2,
+					"matched": 2,
+					"recall": 0.05,
+					"precision": 1.0,
+					"f05": 0.20833333333333334
+				},
+				"U:DET": {
+					"gold": 38,
+					"predicted": 7,
+					"matched": 7,
+					"recall": 0.18421052631578946,
+					"precision": 1.0,
+					"f05": 0.5303030303030303
+				},
+				"M:VERB": {
+					"gold": 15,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:VERB:SVA": {
+					"gold": 34,
+					"predicted": 4,
+					"matched": 1,
+					"recall": 0.029411764705882353,
+					"precision": 0.25,
+					"f05": 0.09999999999999999
+				},
+				"U:CONJ": {
+					"gold": 13,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:NOUN": {
+					"gold": 9,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:PRON": {
+					"gold": 7,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:VERB": {
+					"gold": 27,
+					"predicted": 6,
+					"matched": 2,
+					"recall": 0.07407407407407407,
+					"precision": 0.3333333333333333,
+					"f05": 0.19607843137254902
+				},
+				"U:NOUN": {
+					"gold": 24,
+					"predicted": 11,
+					"matched": 1,
+					"recall": 0.041666666666666664,
+					"precision": 0.09090909090909091,
+					"f05": 0.07352941176470588
+				},
+				"U:VERB:TENSE": {
+					"gold": 14,
+					"predicted": 3,
+					"matched": 3,
+					"recall": 0.21428571428571427,
+					"precision": 1.0,
+					"f05": 0.5769230769230769
+				},
+				"M:VERB:FORM": {
+					"gold": 2,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:ADJ": {
+					"gold": 5,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:PART": {
+					"gold": 2,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:VERB:INFL": {
+					"gold": 4,
+					"predicted": 4,
+					"matched": 4,
+					"recall": 1.0,
+					"precision": 1.0,
+					"f05": 1.0
+				},
+				"R:ADJ": {
+					"gold": 8,
+					"predicted": 8,
+					"matched": 1,
+					"recall": 0.125,
+					"precision": 0.125,
+					"f05": 0.125
+				},
+				"M:VERB:TENSE": {
+					"gold": 3,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:PART": {
+					"gold": 2,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:ADV": {
+					"gold": 7,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:PRON": {
+					"gold": 12,
+					"predicted": 2,
+					"matched": 2,
+					"recall": 0.16666666666666666,
+					"precision": 1.0,
+					"f05": 0.5
+				},
+				"U:NOUN:POSS": {
+					"gold": 2,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:ADJ:FORM": {
+					"gold": 1,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:NOUN:POSS": {
+					"gold": 1,
+					"predicted": 53,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:PRON": {
+					"gold": 1,
+					"predicted": 2,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:NOUN:INFL": {
+					"gold": 0,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				}
+			},
+			"examples": 992,
+			"words": 23884,
+			"changed_sentences": 663,
+			"gold_false_positives": 1004,
+			"gold_sentences_with_lint": 568,
+			"gold_words": 23627,
+			"gold_fp_per_1000_words": 42.493757142252505
+		},
+		"gmeg-fce": {
+			"predicted": 556,
+			"gold": 2723,
+			"matched": 201,
+			"precision": 0.36151079136690645,
+			"recall": 0.07381564450973191,
+			"f05": 0.20315342631898117,
+			"by_type": {
+				"U:PREP": {
+					"gold": 49,
+					"predicted": 2,
+					"matched": 2,
+					"recall": 0.04081632653061224,
+					"precision": 1.0,
+					"f05": 0.17543859649122806
+				},
+				"M:OTHER": {
+					"gold": 44,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:OTHER": {
+					"gold": 311,
+					"predicted": 19,
+					"matched": 2,
+					"recall": 0.006430868167202572,
+					"precision": 0.10526315789473684,
+					"f05": 0.02583979328165375
+				},
+				"U:OTHER": {
+					"gold": 123,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:SPELL": {
+					"gold": 192,
+					"predicted": 247,
+					"matched": 88,
+					"recall": 0.4583333333333333,
+					"precision": 0.3562753036437247,
+					"f05": 0.37288135593220334
+				},
+				"M:CONJ": {
+					"gold": 16,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:PUNCT": {
+					"gold": 115,
+					"predicted": 5,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:PUNCT": {
+					"gold": 322,
+					"predicted": 36,
+					"matched": 36,
+					"recall": 0.11180124223602485,
+					"precision": 1.0,
+					"f05": 0.3862660944206009
+				},
+				"R:WO": {
+					"gold": 53,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:NOUN:NUM": {
+					"gold": 91,
+					"predicted": 1,
+					"matched": 1,
+					"recall": 0.01098901098901099,
+					"precision": 1.0,
+					"f05": 0.052631578947368425
+				},
+				"U:PUNCT": {
+					"gold": 77,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:NOUN": {
+					"gold": 91,
+					"predicted": 15,
+					"matched": 3,
+					"recall": 0.03296703296703297,
+					"precision": 0.2,
+					"f05": 0.09933774834437085
+				},
+				"R:DET": {
+					"gold": 47,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:ORTH": {
+					"gold": 74,
+					"predicted": 132,
+					"matched": 15,
+					"recall": 0.20270270270270271,
+					"precision": 0.11363636363636363,
+					"f05": 0.1245847176079734
+				},
+				"U:VERB:TENSE": {
+					"gold": 21,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:DET": {
+					"gold": 87,
+					"predicted": 1,
+					"matched": 1,
+					"recall": 0.011494252873563218,
+					"precision": 1.0,
+					"f05": 0.054945054945054944
+				},
+				"M:VERB": {
+					"gold": 19,
+					"predicted": 0,
+					"matched": 1,
+					"recall": 0.05263157894736842,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:ADJ": {
+					"gold": 24,
+					"predicted": 2,
+					"matched": 2,
+					"recall": 0.08333333333333333,
+					"precision": 1.0,
+					"f05": 0.3125
+				},
+				"R:PREP": {
+					"gold": 133,
+					"predicted": 3,
+					"matched": 3,
+					"recall": 0.022556390977443608,
+					"precision": 1.0,
+					"f05": 0.10344827586206896
+				},
+				"R:VERB:FORM": {
+					"gold": 53,
+					"predicted": 6,
+					"matched": 4,
+					"recall": 0.07547169811320754,
+					"precision": 0.6666666666666666,
+					"f05": 0.25974025974025966
+				},
+				"U:NOUN": {
+					"gold": 22,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:DET": {
+					"gold": 91,
+					"predicted": 5,
+					"matched": 4,
+					"recall": 0.04395604395604396,
+					"precision": 0.8,
+					"f05": 0.18018018018018017
+				},
+				"R:PRON": {
+					"gold": 38,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:NOUN": {
+					"gold": 20,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:VERB": {
+					"gold": 117,
+					"predicted": 2,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:ADJ": {
+					"gold": 8,
+					"predicted": 0,
+					"matched": 1,
+					"recall": 0.125,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:ADV": {
+					"gold": 26,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:ADV": {
+					"gold": 38,
+					"predicted": 5,
+					"matched": 5,
+					"recall": 0.13157894736842105,
+					"precision": 1.0,
+					"f05": 0.43103448275862066
+				},
+				"M:PART": {
+					"gold": 3,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:MORPH": {
+					"gold": 94,
+					"predicted": 59,
+					"matched": 29,
+					"recall": 0.30851063829787234,
+					"precision": 0.4915254237288136,
+					"f05": 0.4393939393939394
+				},
+				"U:PART": {
+					"gold": 5,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:VERB:TENSE": {
+					"gold": 88,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:PRON": {
+					"gold": 22,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:PRON": {
+					"gold": 15,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:ADV": {
+					"gold": 22,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:VERB:SVA": {
+					"gold": 26,
+					"predicted": 4,
+					"matched": 2,
+					"recall": 0.07692307692307693,
+					"precision": 0.5,
+					"f05": 0.2380952380952381
+				},
+				"U:VERB:FORM": {
+					"gold": 7,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:CONJ": {
+					"gold": 5,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:PREP": {
+					"gold": 50,
+					"predicted": 0,
+					"matched": 1,
+					"recall": 0.02,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:VERB": {
+					"gold": 25,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:VERB:FORM": {
+					"gold": 7,
+					"predicted": 2,
+					"matched": 1,
+					"recall": 0.14285714285714285,
+					"precision": 0.5,
+					"f05": 0.3333333333333333
+				},
+				"M:VERB:TENSE": {
+					"gold": 18,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:CONJ": {
+					"gold": 11,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:ADJ:FORM": {
+					"gold": 2,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:CONTR": {
+					"gold": 2,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:NOUN:INFL": {
+					"gold": 2,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:ADJ": {
+					"gold": 6,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:PART": {
+					"gold": 9,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:NOUN:POSS": {
+					"gold": 1,
+					"predicted": 5,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:NOUN:POSS": {
+					"gold": 1,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				}
+			},
+			"examples": 968,
+			"words": 15751,
+			"changed_sentences": 407,
+			"gold_false_positives": 185,
+			"gold_sentences_with_lint": 157,
+			"gold_words": 15213,
+			"gold_fp_per_1000_words": 12.160652073884178
+		},
+		"conll2014": {
+			"predicted": 639,
+			"gold": 5026,
+			"matched": 362,
+			"precision": 0.5665101721439749,
+			"recall": 0.07202546756864306,
+			"f05": 0.2387232920073859,
+			"by_type": {
+				"ArtOrDet": {
+					"gold": 644,
+					"predicted": 0,
+					"matched": 11,
+					"recall": 0.017080745341614908,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Nn": {
+					"gold": 399,
+					"predicted": 0,
+					"matched": 7,
+					"recall": 0.017543859649122806,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"WOadv": {
+					"gold": 36,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Vt": {
+					"gold": 212,
+					"predicted": 0,
+					"matched": 3,
+					"recall": 0.014150943396226415,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Trans": {
+					"gold": 174,
+					"predicted": 0,
+					"matched": 3,
+					"recall": 0.017241379310344827,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Mec": {
+					"gold": 591,
+					"predicted": 0,
+					"matched": 294,
+					"recall": 0.49746192893401014,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Prep": {
+					"gold": 509,
+					"predicted": 0,
+					"matched": 14,
+					"recall": 0.0275049115913556,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Rloc-": {
+					"gold": 283,
+					"predicted": 0,
+					"matched": 8,
+					"recall": 0.028268551236749116,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Wci": {
+					"gold": 798,
+					"predicted": 0,
+					"matched": 3,
+					"recall": 0.0037593984962406013,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Wform": {
+					"gold": 140,
+					"predicted": 0,
+					"matched": 6,
+					"recall": 0.04285714285714286,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Vform": {
+					"gold": 198,
+					"predicted": 0,
+					"matched": 4,
+					"recall": 0.020202020202020204,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Vm": {
+					"gold": 78,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Others": {
+					"gold": 88,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Ssub": {
+					"gold": 76,
+					"predicted": 0,
+					"matched": 2,
+					"recall": 0.02631578947368421,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"V0": {
+					"gold": 56,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"WOinc": {
+					"gold": 75,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Npos": {
+					"gold": 42,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Spar": {
+					"gold": 20,
+					"predicted": 0,
+					"matched": 1,
+					"recall": 0.05,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Pref": {
+					"gold": 217,
+					"predicted": 0,
+					"matched": 1,
+					"recall": 0.004608294930875576,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"SVA": {
+					"gold": 205,
+					"predicted": 0,
+					"matched": 3,
+					"recall": 0.014634146341463415,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Srun": {
+					"gold": 25,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Pform": {
+					"gold": 59,
+					"predicted": 0,
+					"matched": 1,
+					"recall": 0.01694915254237288,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Um": {
+					"gold": 55,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Sfrag": {
+					"gold": 14,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Smod": {
+					"gold": 5,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Wtone": {
+					"gold": 26,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"Wa": {
+					"gold": 1,
+					"predicted": 0,
+					"matched": 1,
+					"recall": 1.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:SPELL": {
+					"gold": 0,
+					"predicted": 174,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:VERB:FORM": {
+					"gold": 0,
+					"predicted": 2,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:PUNCT": {
+					"gold": 0,
+					"predicted": 221,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:VERB:TENSE": {
+					"gold": 0,
+					"predicted": 2,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:NOUN": {
+					"gold": 0,
+					"predicted": 12,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:ADJ": {
+					"gold": 0,
+					"predicted": 4,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:ORTH": {
+					"gold": 0,
+					"predicted": 85,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:DET": {
+					"gold": 0,
+					"predicted": 8,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:DET": {
+					"gold": 0,
+					"predicted": 3,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:VERB:SVA": {
+					"gold": 0,
+					"predicted": 3,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:PRON": {
+					"gold": 0,
+					"predicted": 3,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:NOUN:INFL": {
+					"gold": 0,
+					"predicted": 4,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:PART": {
+					"gold": 0,
+					"predicted": 2,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:NOUN:POSS": {
+					"gold": 0,
+					"predicted": 42,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:PREP": {
+					"gold": 0,
+					"predicted": 7,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:MORPH": {
+					"gold": 0,
+					"predicted": 23,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:ADV": {
+					"gold": 0,
+					"predicted": 12,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:VERB:TENSE": {
+					"gold": 0,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:NOUN:NUM": {
+					"gold": 0,
+					"predicted": 8,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:PUNCT": {
+					"gold": 0,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:ADJ:FORM": {
+					"gold": 0,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:OTHER": {
+					"gold": 0,
+					"predicted": 9,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:OTHER": {
+					"gold": 0,
+					"predicted": 2,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:PREP": {
+					"gold": 0,
+					"predicted": 4,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:VERB:INFL": {
+					"gold": 0,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:NOUN:POSS": {
+					"gold": 0,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:PUNCT": {
+					"gold": 0,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:VERB:FORM": {
+					"gold": 0,
+					"predicted": 2,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:ADV": {
+					"gold": 0,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				}
+			},
+			"examples": 1312,
+			"words": 27831,
+			"changed_sentences": 468,
+			"gold_false_positives": 521,
+			"gold_sentences_with_lint": 419,
+			"gold_words": 27794,
+			"gold_fp_per_1000_words": 18.74505288911276
+		},
+		"bea19": {
+			"predicted": 2272,
+			"gold": 7114,
+			"matched": 632,
+			"precision": 0.27816901408450706,
+			"recall": 0.08883890919314029,
+			"f05": 0.1950376496728799,
+			"by_type": {
+				"M:VERB:FORM": {
+					"gold": 20,
+					"predicted": 4,
+					"matched": 5,
+					"recall": 0.25,
+					"precision": 1.25,
+					"f05": 0.6944444444444444
+				},
+				"U:PREP": {
+					"gold": 101,
+					"predicted": 11,
+					"matched": 7,
+					"recall": 0.06930693069306931,
+					"precision": 0.6363636363636364,
+					"f05": 0.2413793103448276
+				},
+				"M:PUNCT": {
+					"gold": 879,
+					"predicted": 254,
+					"matched": 252,
+					"recall": 0.28668941979522183,
+					"precision": 0.9921259842519685,
+					"f05": 0.6649076517150395
+				},
+				"M:VERB": {
+					"gold": 39,
+					"predicted": 0,
+					"matched": 2,
+					"recall": 0.05128205128205128,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:NOUN": {
+					"gold": 264,
+					"predicted": 127,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:ADV": {
+					"gold": 62,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:DET": {
+					"gold": 257,
+					"predicted": 15,
+					"matched": 17,
+					"recall": 0.06614785992217899,
+					"precision": 1.1333333333333333,
+					"f05": 0.26813880126182965
+				},
+				"R:VERB": {
+					"gold": 332,
+					"predicted": 7,
+					"matched": 2,
+					"recall": 0.006024096385542169,
+					"precision": 0.2857142857142857,
+					"f05": 0.027777777777777776
+				},
+				"R:PRON": {
+					"gold": 63,
+					"predicted": 2,
+					"matched": 1,
+					"recall": 0.015873015873015872,
+					"precision": 0.5,
+					"f05": 0.07042253521126761
+				},
+				"U:VERB": {
+					"gold": 29,
+					"predicted": 6,
+					"matched": 2,
+					"recall": 0.06896551724137931,
+					"precision": 0.3333333333333333,
+					"f05": 0.18867924528301883
+				},
+				"U:PART": {
+					"gold": 6,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:ADV": {
+					"gold": 27,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:NOUN": {
+					"gold": 35,
+					"predicted": 6,
+					"matched": 1,
+					"recall": 0.02857142857142857,
+					"precision": 0.16666666666666666,
+					"f05": 0.0847457627118644
+				},
+				"R:OTHER": {
+					"gold": 838,
+					"predicted": 67,
+					"matched": 11,
+					"recall": 0.013126491646778043,
+					"precision": 0.16417910447761194,
+					"f05": 0.049728752260397836
+				},
+				"R:NOUN:NUM": {
+					"gold": 248,
+					"predicted": 11,
+					"matched": 8,
+					"recall": 0.03225806451612903,
+					"precision": 0.7272727272727273,
+					"f05": 0.136986301369863
+				},
+				"R:DET": {
+					"gold": 157,
+					"predicted": 13,
+					"matched": 7,
+					"recall": 0.044585987261146494,
+					"precision": 0.5384615384615384,
+					"f05": 0.16746411483253587
+				},
+				"R:VERB:TENSE": {
+					"gold": 358,
+					"predicted": 3,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:ORTH": {
+					"gold": 320,
+					"predicted": 445,
+					"matched": 96,
+					"recall": 0.3,
+					"precision": 0.2157303370786517,
+					"f05": 0.22857142857142856
+				},
+				"M:DET": {
+					"gold": 332,
+					"predicted": 2,
+					"matched": 2,
+					"recall": 0.006024096385542169,
+					"precision": 1.0,
+					"f05": 0.02941176470588235
+				},
+				"R:PREP": {
+					"gold": 481,
+					"predicted": 8,
+					"matched": 7,
+					"recall": 0.014553014553014554,
+					"precision": 0.875,
+					"f05": 0.0682261208576998
+				},
+				"M:OTHER": {
+					"gold": 89,
+					"predicted": 1,
+					"matched": 1,
+					"recall": 0.011235955056179775,
+					"precision": 1.0,
+					"f05": 0.05376344086021505
+				},
+				"U:VERB:TENSE": {
+					"gold": 41,
+					"predicted": 1,
+					"matched": 1,
+					"recall": 0.024390243902439025,
+					"precision": 1.0,
+					"f05": 0.1111111111111111
+				},
+				"R:PART": {
+					"gold": 42,
+					"predicted": 0,
+					"matched": 1,
+					"recall": 0.023809523809523808,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:VERB:FORM": {
+					"gold": 202,
+					"predicted": 70,
+					"matched": 6,
+					"recall": 0.0297029702970297,
+					"precision": 0.08571428571428572,
+					"f05": 0.062240663900414946
+				},
+				"R:CONJ": {
+					"gold": 8,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:NOUN:POSS": {
+					"gold": 26,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:PUNCT": {
+					"gold": 278,
+					"predicted": 38,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:VERB:TENSE": {
+					"gold": 60,
+					"predicted": 3,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:PREP": {
+					"gold": 147,
+					"predicted": 3,
+					"matched": 3,
+					"recall": 0.02040816326530612,
+					"precision": 1.0,
+					"f05": 0.09433962264150941
+				},
+				"R:ADJ:FORM": {
+					"gold": 16,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:VERB:SVA": {
+					"gold": 146,
+					"predicted": 23,
+					"matched": 10,
+					"recall": 0.0684931506849315,
+					"precision": 0.43478260869565216,
+					"f05": 0.21008403361344535
+				},
+				"U:VERB:FORM": {
+					"gold": 11,
+					"predicted": 0,
+					"matched": 1,
+					"recall": 0.09090909090909091,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:PRON": {
+					"gold": 45,
+					"predicted": 0,
+					"matched": 1,
+					"recall": 0.022222222222222223,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:OTHER": {
+					"gold": 48,
+					"predicted": 5,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:SPELL": {
+					"gold": 383,
+					"predicted": 889,
+					"matched": 168,
+					"recall": 0.4386422976501306,
+					"precision": 0.1889763779527559,
+					"f05": 0.21325209444021326
+				},
+				"U:ADJ": {
+					"gold": 11,
+					"predicted": 0,
+					"matched": 1,
+					"recall": 0.09090909090909091,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:ADJ": {
+					"gold": 86,
+					"predicted": 32,
+					"matched": 1,
+					"recall": 0.011627906976744186,
+					"precision": 0.03125,
+					"f05": 0.02336448598130841
+				},
+				"U:CONTR": {
+					"gold": 9,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:CONJ": {
+					"gold": 11,
+					"predicted": 4,
+					"matched": 2,
+					"recall": 0.18181818181818182,
+					"precision": 0.5,
+					"f05": 0.3703703703703704
+				},
+				"R:MORPH": {
+					"gold": 155,
+					"predicted": 110,
+					"matched": 5,
+					"recall": 0.03225806451612903,
+					"precision": 0.045454545454545456,
+					"f05": 0.04201680672268907
+				},
+				"R:NOUN:INFL": {
+					"gold": 9,
+					"predicted": 3,
+					"matched": 3,
+					"recall": 0.3333333333333333,
+					"precision": 1.0,
+					"f05": 0.7142857142857143
+				},
+				"M:ADJ": {
+					"gold": 15,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:PUNCT": {
+					"gold": 101,
+					"predicted": 8,
+					"matched": 3,
+					"recall": 0.0297029702970297,
+					"precision": 0.375,
+					"f05": 0.11278195488721804
+				},
+				"M:PRON": {
+					"gold": 63,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:CONTR": {
+					"gold": 19,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:WO": {
+					"gold": 95,
+					"predicted": 1,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:CONTR": {
+					"gold": 2,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:PART": {
+					"gold": 11,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"UNK": {
+					"gold": 17,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"M:NOUN": {
+					"gold": 26,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:ADV": {
+					"gold": 25,
+					"predicted": 22,
+					"matched": 2,
+					"recall": 0.08,
+					"precision": 0.09090909090909091,
+					"f05": 0.08849557522123895
+				},
+				"M:CONJ": {
+					"gold": 25,
+					"predicted": 0,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"R:VERB:INFL": {
+					"gold": 5,
+					"predicted": 6,
+					"matched": 3,
+					"recall": 0.6,
+					"precision": 0.5,
+					"f05": 0.5172413793103449
+				},
+				"R:NOUN:POSS": {
+					"gold": 29,
+					"predicted": 67,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				},
+				"U:NOUN:POSS": {
+					"gold": 10,
+					"predicted": 2,
+					"matched": 0,
+					"recall": 0.0,
+					"precision": 0.0,
+					"f05": 0.0
+				}
+			},
+			"examples": 4384,
+			"words": 78371,
+			"changed_sentences": 1624,
+			"gold_false_positives": 2350,
+			"gold_sentences_with_lint": 1618,
+			"gold_words": 79303,
+			"gold_fp_per_1000_words": 29.633179072670643
+		}
+	}
+}

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <shadow-editor></shadow-editor>
+    <script>
+      class ShadowEditor extends HTMLElement {
+        constructor() {
+          super();
+          const root = this.attachShadow({ mode: 'open' });
+          const textarea = document.createElement('textarea');
+          textarea.rows = 5;
+          textarea.cols = 33;
+          root.append(textarea);
+        }
+      }
+      customElements.define('shadow-editor', ShadowEditor);
+    </script>
+  </body>
+</html>
