@@ -212,7 +212,11 @@ function suggestionTitle(suggestion: UnpackedSuggestion, original: string): stri
 	}
 }
 
-function button(label: string, onClick: (event: Event) => void, props: Record<string, unknown> = {}) {
+function button(
+	label: string,
+	onClick: (event: Event) => void,
+	props: Record<string, unknown> = {},
+) {
 	return h(
 		'button',
 		{

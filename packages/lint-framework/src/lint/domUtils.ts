@@ -59,14 +59,18 @@ export function getClosestBlockAncestor(leaf: Node, root: Element): Element | nu
  * into the edited content itself (e.g. a designMode or contenteditable `<body>`), where they would
  * be serialized with it and trigger mutation observers watching it.
  */
-export function nonEditableAncestor(el: HTMLElement): HTMLElement {
+export function nonEditableAncestor(el: HTMLElement | null): HTMLElement {
 	let node: HTMLElement | null = el;
 
 	while (node?.isContentEditable) {
-		node = node.parentElement;
+		const parent = node.parentElement;
+		// A top-level editable inside an open shadow root has no parentElement;
+		// continue at the host so the render box stays outside the edited content.
+		const root = parent == null ? node.getRootNode() : null;
+		node = parent ?? (root instanceof ShadowRoot ? (root.host as HTMLElement) : null);
 	}
 
-	return node ?? el.ownerDocument.documentElement;
+	return node ?? (el?.ownerDocument ?? document).documentElement;
 }
 
 /**

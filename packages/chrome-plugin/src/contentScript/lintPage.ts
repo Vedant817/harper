@@ -100,7 +100,9 @@ async function bootLintPage() {
 	document.addEventListener(
 		'focusin',
 		(event) => {
-			lintFocusedEditor(event.target, false);
+			// focusin is retargeted to the shadow host at the document level, so
+			// composedPath()[0] is the real editor inside an open shadow root.
+			lintFocusedEditor(event.composedPath()[0] ?? event.target, false);
 		},
 		{ capture: true },
 	);

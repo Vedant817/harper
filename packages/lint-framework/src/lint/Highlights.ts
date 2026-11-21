@@ -304,7 +304,16 @@ export default class Highlights {
 			}
 		}
 
-		return nonEditableAncestor(el.parentElement!);
+		// A top-level node inside an open shadow root has no parentElement, and the
+		// host's light DOM is not rendered. Put the render box in the document body
+		// instead; its contents are position: fixed, so viewport coordinates still
+		// place the highlights correctly.
+		const root = el.getRootNode();
+		if (root instanceof ShadowRoot) {
+			const doc = root.host.ownerDocument;
+			return nonEditableAncestor(doc.body ?? doc.documentElement);
+		}
+		return nonEditableAncestor(el.parentElement);
 	}
 }
 
