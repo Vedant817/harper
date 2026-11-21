@@ -41,6 +41,7 @@ def load_metrics() -> dict[str, object]:
 def check(metrics: dict[str, object]) -> list[dict]:
     checks = [
         ("paste underline <= 700 ms", metrics.get("pasteUnderlineMs"), 700),
+        ("repeated !!! underline <= 700 ms", metrics.get("repeatedPunctuationMs"), 700),
         ("full draft tail underlined", metrics.get("fullDraftTailUnderlined"), True),
         ("highlight in shadow root", metrics.get("highlightInShadowRoot"), True),
         ("shadow-root editor linted", metrics.get("shadowEditorUnderlined"), True),

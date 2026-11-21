@@ -1,25 +1,33 @@
 {
-  "passed": true,
+  "passed": false,
   "metrics": {
-    "cardOpenMs": 34,
-    "cardWidthPx": 266.0991439819336,
+    "cardOpenMs": 33,
+    "cardWidthPx": 266.09728240966797,
     "dialogCalls": [],
     "fullDraftTailUnderlined": true,
     "fullDraftWords": 142,
-    "gmailLoadMs": 330,
-    "gmailUnfocusedMs": 355,
+    "gmailLoadMs": 878,
+    "gmailUnfocusedMs": 860,
     "highlightInShadowRoot": true,
-    "linkedinComboboxMs": 16,
-    "linkedinPasteMs": 13,
+    "linkedinComboboxMs": 8,
+    "linkedinPasteMs": 11,
     "localhostUnfocusedHighlights": 0,
     "openDialogElements": 0,
-    "pasteUnderlineMs": 20,
+    "pasteUnderlineMs": 14,
+    "repeatedPunctuationMs": 334,
     "shadowEditorUnderlined": true
   },
   "checks": [
     {
       "check": "paste underline <= 700 ms",
-      "observed": 20,
+      "observed": 14,
+      "pass": true,
+      "status": "PASS",
+      "limit": 700
+    },
+    {
+      "check": "repeated !!! underline <= 700 ms",
+      "observed": 334,
       "pass": true,
       "status": "PASS",
       "limit": 700
@@ -47,30 +55,30 @@
     },
     {
       "check": "LinkedIn dialog paste <= 700 ms",
-      "observed": 13,
+      "observed": 11,
       "pass": true,
       "status": "PASS",
       "limit": 700
     },
     {
       "check": "LinkedIn combobox paste <= 700 ms",
-      "observed": 16,
+      "observed": 8,
       "pass": true,
       "status": "PASS",
       "limit": 700
     },
     {
       "check": "Gmail prefilled draft <= 700 ms",
-      "observed": 330,
-      "pass": true,
-      "status": "PASS",
+      "observed": 878,
+      "pass": false,
+      "status": "FAIL",
       "limit": 700
     },
     {
       "check": "Gmail pre-filled without focus",
-      "observed": 355,
-      "pass": true,
-      "status": "PASS",
+      "observed": 860,
+      "pass": false,
+      "status": "FAIL",
       "limit": 700
     },
     {
@@ -82,14 +90,14 @@
     },
     {
       "check": "card width <= 280 px",
-      "observed": 266.0991439819336,
+      "observed": 266.09728240966797,
       "pass": true,
       "status": "PASS",
       "limit": 280
     },
     {
       "check": "card opens <= 300 ms",
-      "observed": 34,
+      "observed": 33,
       "pass": true,
       "status": "PASS",
       "limit": 300

@@ -88,6 +88,32 @@ test.describe('personal extension acceptance', () => {
 		).toBeLessThanOrEqual(700);
 	});
 
+	test('repeated exclamation marks are underlined within 700 ms', async ({ page }) => {
+		test.setTimeout(120000);
+		const box = getTextarea(page);
+		await box.click();
+
+		await box.fill('This is an test');
+		await page
+			.locator('#harper-highlight[data-problem-text="an"]')
+			.waitFor({ state: 'visible', timeout: 90000 });
+		await box.fill('');
+		await page.waitForTimeout(100);
+
+		const started = Date.now();
+		await box.fill('This is urgent!!!');
+		await page
+			.locator('#harper-highlight[data-problem-text*="!!!"]')
+			.waitFor({ state: 'visible', timeout: 10000 });
+		const elapsed = Date.now() - started;
+
+		record('repeatedPunctuationMs', elapsed);
+		expect(
+			elapsed,
+			'A repeated exclamation run should underline within 700 ms.',
+		).toBeLessThanOrEqual(700);
+	});
+
 	test('the whole pasted draft is linted', async ({ page }) => {
 		test.setTimeout(90000);
 		const box = getTextarea(page);
