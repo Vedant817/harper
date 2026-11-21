@@ -41,10 +41,15 @@ impl Linter for RepeatedPunctuation {
                     let mut span_start = chunk[index].span.start;
                     let mut replacement_text = vec![replacement];
 
-                    if index > 0 && chunk[index - 1].kind.is_word() {
-                        span_start = chunk[index - 1].span.start;
+                    let mut word_index = index;
+                    while word_index > 0 && chunk[word_index - 1].kind.is_whitespace() {
+                        word_index -= 1;
+                    }
+
+                    if word_index > 0 && chunk[word_index - 1].kind.is_word() {
+                        span_start = chunk[word_index - 1].span.start;
                         replacement_text = document
-                            .get_span_content(&chunk[index - 1].span)
+                            .get_span_content(&chunk[word_index - 1].span)
                             .to_vec();
                         replacement_text.push(replacement);
                     }
@@ -119,5 +124,41 @@ mod tests {
     fn allows_mixed_marks() {
         assert_lint_count("Really?!", RepeatedPunctuation::default(), 0);
         assert_lint_count("Really!?", RepeatedPunctuation::default(), 0);
+        assert_lint_count("?!?", RepeatedPunctuation::default(), 0);
+        assert_lint_count("!?", RepeatedPunctuation::default(), 0);
+    }
+
+    #[test]
+    fn handles_a_space_before_the_run() {
+        assert_suggestion_result("Wow !!!", RepeatedPunctuation::default(), "Wow!");
+    }
+
+    #[test]
+    fn handles_a_run_at_start_of_text() {
+        assert_suggestion_result("!!!", RepeatedPunctuation::default(), "!");
+    }
+
+    #[test]
+    fn allows_two_question_marks() {
+        assert_lint_count("What??", RepeatedPunctuation::default(), 0);
+    }
+
+    #[test]
+    fn collapses_four_marks() {
+        assert_suggestion_result("Really!!!!", RepeatedPunctuation::default(), "Really!");
+    }
+
+    #[test]
+    fn handles_a_quote_after_the_run() {
+        assert_suggestion_result(
+            "He said \"no!!!\"",
+            RepeatedPunctuation::default(),
+            "He said \"no!\"",
+        );
+    }
+
+    #[test]
+    fn allows_ellipsis_after_a_word() {
+        assert_lint_count("Wait...", RepeatedPunctuation::default(), 0);
     }
 }
