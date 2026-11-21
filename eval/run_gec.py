@@ -115,18 +115,35 @@ def char_span_to_tokens(
     return token_start, token_end
 
 
+# Rules whose suggestion list comes from an unordered set. The CLI writes the
+# set iteration order, so two runs can offer the same corrections in a different
+# order. Canonicalize only these before choosing the first suggestion.
+UNORDERED_SUGGESTION_RULES = {"RegularIrregulars"}
+
+
+def ordered_suggestions(lint: dict) -> list[str]:
+    suggestions = list(lint.get("suggestions") or [])
+    if (lint.get("rule") or "") in UNORDERED_SUGGESTION_RULES:
+        suggestions.sort()
+    return suggestions
+
+
 def apply_token_suggestions(source: str, lints: Iterable[dict]) -> tuple[list[str], list[dict]]:
     """Apply the first non-overlapping suggestion per lint at token granularity."""
     spans = token_spans(source)
     tokens = [token for token, _, _ in spans]
     ordered = sorted(
         lints,
-        key=lambda lint: (lint["span"]["char_start"], lint["span"]["char_end"]),
+        key=lambda lint: (
+            lint["span"]["char_start"],
+            lint["span"]["char_end"],
+            lint.get("rule") or "",
+        ),
     )
     applied: list[dict] = []
     taken: list[tuple[int, int]] = []
     for lint in ordered:
-        suggestions = lint.get("suggestions") or []
+        suggestions = ordered_suggestions(lint)
         if not suggestions:
             continue
         parsed = parse_suggestion(suggestions[0])

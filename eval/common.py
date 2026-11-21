@@ -228,7 +228,18 @@ def lint_texts(
             lint["index"] = index
             lint["file"] = file_result.get("file")
             by_index[index].append(lint)
-    return [lint for index in range(len(texts)) for lint in by_index[index]]
+    return [
+        lint
+        for index in range(len(texts))
+        for lint in sorted(
+            by_index[index],
+            key=lambda item: (
+                item["span"]["char_start"],
+                item["span"]["char_end"],
+                item.get("rule") or "",
+            ),
+        )
+    ]
 
 
 def _unquote(text: str) -> str:
