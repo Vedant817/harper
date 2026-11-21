@@ -1,6 +1,6 @@
 # Harper evaluation report
 
-- Generated: 2026-11-21T13:19:18Z
+- Generated: 2026-11-21T13:47:32Z
 - Engine commit: `e0c2101d`
 - Extension results include the local shadow-root fixes on top of that commit.
 - Scope: spelling, grammar, punctuation, and usage only.
@@ -8,41 +8,88 @@
 
 ## Personal acceptance cases
 
-| case                 | preset | result | reason                                                 |
-| -------------------- | ------ | ------ | ------------------------------------------------------ |
-| comma-splice         | casual | FAIL   | expected PersonalCommaSplice -> ". "                   |
-| direct-question      | casual | FAIL   | expected PersonalDirectQuestion -> "?"                 |
-| greeting-comma       | casual | PASS   |                                                        |
-| object-case          | casual | PASS   |                                                        |
-| less-fewer           | casual | PASS   |                                                        |
-| due-to-fact          | casual | PASS   |                                                        |
-| in-order-to          | casual | FAIL   | expected a suggestion containing "to"                  |
-| at-this-point        | casual | PASS   |                                                        |
-| in-the-event         | casual | PASS   |                                                        |
-| could-care-less      | casual | FAIL   | expected PersonalCouldCareLess -> "couldn't care less" |
-| irregardless         | casual | PASS   |                                                        |
-| urgent-marks         | core   | FAIL   | expected a suggestion containing "urgent!"             |
-| what-marks           | core   | FAIL   | expected a suggestion containing "What?"               |
-| an-test              | core   | PASS   |                                                        |
-| could-of             | core   | PASS   |                                                        |
-| hope-well            | email  | PASS   |                                                        |
-| wanted-follow-up     | email  | PASS   |                                                        |
-| per-last-email       | email  | PASS   |                                                        |
-| circling-back        | email  | PASS   |                                                        |
-| reach-out            | email  | PASS   |                                                        |
-| greeting-ok          | casual | PASS   |                                                        |
-| sounds-good          | casual | PASS   |                                                        |
-| wait-for-it          | casual | PASS   |                                                        |
-| suspect              | casual | PASS   |                                                        |
-| imagine              | casual | PASS   |                                                        |
-| never-due            | casual | PASS   |                                                        |
-| seems-due            | casual | PASS   |                                                        |
-| care-less-comparison | casual | PASS   |                                                        |
-| reach-out-mile       | email  | PASS   |                                                        |
-| about-hour           | email  | PASS   |                                                        |
-| stock-off            | casual | PASS   |                                                        |
+| case                 | preset | result | reason                                     |
+| -------------------- | ------ | ------ | ------------------------------------------ |
+| comma-splice         | casual | PASS   |                                            |
+| direct-question      | casual | FAIL   | expected PersonalDirectQuestion -> "?"     |
+| greeting-comma       | casual | PASS   |                                            |
+| object-case          | casual | PASS   |                                            |
+| less-fewer           | casual | PASS   |                                            |
+| due-to-fact          | casual | PASS   |                                            |
+| in-order-to          | casual | PASS   |                                            |
+| at-this-point        | casual | PASS   |                                            |
+| in-the-event         | casual | PASS   |                                            |
+| could-care-less      | casual | PASS   |                                            |
+| irregardless         | casual | PASS   |                                            |
+| urgent-marks         | core   | FAIL   | expected a suggestion containing "urgent!" |
+| what-marks           | core   | FAIL   | expected a suggestion containing "What?"   |
+| an-test              | core   | PASS   |                                            |
+| could-of             | core   | PASS   |                                            |
+| hope-well            | email  | PASS   |                                            |
+| wanted-follow-up     | email  | PASS   |                                            |
+| per-last-email       | email  | PASS   |                                            |
+| circling-back        | email  | PASS   |                                            |
+| reach-out            | email  | PASS   |                                            |
+| greeting-ok          | casual | PASS   |                                            |
+| sounds-good          | casual | PASS   |                                            |
+| wait-for-it          | casual | PASS   |                                            |
+| suspect              | casual | PASS   |                                            |
+| imagine              | casual | PASS   |                                            |
+| never-due            | casual | PASS   |                                            |
+| seems-due            | casual | PASS   |                                            |
+| care-less-comparison | casual | PASS   |                                            |
+| reach-out-mile       | email  | PASS   |                                            |
+| about-hour           | email  | PASS   |                                            |
+| stock-off            | casual | PASS   |                                            |
 
-**25/31 passed.** A failure here means the browser build does not meet the stated personal contract.
+**28/31 passed.** A failure here means the browser build does not meet the stated personal contract.
+
+## Follow-up changes
+
+| item                 | evidence before                               | change                                                               | result after                                                                                                                     | acceptance         | status           |
+| -------------------- | --------------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ---------------- |
+| 0 baseline           | personal 25/31; BEA 27.77/8.87/19.47          | recorded in this report                                              | same baseline                                                                                                                    | n/a                | PASS             |
+| 1a determinism       | BEA varied 27.77 vs 27.82 between runs        | eval/common.py sort; eval/run_gec.py canonicalizes RegularIrregulars | two full runs identical                                                                                                          | run_gec.py twice   | PASS             |
+| 1b card limit        | limit 280.5                                   | eval/run_extension.py and personal_acceptance.spec.ts use 280        | limit 280; card 266.1                                                                                                            | run_extension.py   | PASS             |
+| 1c diagnostics       | no per-type or per-rule FP detail             | eval/run_gec.py, run_spelling.py, report.py add the tables           | per-type, top-10 FP rules with examples, all clean lints                                                                         | report.py          | PASS             |
+| 1d scope             | unknown whether GEC loads personal packs      | no code change                                                       | GEC loads the curated Rust config only                                                                                           | report scope check | PASS             |
+| 2 false positives    | CWEB-S 5.93%, CWEB-G 10.04%, GMEG wiki 18.76% | diagnosis only; no fix                                               | SpellCheck dominates; style rules next                                                                                           | none               | PASS (diagnosis) |
+| 3a comma splice      | case FAIL                                     | personalWeir.ts accepts AUX tails                                    | case PASS                                                                                                                        | run_personal.py    | PASS             |
+| 3b direct question   | case FAIL                                     | stopped: no Weir end anchor or insert suggestion                     | case FAIL                                                                                                                        | run_personal.py    | STOPPED          |
+| 3c could care less   | case FAIL                                     | personalWeir.ts matches the bare phrase before a period              | case PASS                                                                                                                        | run_personal.py    | PASS             |
+| 3d in order to       | case FAIL                                     | personalWeir.ts adds PersonalInOrderTo to the casual pack            | case PASS                                                                                                                        | run_personal.py    | PASS             |
+| 3e/3f stacked marks  | cases FAIL                                    | stopped: Weir cannot match stacked ! or ?; core preset loads no pack | cases FAIL                                                                                                                       | run_personal.py    | STOPPED          |
+| 4 extension coverage | fixtures only for textarea/shadow             | LinkedIn dialog and pre-filled Gmail fixtures + gates                | LinkedIn 10 ms; Gmail 208 ms; 8/8 gates                                                                                          | run_extension.py   | PASS             |
+| 5 LanguageTool       | not installed                                 | skipped by ALLOW_LT_DOWNLOAD=no                                      | not measured                                                                                                                     | none               | SKIPPED          |
+| 6 regressions        | not reported last time                        | just unavailable; ran the fallback commands explicitly               | test_pos_tagger pass; test_most_lints pass (linters target); pnpm check 0 errors; tsc pass; full crate skipped (no Rust changes) | step 6 commands    | PASS             |
+
+### Personal cases: 25/31 before, 28/31 after
+
+Fixed: comma splice, bare could care less, and in order to. Stopped: direct question (no Weir end anchor; `becomes` only emits ReplaceWith), urgent!!! and What??? (Weir treats `!` as the Not operator and `?` as a chunk terminator; the cases also use the core preset, which loads no personal pack).
+
+### Stopped items
+
+- 3b needs an end-of-input anchor or an insertion suggestion in Weir, or a core Rust linter. Both are outside the personalWeir-only scope.
+- 3e/3f need a repeated-punctuation linter in harper-core and a default-config entry, or a Weir escape for stacked marks. Neither exists, and the core preset does not load personal packs.
+
+### Extension suite
+
+The full chrome-plugin suite ran with playwright.eval.config.ts on Windows: 69 passed, 12 failed, 2 skipped. The failures are css_zoom, github (2), hn, nested_elements, personal_polish, simple_textarea wrap, and typst (5). None are the shadow-root or new composer gates; they use the Windows config without the repo's Linux vglrun/GPU wrapper.
+
+### Still not measured
+
+ErAConD, FCE and CoNLL-2013 scoring, JFLEG, TETRA, LanguageTool rule tests, `just dogfood`, and tone/clarity. These are left for a later round.
+
+### Follow-up commits
+
+- `9ee70eda` fix(eval): make GEC scoring deterministic
+- `e0c2101d` fix(eval): enforce the 280 px card limit exactly
+- `450c0474` feat(eval): add GEC and spelling diagnostics
+- `369ca4bf` fix(personal-weir): accept modal tails in comma splices
+- `f8be1da6` fix(personal-weir): match bare could care less
+- `a814991d` fix(personal-weir): shorten in order to
+- `f7a84153` test(chrome-plugin): cover LinkedIn and Gmail-like composers
+- this report commit
 
 ## Public GEC corpora (ERRANT, token-level)
 
@@ -55,7 +102,7 @@
 | conll2014  | 1312 | 56.65% | 7.20%  | 23.87% | 18.75      | n/a          |
 | bea19      | 4384 | 27.77% | 8.87%  | 19.47% | 29.63      | n/a          |
 
-LanguageTool: No local LanguageTool command found. The 252 MB LanguageTool-stable.zip was not downloaded.
+LanguageTool: not measured — No local LanguageTool command found. The 252 MB LanguageTool-stable.zip was not downloaded.
 
 Method: first non-overlapping suggestion per lint, applied at token granularity; ERRANT annotates source against Harper output; matching requires the same token span and correction tokens. `gold FP/1k` lints the detokenized reference text and reports Harper lints per 1,000 words.
 
@@ -320,16 +367,18 @@ Sources: codespell (64966 pairs), wikipedia (4276 pairs), typos-cli (95923 pairs
 
 ## Extension acceptance (Playwright, headed Chromium)
 
-| gate                       | observed           | limit | result |
-| -------------------------- | ------------------ | ----- | ------ |
-| paste underline <= 700 ms  | 11                 | 700   | PASS   |
-| full draft tail underlined | True               | True  | PASS   |
-| highlight in shadow root   | True               | True  | PASS   |
-| shadow-root editor linted  | True               | True  | PASS   |
-| card width <= 280 px       | 266.10274505615234 | 280   | PASS   |
-| card opens <= 300 ms       | 20                 | 300   | PASS   |
-| no dialog calls            | []                 | []    | PASS   |
-| no open dialog elements    | 0                  | 0     | PASS   |
+| gate                            | observed           | limit | result |
+| ------------------------------- | ------------------ | ----- | ------ |
+| paste underline <= 700 ms       | 15                 | 700   | PASS   |
+| full draft tail underlined      | True               | True  | PASS   |
+| highlight in shadow root        | True               | True  | PASS   |
+| shadow-root editor linted       | True               | True  | PASS   |
+| LinkedIn dialog paste <= 700 ms | 9                  | 700   | PASS   |
+| Gmail prefilled draft <= 700 ms | 205                | 700   | PASS   |
+| card width <= 280 px            | 265.99999237060547 | 280   | PASS   |
+| card opens <= 300 ms            | 32                 | 300   | PASS   |
+| no dialog calls                 | []                 | []    | PASS   |
+| no open dialog elements         | 0                  | 0     | PASS   |
 
 **All gates passed.**
 
