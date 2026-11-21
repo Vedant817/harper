@@ -260,7 +260,7 @@ def main(argv: list[str] | None = None) -> int:
         downloads_section(downloads),
     ]
     text = "\n".join(part for part in parts if part is not None)
-    Path(args.output).write_text(text.rstrip() + "\n", encoding="utf-8")
+    Path(args.output).write_text(text.rstrip() + "\n", encoding="utf-8", newline="\n")
     print(f"Wrote {args.output}")
     return 0
 

@@ -20,6 +20,11 @@ REPORT = REPORTS / "personal.json"
 
 
 def main() -> int:
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except AttributeError:
+            pass
     if not VITEST.exists():
         print(f"vitest not found at {VITEST}; run `pnpm install` in packages/harper.js", file=sys.stderr)
         return 2

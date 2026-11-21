@@ -1,7 +1,7 @@
 # Harper evaluation report
 
-- Generated: 2026-11-21T08:27:30Z
-- Engine commit: `7b1159de`
+- Generated: 2026-11-21T08:40:20Z
+- Engine commit: `08ffa17d`
 - Extension results include the local shadow-root fixes on top of that commit.
 - Scope: spelling, grammar, punctuation, and usage only.
 - This is an evaluation harness, not a claim of Grammarly Premium parity.
@@ -53,7 +53,7 @@
 | gmeg-wiki  | 992  | 18.76% | 11.77% | 16.77% | 42.49      | n/a          |
 | gmeg-fce   | 968  | 36.15% | 7.38%  | 20.32% | 12.16      | n/a          |
 | conll2014  | 1312 | 56.65% | 7.20%  | 23.87% | 18.75      | n/a          |
-| bea19      | 4384 | 27.82% | 8.88%  | 19.50% | 29.63      | n/a          |
+| bea19      | 4384 | 27.77% | 8.87%  | 19.47% | 29.63      | n/a          |
 
 LanguageTool: No local LanguageTool command found. The 252 MB LanguageTool-stable.zip was not downloaded.
 
@@ -81,16 +81,16 @@ Sources: codespell (64966 pairs), wikipedia (4276 pairs), typos-cli (95923 pairs
 
 ## Extension acceptance (Playwright, headed Chromium)
 
-| gate                       | observed           | limit | result |
-| -------------------------- | ------------------ | ----- | ------ |
-| paste underline <= 700 ms  | 9                  | 700   | PASS   |
-| full draft tail underlined | True               | True  | PASS   |
-| highlight in shadow root   | True               | True  | PASS   |
-| shadow-root editor linted  | True               | True  | PASS   |
-| card width <= 280 px       | 266.09935760498047 | 280.5 | PASS   |
-| card opens <= 300 ms       | 23                 | 300   | PASS   |
-| no dialog calls            | []                 | []    | PASS   |
-| no open dialog elements    | 0                  | 0     | PASS   |
+| gate                       | observed          | limit | result |
+| -------------------------- | ----------------- | ----- | ------ |
+| paste underline <= 700 ms  | 12                | 700   | PASS   |
+| full draft tail underlined | True              | True  | PASS   |
+| highlight in shadow root   | True              | True  | PASS   |
+| shadow-root editor linted  | True              | True  | PASS   |
+| card width <= 280 px       | 266.1011276245117 | 280.5 | PASS   |
+| card opens <= 300 ms       | 21                | 300   | PASS   |
+| no dialog calls            | []                | []    | PASS   |
+| no open dialog elements    | 0                 | 0     | PASS   |
 
 **All gates passed.**
 

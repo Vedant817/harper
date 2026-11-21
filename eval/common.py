@@ -75,7 +75,9 @@ def log_download(name: str, url: str, action: str, bytes: int | None = None, rea
             "at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         }
     )
-    (REPORTS / "downloads.json").write_text(json.dumps(entries, indent=2) + "\n", encoding="utf-8")
+    (REPORTS / "downloads.json").write_text(
+        json.dumps(entries, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
 
 
 def fetch(url: str, dest: Path, *, name: str, max_bytes: int = MAX_DOWNLOAD_BYTES) -> Path | None:
@@ -333,7 +335,11 @@ def word_count(text: str) -> int:
 
 def write_json(path: Path, payload) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
 
 
 def pct(value: float) -> str:

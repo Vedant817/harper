@@ -1,6 +1,6 @@
 {
-	"generatedAt": "2026-11-21T08:04:44Z",
-	"commit": "7b1159de",
+	"generatedAt": "2026-11-21T08:38:15Z",
+	"commit": "08ffa17d",
 	"method": {
 		"suggestions": "first suggestion per lint, non-overlapping, applied by token span",
 		"edits": "ERRANT 3 annotation of tokenized source vs. Harper output",
@@ -2102,10 +2102,10 @@
 		"bea19": {
 			"predicted": 2272,
 			"gold": 7114,
-			"matched": 632,
-			"precision": 0.27816901408450706,
-			"recall": 0.08883890919314029,
-			"f05": 0.1950376496728799,
+			"matched": 631,
+			"precision": 0.2777288732394366,
+			"recall": 0.08869834129884735,
+			"f05": 0.1947290457968152,
 			"by_type": {
 				"M:VERB:FORM": {
 					"gold": 20,
@@ -2526,10 +2526,10 @@
 				"R:VERB:INFL": {
 					"gold": 5,
 					"predicted": 6,
-					"matched": 3,
-					"recall": 0.6,
-					"precision": 0.5,
-					"f05": 0.5172413793103449
+					"matched": 2,
+					"recall": 0.4,
+					"precision": 0.3333333333333333,
+					"f05": 0.3448275862068965
 				},
 				"R:NOUN:POSS": {
 					"gold": 29,

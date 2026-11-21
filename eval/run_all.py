@@ -19,6 +19,11 @@ VENV = ROOT / "eval" / ".venv" / "Scripts" / "python.exe"
 
 
 def main(argv: list[str] | None = None) -> int:
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except AttributeError:
+            pass
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--skip-extension", action="store_true", help="do not run Playwright gates")
     parser.add_argument("--limit", type=int, default=0, help="limit sentences per GEC corpus")
