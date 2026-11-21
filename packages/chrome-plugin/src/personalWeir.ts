@@ -42,7 +42,7 @@ function rule(source: string): string {
 
 const commaSplice = rule(`
 expr headVerb <VERB, (![know, mean, guess, suppose, understand, think, said, says, told, asked])>
-expr tailVerb <VERB, (![know, mean, guess, suppose, understand, think, hope, believe, recall, remember, assume, assumed, thought, thinks, suspect, imagine, fear, feared, reckon, figure, gather, presume])>
+expr tailVerb <[VERB, AUX], (![know, mean, guess, suppose, understand, think, hope, believe, recall, remember, assume, assumed, thought, thinks, suspect, imagine, fear, feared, reckon, figure, gather, presume])>
 expr head (^PRON @headVerb)
 expr splice [${arms('@head', ', I @tailVerb', 24)}]
 expr main <@splice, (, I @tailVerb), (, )>
@@ -54,6 +54,7 @@ let strategy "Exact"
 let scope "Sentence"
 
 test "I finished the draft, I sent it." "I finished the draft. I sent it."
+test "I have a meeting at 3, I will be late." "I have a meeting at 3. I will be late."
 test "We wrote the note, I sent it." "We wrote the note. I sent it."
 test "I hope, I sent it." "I hope. I sent it."
 allows "Hi Sarah, I sent it."
