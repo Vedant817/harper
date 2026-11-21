@@ -291,6 +291,21 @@ def run_fixture(pairs: list[Pair], clean: list[str], limit: int) -> dict:
 
     clean_lints = spelling_lints(lint_texts(clean)) if clean else []
     clean_words = sum(word_count(text) for text in clean)
+    clean_details = []
+    for lint in clean_lints:
+        suggestion = None
+        suggestions = lint.get("suggestions") or []
+        if suggestions:
+            parsed = parse_suggestion(suggestions[0])
+            suggestion = parsed[1] if parsed is not None else None
+        clean_details.append(
+            {
+                "word": lint.get("matched_text"),
+                "rule": lint.get("rule"),
+                "suggestion": suggestion,
+                "sentence": clean[lint["index"]],
+            }
+        )
     return {
         "fixtures": len(fixtures),
         "substituted": sum(1 for fixture in fixtures if fixture[3] == "substituted"),
@@ -304,6 +319,7 @@ def run_fixture(pairs: list[Pair], clean: list[str], limit: int) -> dict:
         "clean_words": clean_words,
         "clean_false_positives": len(clean_lints),
         "clean_fp_per_1000_words": 1000.0 * len(clean_lints) / clean_words if clean_words else 0.0,
+        "clean_lints": clean_details,
     }
 
 

@@ -1,117 +1,257 @@
 {
-	"generatedAt": "2026-11-21T08:38:15Z",
-	"sources": {
-		"codespell": "64966 pairs",
-		"wikipedia": "4276 pairs",
-		"typos-cli": "95923 pairs"
-	},
-	"word_level": {
-		"pairs": 300,
-		"detected": 288,
-		"detection": 0.96,
-		"suggestion_at_1": 0.7266666666666667,
-		"suggestion_at_3": 0.85,
-		"misses": [
-			{
-				"typo": "restrictin",
-				"correct": "restricting",
-				"source": "codespell"
-			},
-			{
-				"typo": "prepates",
-				"correct": "prepares",
-				"source": "codespell"
-			},
-			{
-				"typo": "implementate",
-				"correct": "implement",
-				"source": "codespell"
-			},
-			{
-				"typo": "expoit",
-				"correct": "exploit",
-				"source": "codespell"
-			},
-			{
-				"typo": "firin",
-				"correct": "firing",
-				"source": "codespell"
-			},
-			{
-				"typo": "neighborin",
-				"correct": "neighboring",
-				"source": "codespell"
-			},
-			{
-				"typo": "womans",
-				"correct": "woman's",
-				"source": "codespell"
-			},
-			{
-				"typo": "oncompressed",
-				"correct": "uncompressed",
-				"source": "typos-cli"
-			},
-			{
-				"typo": "wonderus",
-				"correct": "wonders",
-				"source": "typos-cli"
-			},
-			{
-				"typo": "optin",
-				"correct": "option",
-				"source": "codespell"
-			},
-			{
-				"typo": "expection",
-				"correct": "exception",
-				"source": "codespell"
-			},
-			{
-				"typo": "upporting",
-				"correct": "supporting",
-				"source": "codespell"
-			}
-		]
-	},
-	"developer_fixtures": {
-		"fixtures": 60,
-		"substituted": 4,
-		"injected": 56,
-		"detected": 51,
-		"recall": 0.85,
-		"precision": 0.8360655737704918,
-		"suggestion_at_1": 0.75,
-		"suggestion_at_3": 0.7833333333333333,
-		"clean_sentences": 200,
-		"clean_words": 2345,
-		"clean_false_positives": 23,
-		"clean_fp_per_1000_words": 9.808102345415778
-	},
-	"birkbeck_detection": {
-		"missp": {
-			"words": 200,
-			"detected": 169,
-			"detection": 0.845
-		},
-		"holbrook": {
-			"words": 200,
-			"detected": 116,
-			"detection": 0.58
-		},
-		"aspell": {
-			"words": 200,
-			"detected": 183,
-			"detection": 0.915
-		},
-		"wikipedia": {
-			"words": 200,
-			"detected": 187,
-			"detection": 0.935
-		}
-	},
-	"developer_clean_prose": {
-		"sentences": 200,
-		"spelling_lints": 23
-	}
+  "generatedAt": "2026-11-21T13:16:16Z",
+  "sources": {
+    "codespell": "64966 pairs",
+    "wikipedia": "4276 pairs",
+    "typos-cli": "95923 pairs"
+  },
+  "word_level": {
+    "pairs": 300,
+    "detected": 288,
+    "detection": 0.96,
+    "suggestion_at_1": 0.7266666666666667,
+    "suggestion_at_3": 0.85,
+    "misses": [
+      {
+        "typo": "restrictin",
+        "correct": "restricting",
+        "source": "codespell"
+      },
+      {
+        "typo": "prepates",
+        "correct": "prepares",
+        "source": "codespell"
+      },
+      {
+        "typo": "implementate",
+        "correct": "implement",
+        "source": "codespell"
+      },
+      {
+        "typo": "expoit",
+        "correct": "exploit",
+        "source": "codespell"
+      },
+      {
+        "typo": "firin",
+        "correct": "firing",
+        "source": "codespell"
+      },
+      {
+        "typo": "neighborin",
+        "correct": "neighboring",
+        "source": "codespell"
+      },
+      {
+        "typo": "womans",
+        "correct": "woman's",
+        "source": "codespell"
+      },
+      {
+        "typo": "oncompressed",
+        "correct": "uncompressed",
+        "source": "typos-cli"
+      },
+      {
+        "typo": "wonderus",
+        "correct": "wonders",
+        "source": "typos-cli"
+      },
+      {
+        "typo": "optin",
+        "correct": "option",
+        "source": "codespell"
+      },
+      {
+        "typo": "expection",
+        "correct": "exception",
+        "source": "codespell"
+      },
+      {
+        "typo": "upporting",
+        "correct": "supporting",
+        "source": "codespell"
+      }
+    ]
+  },
+  "developer_fixtures": {
+    "fixtures": 60,
+    "substituted": 4,
+    "injected": 56,
+    "detected": 51,
+    "recall": 0.85,
+    "precision": 0.8360655737704918,
+    "suggestion_at_1": 0.75,
+    "suggestion_at_3": 0.7833333333333333,
+    "clean_sentences": 200,
+    "clean_words": 2345,
+    "clean_false_positives": 23,
+    "clean_fp_per_1000_words": 9.808102345415778,
+    "clean_lints": [
+      {
+        "word": "SmallVec",
+        "rule": "SpellCheck",
+        "suggestion": "Smaller",
+        "sentence": "TODO: remove this when `SmallVec` allows retrieving this value in a const context."
+      },
+      {
+        "word": "DialectFlags",
+        "rule": "SpellCheck",
+        "suggestion": "Dialect's",
+        "sentence": "The underlying type used for DialectFlags."
+      },
+      {
+        "word": "DialectFlags",
+        "rule": "SpellCheck",
+        "suggestion": "Dialect's",
+        "sentence": "Get and convert the collection of most used dialects into a `DialectFlags`."
+      },
+      {
+        "word": "DialectFlags",
+        "rule": "SpellCheck",
+        "suggestion": "Dialect's",
+        "sentence": "Fold most used dialects into `DialectFlags` via bitwise or."
+      },
+      {
+        "word": "R&D",
+        "rule": "SpellCheck",
+        "suggestion": "Rad",
+        "sentence": "Condenses \"ampersand pairs\" such as \"R&D\" or \"Q&A\" into single tokens."
+      },
+      {
+        "word": "I/O",
+        "rule": "SpellCheck",
+        "suggestion": "IMO",
+        "sentence": "Condenses \"slash pairs\" such as \"I/O\" into single tokens."
+      },
+      {
+        "word": "Expr",
+        "rule": "SpellCheck",
+        "suggestion": "Exp",
+        "sentence": "! An `Expr` is a declarative way to express whether a certain set of tokens fulfill a criteria."
+      },
+      {
+        "word": "ExprLinter",
+        "rule": "SpellCheck",
+        "suggestion": "Expediter",
+        "sentence": "! The actual searching is done by another system (usually a part of the [lint framework](crate::linting::ExprLinter))."
+      },
+      {
+        "word": "Expr",
+        "rule": "SpellCheck",
+        "suggestion": "Exp",
+        "sentence": "! When supplied a specific position in a token stream, the technical job of an `Expr` is to determine the window of tokens (including the cursor itself) that fulfills whatever criteria the author desires."
+      },
+      {
+        "word": "Expr",
+        "rule": "SpellCheck",
+        "suggestion": "Exp",
+        "sentence": "! The goal of the `Expr` initiative is to make rules easier to _read_ as well as to write."
+      },
+      {
+        "word": "standalones",
+        "rule": "SpellCheck",
+        "suggestion": "standalone",
+        "sentence": "These can make a compound with the part_2 standalones above."
+      },
+      {
+        "word": "z0",
+        "rule": "SpellCheck",
+        "suggestion": "z",
+        "sentence": "([a-z0-9]+ only) - We previously flagged just the z0 in the middle of it."
+      },
+      {
+        "word": "ReplaceWith",
+        "rule": "SpellCheck",
+        "suggestion": "Replacer's",
+        "sentence": "We use `ReplaceWith` rather than `Remove` because the latter has no case-matching."
+      },
+      {
+        "word": "Internt",
+        "rule": "SpellCheck",
+        "suggestion": "Intent",
+        "sentence": "Tests using real-world sentences from the Internt."
+      },
+      {
+        "word": "favourite",
+        "rule": "SpellCheck",
+        "suggestion": "favorite",
+        "sentence": "Some resources call 'favourite' an 'absolute adjective', some consider it a superlative."
+      },
+      {
+        "word": "OOV",
+        "rule": "SpellCheck",
+        "suggestion": "OOP",
+        "sentence": "We include OOV because novel words not in the dictionary tend to be nouns."
+      },
+      {
+        "word": "Automod",
+        "rule": "SpellCheck",
+        "suggestion": "Autoload",
+        "sentence": "You might be better off served by making Automod hold all posts and/or comments."
+      },
+      {
+        "word": "OOV",
+        "rule": "SpellCheck",
+        "suggestion": "OOP",
+        "sentence": "because OOV words are most commonly nouns."
+      },
+      {
+        "word": "ing",
+        "rule": "SpellCheck",
+        "suggestion": "in",
+        "sentence": "Verbs in -ing are also gerunds, which are nouns."
+      },
+      {
+        "word": "non-native",
+        "rule": "DisjointPrefixes",
+        "suggestion": "nonnative",
+        "sentence": "Ambiguous. Probably a non-native speaker that means \"least worst\", but offer all three options."
+      },
+      {
+        "word": "Expr",
+        "rule": "SpellCheck",
+        "suggestion": "Exp",
+        "sentence": "We have to use `Sentence` if our `Expr` includes commas!"
+      },
+      {
+        "word": "OK",
+        "rule": "OkToOkay",
+        "suggestion": "OKAY",
+        "sentence": "US is a qualifier meaning American, so uppercase after a possessive is OK."
+      },
+      {
+        "word": "OK",
+        "rule": "OkToOkay",
+        "suggestion": "OKAY",
+        "sentence": "\"you\" is subject and object both OK before \"want\"."
+      }
+    ]
+  },
+  "birkbeck_detection": {
+    "missp": {
+      "words": 200,
+      "detected": 169,
+      "detection": 0.845
+    },
+    "holbrook": {
+      "words": 200,
+      "detected": 116,
+      "detection": 0.58
+    },
+    "aspell": {
+      "words": 200,
+      "detected": 183,
+      "detection": 0.915
+    },
+    "wikipedia": {
+      "words": 200,
+      "detected": 187,
+      "detection": 0.935
+    }
+  },
+  "developer_clean_prose": {
+    "sentences": 200,
+    "spelling_lints": 23
+  }
 }

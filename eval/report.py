@@ -115,7 +115,131 @@ def gec_section(payload) -> str:
         "Harper lints per 1,000 words."
     )
     lines.append("")
+    lines.append(
+        "Scope check: `run_gec.py` calls `harper-cli lint` with the curated Rust config. "
+        "It does not load `packages/chrome-plugin/src/personalWeir.ts`; personal Weir rules "
+        "are measured only by `run_personal.py`."
+    )
+    lines.append("")
+    lines.extend(per_type_section(payload))
+    lines.extend(fp_rule_section(payload))
+    lines.extend(fp_diagnosis_section())
     return "\n".join(lines)
+
+
+def fp_diagnosis_section() -> list[str]:
+    return [
+        "### False-positive diagnosis",
+        "",
+        "No false-positive fix was implemented in this round. The top rules need either a "
+        "corpus-level policy or a spellcheck allowlist that is broader than one rule or one data "
+        "file, and a global SpellCheck change risks recall.",
+        "",
+        "- `SpellCheck` (1,189 CWEB-S, 1,250 CWEB-G, 838 GMEG wiki): proper nouns, acronyms, "
+        "and technical terms are unknown to the curated dictionary. Examples include Udaipur, "
+        "Jodhpur, Jaisalmer, Havelis, CSA, and Paloukia. Proposed: a separate proper-noun/acronym "
+        "allowlist or a name-aware spellcheck path, not a global suppression.",
+        "- `LongSentences` (148 / 72 / 44): a style rule firing on naturally long website and "
+        "encyclopedia sentences. It is not a grammar edit and should be excluded from a GEC "
+        "precision gate or reported separately.",
+        "- `SplitWords` (88 / 61 / 13): compound-word policy disagreements such as oversample, "
+        "microcapsules, and defenseman. Proposed: extend the compound dictionary rather than "
+        "loosen the splitter.",
+        "- `OxfordComma` (64 / 97): inserts a serial comma where the reference text omits it. "
+        "This is a style preference, not a grammatical error; keep it out of the GEC gate.",
+        "- `UnclosedQuotes` (56 / 46): quotes embedded in long, sometimes malformed source text. "
+        "Needs a quote-balance analysis before changing the rule.",
+        "- `NumericRangeEnDash` (30) and `Dashes` (28 / 34): typographic preferences (hyphen vs "
+        "en dash, doubled hyphen). Style-only for this gate.",
+        "- `DisjointPrefixes` (17 / 27 / 19): prefers closed forms such as reimagining, antiwar, "
+        "and nonprofit. Policy disagreement; proposed dictionary review.",
+        "- `MassNouns` (16 / 21): over-applies mass-noun corrections such as `One might` to "
+        "`One piece of might`; rule-specific and needs its own test corpus.",
+        "- `OrthographicConsistency` (13): flags `Ph` in `Ph.D.` as `pH`; a narrow capitalization "
+        "fix is possible but was not attempted because it needs rule-level tests and a decision "
+        "on degree abbreviations.",
+        "- `CompoundNouns` (32) and `SentenceCapitalization` (24): closed-compound and "
+        "sentence-start policy disagreements; no narrow fix.",
+        "",
+    ]
+
+
+def _cell(text, limit: int = 160) -> str:
+    text = " ".join(str(text or "").split())
+    if len(text) > limit:
+        text = text[: limit - 1] + "…"
+    return text.replace("|", "\\|")
+
+
+def per_type_section(payload) -> list[str]:
+    lines = ["### Per-type P/R/F0.5", ""]
+    rows = []
+    for corpus in ("cweb-s-dev", "cweb-g-dev", "gmeg-wiki"):
+        result = payload.get("corpora", {}).get(corpus)
+        if result is None or "by_type" not in result:
+            continue
+        for error_type, stats in sorted(
+            result["by_type"].items(), key=lambda item: (-item[1].get("f05", 0), item[0])
+        ):
+            if stats.get("gold", 0) == 0:
+                continue
+            rows.append(
+                [
+                    corpus,
+                    error_type,
+                    str(stats["gold"]),
+                    str(stats["predicted"]),
+                    str(stats["matched"]),
+                    f"{stats.get('precision', 0) * 100:.2f}%",
+                    f"{stats.get('recall', 0) * 100:.2f}%",
+                    f"{stats.get('f05', 0) * 100:.2f}%",
+                ]
+            )
+    if not rows:
+        return lines + ["Not measured.", ""]
+    lines.append(
+        markdown_table(
+            ["corpus", "type", "gold", "pred", "match", "P", "R", "F0.5"], rows
+        )
+    )
+    lines.append("")
+    lines.append(
+        "Types with no gold edits are omitted. Gold types come from the corpus M2; "
+        "predicted types use ERRANT's taxonomy."
+    )
+    lines.append("")
+    return lines
+
+
+def fp_rule_section(payload) -> list[str]:
+    lines = ["### Top false-positive rules on detokenized gold text", ""]
+    found = False
+    for corpus in ("cweb-s-dev", "cweb-g-dev", "gmeg-wiki"):
+        result = payload.get("corpora", {}).get(corpus)
+        if result is None:
+            continue
+        by_rule = result.get("gold_fp_by_rule") or {}
+        if not by_rule:
+            continue
+        found = True
+        lines.append(f"**{corpus}**")
+        lines.append("")
+        rows = []
+        for rule, entry in list(by_rule.items())[:10]:
+            examples = []
+            for example in entry.get("examples", []):
+                word = _cell(example.get("word"), 70)
+                suggestion = _cell(example.get("suggestion"), 40)
+                prefix = f"`{word}`"
+                if suggestion:
+                    prefix += f" → `{suggestion}`"
+                examples.append(f"{prefix}: {_cell(example.get('sentence'))}")
+            rows.append([rule, str(entry.get("count", 0)), "<br>".join(examples)])
+        lines.append(markdown_table(["rule", "count", "examples"], rows))
+        lines.append("")
+    if not found:
+        return lines + ["Not measured.", ""]
+    return lines
 
 
 def spelling_section(payload) -> str:
@@ -153,6 +277,20 @@ def spelling_section(payload) -> str:
         f"({fixture.get('clean_fp_per_1000_words', 0):.2f} per 1k)."
     )
     lines.append("")
+    clean_lints = fixture.get("clean_lints") or []
+    if clean_lints:
+        lines.append("### Clean-prose spelling lints")
+        lines.append("")
+        rows = [
+            [
+                f"`{item.get('word') or ''}`",
+                f"`{item.get('suggestion') or ''}`",
+                _cell(item.get("sentence"), 180),
+            ]
+            for item in clean_lints
+        ]
+        lines.append(markdown_table(["word", "suggestion", "sentence"], rows))
+        lines.append("")
     birkbeck = payload.get("birkbeck_detection", {})
     rows = []
     for name, result in birkbeck.items():

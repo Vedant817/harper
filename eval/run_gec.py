@@ -449,6 +449,28 @@ def run_corpus(name: str, examples: list[Example], annotator) -> dict:
         result["gold_fp_per_1000_words"] = (
             1000.0 * len(gold_lints) / result["gold_words"] if result["gold_words"] else 0.0
         )
+        fp_by_rule: dict[str, dict] = {}
+        for lint in gold_lints:
+            rule = lint.get("rule") or "unknown"
+            entry = fp_by_rule.setdefault(rule, {"count": 0, "examples": []})
+            entry["count"] += 1
+            if len(entry["examples"]) >= 3:
+                continue
+            suggestion = None
+            suggestions = ordered_suggestions(lint)
+            if suggestions:
+                parsed = parse_suggestion(suggestions[0])
+                suggestion = parsed[1] if parsed is not None else None
+            entry["examples"].append(
+                {
+                    "sentence": gold_texts[lint["index"]],
+                    "word": lint.get("matched_text"),
+                    "suggestion": suggestion,
+                }
+            )
+        result["gold_fp_by_rule"] = dict(
+            sorted(fp_by_rule.items(), key=lambda item: (-item[1]["count"], item[0]))
+        )
     else:
         result["gold_false_positives"] = None
 
