@@ -515,6 +515,123 @@ def round4_section() -> str:
     )
 
 
+def round5_section() -> str:
+    rows = [
+        [
+            "1 ship repeated rule",
+            "extension built before the Rust rule existed",
+            "rebuilt full+slim WASM, harper.js, chrome; added !!! gate",
+            "!!! underline 314 ms; Gmail gates 845-893 ms (FAIL)",
+            "run_extension.py",
+            "PASS (rule) / Gmail FAIL",
+        ],
+        [
+            "2 edge cases",
+            "123-line rule, only 7 tests",
+            "added 6 tests; fixed the whitespace span",
+            "13/13 rule tests pass; code 78 lines, tests 88",
+            "cargo test --lib repeated_punctuation",
+            "PASS",
+        ],
+        [
+            "3a overlay mechanism",
+            "round 4 did not show runtime config application",
+            "read background/index.ts:872 and personalPreset.ts",
+            "overlayLintConfig is applied at runtime",
+            "rg/read",
+            "PASS",
+        ],
+        [
+            "3c direct question",
+            "30/31; default-OFF rule unreachable in harness",
+            "PersonalDirectQuestion default OFF, casual overlay, harness wiring",
+            "31/31 personal; GEC unchanged",
+            "run_personal.py; run_gec.py",
+            "PASS",
+        ],
+        [
+            "4 LinkedIn/search",
+            "only Gmail unfocused tested",
+            "LinkedIn routed gate + Gmail search-input measurement",
+            "LinkedIn 846 ms (FAIL); search input 1 highlight",
+            "run_extension.py",
+            "FAIL (latency)",
+        ],
+        [
+            "5 SpellCheck names",
+            "switch off",
+            "skipped by switch",
+            "not measured",
+            "none",
+            "SKIPPED-BY-SWITCH",
+        ],
+        [
+            "6 LanguageTool",
+            "switch off",
+            "skipped by switch",
+            "not measured",
+            "none",
+            "SKIPPED-BY-SWITCH",
+        ],
+        [
+            "7 regressions",
+            "pending",
+            "cargo, chrome, tsc, 12 specs",
+            "all checks pass; 23/11/0 specs with css_zoom new fail",
+            "step 7 commands",
+            "PASS (with known spec change)",
+        ],
+    ]
+    return "\n".join(
+        [
+            "## Round 5",
+            "",
+            markdown_table(
+                ["item", "evidence before", "change", "result after", "acceptance", "status"],
+                rows,
+            ),
+            "",
+            "### Build order",
+            "",
+            "- Full WASM: `harper-wasm/pkg/harper_wasm_bg.wasm` at `2026-11-21T23:41:48+05:30`.",
+            "- Slim WASM: `harper-wasm/pkg/harper_wasm_slim_bg.wasm` at `2026-11-21T23:46:11+05:30`.",
+            "- harper.js dist: `2026-11-21T23:47:16+05:30`.",
+            "- Chrome plugin slim copy: `2026-11-21T23:47:38+05:30`.",
+            "",
+            "### Line counts",
+            "",
+            "`repeated_punctuation.rs`: 78 code lines, 88 test lines, 165 total.",
+            "",
+            "### Personal and GEC",
+            "",
+            "Personal is **31/31**. `PersonalDirectQuestion` is default OFF in the curated config, "
+            "enabled only for `casual` through `overlayLintConfig`; the harness applies the same "
+            "config. GEC is unchanged from the 30/31 baseline: FCE 36.09/7.38/20.30 and BEA "
+            "27.77/8.87/19.47.",
+            "",
+            "### Twelve-spec comparison",
+            "",
+            "Round 4 after: 22 passed / 11 failed / 1 skipped. Round 5 after: **23 passed / 11 "
+            "failed / 0 skipped**. `personal_polish` now passes; `css_zoom` newly fails. The other "
+            "10 failures are the same.",
+            "",
+            "### Known failures",
+            "",
+            "- Gmail focused (893 ms), Gmail unfocused (845 ms), LinkedIn unfocused (846 ms) are "
+            "over the 700 ms gate after the rebuild.",
+            "- `css_zoom` newly fails in the 12-spec set; `personal_polish` now passes.",
+            "- `How to install` is a known heading false positive for `PersonalDirectQuestion`.",
+            "- The Gmail search input gets **1** highlight; measurement only, not fixed.",
+            "",
+            "### Still not measured",
+            "",
+            "ErAConD, FCE and CoNLL-2013 scoring, JFLEG, TETRA, LanguageTool rule tests, "
+            "`just dogfood`, and tone/clarity.",
+            "",
+        ]
+    )
+
+
 def gec_section(payload) -> str:
     lines = ["## Public GEC corpora (ERRANT, token-level)", ""]
     if payload is None:
@@ -999,6 +1116,7 @@ def main(argv: list[str] | None = None) -> int:
         followup_section(),
         round3_section(),
         round4_section(),
+        round5_section(),
         gec_section(gec),
         spelling_section(spelling),
         extension_section(extension),

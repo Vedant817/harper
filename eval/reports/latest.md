@@ -1,48 +1,48 @@
 # Harper evaluation report
 
-- Generated: 2026-11-21T16:42:17Z
-- Engine commit: `06a2933a`
+- Generated: 2026-11-22T04:10:56Z
+- Engine commit: `86b87d03`
 - Extension results include the local shadow-root fixes on top of that commit.
 - Scope: spelling, grammar, punctuation, and usage only.
 - This is an evaluation harness, not a claim of Grammarly Premium parity.
 
 ## Personal acceptance cases
 
-| case                 | preset | result | reason                                 |
-| -------------------- | ------ | ------ | -------------------------------------- |
-| comma-splice         | casual | PASS   |                                        |
-| direct-question      | casual | FAIL   | expected PersonalDirectQuestion -> "?" |
-| greeting-comma       | casual | PASS   |                                        |
-| object-case          | casual | PASS   |                                        |
-| less-fewer           | casual | PASS   |                                        |
-| due-to-fact          | casual | PASS   |                                        |
-| in-order-to          | casual | PASS   |                                        |
-| at-this-point        | casual | PASS   |                                        |
-| in-the-event         | casual | PASS   |                                        |
-| could-care-less      | casual | PASS   |                                        |
-| irregardless         | casual | PASS   |                                        |
-| urgent-marks         | core   | PASS   |                                        |
-| what-marks           | core   | PASS   |                                        |
-| an-test              | core   | PASS   |                                        |
-| could-of             | core   | PASS   |                                        |
-| hope-well            | email  | PASS   |                                        |
-| wanted-follow-up     | email  | PASS   |                                        |
-| per-last-email       | email  | PASS   |                                        |
-| circling-back        | email  | PASS   |                                        |
-| reach-out            | email  | PASS   |                                        |
-| greeting-ok          | casual | PASS   |                                        |
-| sounds-good          | casual | PASS   |                                        |
-| wait-for-it          | casual | PASS   |                                        |
-| suspect              | casual | PASS   |                                        |
-| imagine              | casual | PASS   |                                        |
-| never-due            | casual | PASS   |                                        |
-| seems-due            | casual | PASS   |                                        |
-| care-less-comparison | casual | PASS   |                                        |
-| reach-out-mile       | email  | PASS   |                                        |
-| about-hour           | email  | PASS   |                                        |
-| stock-off            | casual | PASS   |                                        |
+| case                 | preset | result | reason |
+| -------------------- | ------ | ------ | ------ |
+| comma-splice         | casual | PASS   |        |
+| direct-question      | casual | PASS   |        |
+| greeting-comma       | casual | PASS   |        |
+| object-case          | casual | PASS   |        |
+| less-fewer           | casual | PASS   |        |
+| due-to-fact          | casual | PASS   |        |
+| in-order-to          | casual | PASS   |        |
+| at-this-point        | casual | PASS   |        |
+| in-the-event         | casual | PASS   |        |
+| could-care-less      | casual | PASS   |        |
+| irregardless         | casual | PASS   |        |
+| urgent-marks         | core   | PASS   |        |
+| what-marks           | core   | PASS   |        |
+| an-test              | core   | PASS   |        |
+| could-of             | core   | PASS   |        |
+| hope-well            | email  | PASS   |        |
+| wanted-follow-up     | email  | PASS   |        |
+| per-last-email       | email  | PASS   |        |
+| circling-back        | email  | PASS   |        |
+| reach-out            | email  | PASS   |        |
+| greeting-ok          | casual | PASS   |        |
+| sounds-good          | casual | PASS   |        |
+| wait-for-it          | casual | PASS   |        |
+| suspect              | casual | PASS   |        |
+| imagine              | casual | PASS   |        |
+| never-due            | casual | PASS   |        |
+| seems-due            | casual | PASS   |        |
+| care-less-comparison | casual | PASS   |        |
+| reach-out-mile       | email  | PASS   |        |
+| about-hour           | email  | PASS   |        |
+| stock-off            | casual | PASS   |        |
 
-**30/31 passed.** A failure here means the browser build does not meet the stated personal contract.
+**31/31 passed.** A failure here means the browser build does not meet the stated personal contract.
 
 ## Follow-up changes
 
@@ -184,6 +184,49 @@ Unfocused Gmail draft: 355 ms. Localhost unfocused: 0 highlights. All executable
 - ALLOW_LT_DOWNLOAD=no: Step 5 skipped by switch.
 - ALLOW_CORE_LINTERS=yes: Step 3a implemented; Step 3b stopped for the harness reason.
 - FIX_UNFOCUSED_DRAFTS=yes: Step 4 implemented and verified.
+
+### Still not measured
+
+ErAConD, FCE and CoNLL-2013 scoring, JFLEG, TETRA, LanguageTool rule tests, `just dogfood`, and tone/clarity.
+
+## Round 5
+
+| item                 | evidence before                                 | change                                                             | result after                                          | acceptance                            | status                        |
+| -------------------- | ----------------------------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------- | ------------------------------------- | ----------------------------- |
+| 1 ship repeated rule | extension built before the Rust rule existed    | rebuilt full+slim WASM, harper.js, chrome; added !!! gate          | !!! underline 314 ms; Gmail gates 845-893 ms (FAIL)   | run_extension.py                      | PASS (rule) / Gmail FAIL      |
+| 2 edge cases         | 123-line rule, only 7 tests                     | added 6 tests; fixed the whitespace span                           | 13/13 rule tests pass; code 78 lines, tests 88        | cargo test --lib repeated_punctuation | PASS                          |
+| 3a overlay mechanism | round 4 did not show runtime config application | read background/index.ts:872 and personalPreset.ts                 | overlayLintConfig is applied at runtime               | rg/read                               | PASS                          |
+| 3c direct question   | 30/31; default-OFF rule unreachable in harness  | PersonalDirectQuestion default OFF, casual overlay, harness wiring | 31/31 personal; GEC unchanged                         | run_personal.py; run_gec.py           | PASS                          |
+| 4 LinkedIn/search    | only Gmail unfocused tested                     | LinkedIn routed gate + Gmail search-input measurement              | LinkedIn 846 ms (FAIL); search input 1 highlight      | run_extension.py                      | FAIL (latency)                |
+| 5 SpellCheck names   | switch off                                      | skipped by switch                                                  | not measured                                          | none                                  | SKIPPED-BY-SWITCH             |
+| 6 LanguageTool       | switch off                                      | skipped by switch                                                  | not measured                                          | none                                  | SKIPPED-BY-SWITCH             |
+| 7 regressions        | pending                                         | cargo, chrome, tsc, 12 specs                                       | all checks pass; 23/11/0 specs with css_zoom new fail | step 7 commands                       | PASS (with known spec change) |
+
+### Build order
+
+- Full WASM: `harper-wasm/pkg/harper_wasm_bg.wasm` at `2026-11-21T23:41:48+05:30`.
+- Slim WASM: `harper-wasm/pkg/harper_wasm_slim_bg.wasm` at `2026-11-21T23:46:11+05:30`.
+- harper.js dist: `2026-11-21T23:47:16+05:30`.
+- Chrome plugin slim copy: `2026-11-21T23:47:38+05:30`.
+
+### Line counts
+
+`repeated_punctuation.rs`: 78 code lines, 88 test lines, 165 total.
+
+### Personal and GEC
+
+Personal is **31/31**. `PersonalDirectQuestion` is default OFF in the curated config, enabled only for `casual` through `overlayLintConfig`; the harness applies the same config. GEC is unchanged from the 30/31 baseline: FCE 36.09/7.38/20.30 and BEA 27.77/8.87/19.47.
+
+### Twelve-spec comparison
+
+Round 4 after: 22 passed / 11 failed / 1 skipped. Round 5 after: **23 passed / 11 failed / 0 skipped**. `personal_polish` now passes; `css_zoom` newly fails. The other 10 failures are the same.
+
+### Known failures
+
+- Gmail focused (893 ms), Gmail unfocused (845 ms), LinkedIn unfocused (846 ms) are over the 700 ms gate after the rebuild.
+- `css_zoom` newly fails in the 12-spec set; `personal_polish` now passes.
+- `How to install` is a known heading false positive for `PersonalDirectQuestion`.
+- The Gmail search input gets **1** highlight; measurement only, not fixed.
 
 ### Still not measured
 
@@ -576,21 +619,23 @@ Sources: codespell (64966 pairs), wikipedia (4276 pairs), typos-cli (95923 pairs
 
 | gate                                   | observed          | limit | result |
 | -------------------------------------- | ----------------- | ----- | ------ |
-| paste underline <= 700 ms              | 20                | 700   | PASS   |
+| paste underline <= 700 ms              | 18                | 700   | PASS   |
+| repeated !!! underline <= 700 ms       | 314               | 700   | PASS   |
 | full draft tail underlined             | True              | True  | PASS   |
 | highlight in shadow root               | True              | True  | PASS   |
 | shadow-root editor linted              | True              | True  | PASS   |
 | LinkedIn dialog paste <= 700 ms        | 13                | 700   | PASS   |
-| LinkedIn combobox paste <= 700 ms      | 16                | 700   | PASS   |
-| Gmail prefilled draft <= 700 ms        | 330               | 700   | PASS   |
-| Gmail pre-filled without focus         | 355               | 700   | PASS   |
+| LinkedIn combobox paste <= 700 ms      | 19                | 700   | PASS   |
+| Gmail prefilled draft <= 700 ms        | 893               | 700   | FAIL   |
+| Gmail pre-filled without focus         | 845               | 700   | FAIL   |
+| LinkedIn pre-filled without focus      | 846               | 700   | FAIL   |
 | Gmail localhost unfocused no highlight | 0                 | 0     | PASS   |
-| card width <= 280 px                   | 266.0991439819336 | 280   | PASS   |
-| card opens <= 300 ms                   | 34                | 300   | PASS   |
+| card width <= 280 px                   | 266.0947799682617 | 280   | PASS   |
+| card opens <= 300 ms                   | 19                | 300   | PASS   |
 | no dialog calls                        | []                | []    | PASS   |
 | no open dialog elements                | 0                 | 0     | PASS   |
 
-**All executable gates passed; FIXME rows are known failures.**
+**One or more gates failed.**
 
 ## Commands
 

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-21T15:43:44.226Z",
+  "generatedAt": "2026-11-21T18:12:54.567Z",
   "cases": [
     {
       "id": "comma-splice",
@@ -20,9 +20,15 @@
       "id": "direct-question",
       "text": "What time is the call",
       "preset": "casual",
-      "pass": false,
-      "observed": [],
-      "reason": "expected PersonalDirectQuestion -> \"?\""
+      "pass": true,
+      "observed": [
+        {
+          "rule": "PersonalDirectQuestion",
+          "suggestions": [
+            "?"
+          ]
+        }
+      ]
     },
     {
       "id": "greeting-comma",

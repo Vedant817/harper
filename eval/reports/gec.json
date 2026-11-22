@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-11-21T16:28:40Z",
-  "commit": "06a2933a",
+  "generatedAt": "2026-11-21T18:48:43Z",
+  "commit": "86b87d03",
   "method": {
     "suggestions": "first suggestion per lint, non-overlapping, applied by token span",
     "edits": "ERRANT 3 annotation of tokenized source vs. Harper output",
