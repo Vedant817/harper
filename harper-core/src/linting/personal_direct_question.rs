@@ -69,7 +69,7 @@ impl Linter for PersonalDirectQuestion {
     }
 
     fn description(&self) -> &'static str {
-        "Adds a question mark to an unpunctuated line that starts with a question word."
+        "Adds a question mark to a line that starts with a question word and has no terminal punctuation."
     }
 }
 
