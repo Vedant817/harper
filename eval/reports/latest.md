@@ -1,7 +1,7 @@
 # Harper evaluation report
 
-- Generated: 2026-11-22T04:10:56Z
-- Engine commit: `86b87d03`
+- Generated: 2026-11-22T10:08:08Z
+- Engine commit: `e7d24c8b`
 - Extension results include the local shadow-root fixes on top of that commit.
 - Scope: spelling, grammar, punctuation, and usage only.
 - This is an evaluation harness, not a claim of Grammarly Premium parity.
@@ -231,6 +231,82 @@ Round 4 after: 22 passed / 11 failed / 1 skipped. Round 5 after: **23 passed / 1
 ### Still not measured
 
 ErAConD, FCE and CoNLL-2013 scoring, JFLEG, TETRA, LanguageTool rule tests, `just dogfood`, and tone/clarity.
+
+## Round 6
+
+### Step 1a: baseline on the fresh personal build
+
+| metric              | run 1 | run 2 | run 3 |
+| ------------------- | ----- | ----- | ----- |
+| gmailLoadMs         | 846   | 828   | 861   |
+| gmailUnfocusedMs    | 1359  | 854   | 869   |
+| linkedinUnfocusedMs | 1364  | 864   | 862   |
+
+Round 4 recorded `gmailLoadMs` 330 and `gmailUnfocusedMs` 355.
+
+### Step 1b: two navigations in one context
+
+| run   | first navigation | second navigation |
+| ----- | ---------------- | ----------------- |
+| run 1 | 845              | 838               |
+| run 2 | 871              | 850               |
+| run 3 | 851              | 825               |
+
+Warm navigation is still 825-850 ms.
+
+### Step 1c: both new rule registrations commented out
+
+| metric              | run 1 | run 2 | run 3 |
+| ------------------- | ----- | ----- | ----- |
+| gmailLoadMs         | 864   | 854   | 825   |
+| gmailUnfocusedMs    | 846   | 855   | 843   |
+| linkedinUnfocusedMs | 1378  | 860   | 847   |
+
+Without the rules the load gates are still ~850 ms. The registration file was restored (`git diff --stat` empty) and the full four-step rebuild was rerun.
+
+### Step 1d: artifacts
+
+- Largest built JS chunk: `build/assets/chunk-CWFsjbiE.js`, **44,422,944 bytes**.
+- Built JS references `harper_wasm_slim_bg.wasm` in `chunk-BI3EVHd8.js`; the large chunk references both full and slim URLs.
+- `build/wasm/harper_wasm_bg.wasm` 16,605,637 bytes; `build/wasm/harper_wasm_slim_bg.wasm` 16,372,832 bytes.
+
+### Conclusion: (C) something else
+
+The two rules are not the cause: with both registrations commented out the same three gates stay at 825-1378 ms. Simple cold start is not the cause either: the second navigation in the same context stays at 825-850 ms. The measured artifact is a 44.4 MB JS chunk in the extension bundle. Step 2 is STOPPED: cause is C, not the rules.
+
+### Step 3: css_zoom
+
+Personal build: 3/3 runs fail. Public build: line-46 test fails in both public runs. Assertion: `expect(locator).toHaveCount(expected) failed`, Expected 2, Received 1. It fails on both builds, not personal-only. The other css_zoom test (line 5) passes.
+
+The Round 4 skipped test was `personal_polish.spec.ts` > `An empty model address does not phone home`; in Round 6 that spec is no longer skipped and `personal_polish` passes.
+
+### Step 4: loose ends
+
+All five required strings are present in `personal_direct_question.rs`: `Sounds good.`, `Wait for it...`, `What I mean is this.`, `I wonder what time it is.`, `Is this ok?`. `How to install` is also present and flags as a known false positive. Code lines 76, test lines 46, total 121.
+
+Final build timestamps: full `2026-11-22T14:53:27+05:30`, slim `2026-11-22T14:56:16+05:30`, harper.js `2026-11-22T14:57:15+05:30`, chrome `2026-11-22T15:02:12+05:30`. Last Rust commit: `2026-11-22T09:41:16+05:30`.
+
+### Step 5: regressions
+
+- `cargo test -p harper-core`: exit 0.
+- `cargo test --test linters test_most_lints`: 1 passed.
+- Personal: **31/31**.
+- GEC unchanged from Round 5: CWEB-S 5.93 / 8.80 / 6.35.
+- `pnpm check`: 0 errors; `tsc`: exit 0.
+- Extension: 11 passed / 3 failed (Gmail and LinkedIn load gates).
+- 12 specs: 23 passed / 11 failed / 0 skipped; failures are css_zoom, github x2, hn, nested_elements, simple_textarea wrap, typst x5.
+
+### Known failures
+
+- Gmail focused, Gmail unfocused, and LinkedIn unfocused exceed 700 ms.
+- `css_zoom` line 46 fails on both personal and public builds.
+- The 10 long-standing specs remain (github x2, hn, nested_elements, simple_textarea wrap, typst x5).
+- Gmail search input gets 1 highlight (Round 5 measurement; not fixed).
+- `How to install` is a heading-like false positive.
+
+### Still not measured
+
+SpellCheck name suppression (`ALLOW_SPELLCHECK_NAME_SUPPRESSION=no`), LanguageTool (`ALLOW_LT_DOWNLOAD=no`), ErAConD, FCE and CoNLL-2013 scoring, JFLEG, TETRA, `just dogfood`, and tone/clarity.
 
 ## Public GEC corpora (ERRANT, token-level)
 
@@ -617,23 +693,23 @@ Sources: codespell (64966 pairs), wikipedia (4276 pairs), typos-cli (95923 pairs
 
 ## Extension acceptance (Playwright, headed Chromium)
 
-| gate                                   | observed          | limit | result |
-| -------------------------------------- | ----------------- | ----- | ------ |
-| paste underline <= 700 ms              | 18                | 700   | PASS   |
-| repeated !!! underline <= 700 ms       | 314               | 700   | PASS   |
-| full draft tail underlined             | True              | True  | PASS   |
-| highlight in shadow root               | True              | True  | PASS   |
-| shadow-root editor linted              | True              | True  | PASS   |
-| LinkedIn dialog paste <= 700 ms        | 13                | 700   | PASS   |
-| LinkedIn combobox paste <= 700 ms      | 19                | 700   | PASS   |
-| Gmail prefilled draft <= 700 ms        | 893               | 700   | FAIL   |
-| Gmail pre-filled without focus         | 845               | 700   | FAIL   |
-| LinkedIn pre-filled without focus      | 846               | 700   | FAIL   |
-| Gmail localhost unfocused no highlight | 0                 | 0     | PASS   |
-| card width <= 280 px                   | 266.0947799682617 | 280   | PASS   |
-| card opens <= 300 ms                   | 19                | 300   | PASS   |
-| no dialog calls                        | []                | []    | PASS   |
-| no open dialog elements                | 0                 | 0     | PASS   |
+| gate                                   | observed           | limit | result |
+| -------------------------------------- | ------------------ | ----- | ------ |
+| paste underline <= 700 ms              | 16                 | 700   | PASS   |
+| repeated !!! underline <= 700 ms       | 331                | 700   | PASS   |
+| full draft tail underlined             | True               | True  | PASS   |
+| highlight in shadow root               | True               | True  | PASS   |
+| shadow-root editor linted              | True               | True  | PASS   |
+| LinkedIn dialog paste <= 700 ms        | 17                 | 700   | PASS   |
+| LinkedIn combobox paste <= 700 ms      | 15                 | 700   | PASS   |
+| Gmail prefilled draft <= 700 ms        | 845                | 700   | FAIL   |
+| Gmail pre-filled without focus         | 1371               | 700   | FAIL   |
+| LinkedIn pre-filled without focus      | 1364               | 700   | FAIL   |
+| Gmail localhost unfocused no highlight | 0                  | 0     | PASS   |
+| card width <= 280 px                   | 279.99999237060547 | 280   | PASS   |
+| card opens <= 300 ms                   | 129                | 300   | PASS   |
+| no dialog calls                        | []                 | []    | PASS   |
+| no open dialog elements                | 0                  | 0     | PASS   |
 
 **One or more gates failed.**
 

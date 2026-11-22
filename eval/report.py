@@ -632,6 +632,112 @@ def round5_section() -> str:
     )
 
 
+def round6_section() -> str:
+    one_a = [
+        ["gmailLoadMs", "846", "828", "861"],
+        ["gmailUnfocusedMs", "1359", "854", "869"],
+        ["linkedinUnfocusedMs", "1364", "864", "862"],
+    ]
+    one_b = [
+        ["run 1", "845", "838"],
+        ["run 2", "871", "850"],
+        ["run 3", "851", "825"],
+    ]
+    one_c = [
+        ["gmailLoadMs", "864", "854", "825"],
+        ["gmailUnfocusedMs", "846", "855", "843"],
+        ["linkedinUnfocusedMs", "1378", "860", "847"],
+    ]
+    return "\n".join(
+        [
+            "## Round 6",
+            "",
+            "### Step 1a: baseline on the fresh personal build",
+            "",
+            markdown_table(["metric", "run 1", "run 2", "run 3"], one_a),
+            "",
+            "Round 4 recorded `gmailLoadMs` 330 and `gmailUnfocusedMs` 355.",
+            "",
+            "### Step 1b: two navigations in one context",
+            "",
+            markdown_table(["run", "first navigation", "second navigation"], one_b),
+            "",
+            "Warm navigation is still 825-850 ms.",
+            "",
+            "### Step 1c: both new rule registrations commented out",
+            "",
+            markdown_table(["metric", "run 1", "run 2", "run 3"], one_c),
+            "",
+            "Without the rules the load gates are still ~850 ms. The registration file was "
+            "restored (`git diff --stat` empty) and the full four-step rebuild was rerun.",
+            "",
+            "### Step 1d: artifacts",
+            "",
+            "- Largest built JS chunk: `build/assets/chunk-CWFsjbiE.js`, **44,422,944 bytes**.",
+            "- Built JS references `harper_wasm_slim_bg.wasm` in `chunk-BI3EVHd8.js`; the large "
+            "chunk references both full and slim URLs.",
+            "- `build/wasm/harper_wasm_bg.wasm` 16,605,637 bytes; "
+            "`build/wasm/harper_wasm_slim_bg.wasm` 16,372,832 bytes.",
+            "",
+            "### Conclusion: (C) something else",
+            "",
+            "The two rules are not the cause: with both registrations commented out the same "
+            "three gates stay at 825-1378 ms. Simple cold start is not the cause either: the "
+            "second navigation in the same context stays at 825-850 ms. The measured artifact is "
+            "a 44.4 MB JS chunk in the extension bundle. Step 2 is STOPPED: cause is C, not the "
+            "rules.",
+            "",
+            "### Step 3: css_zoom",
+            "",
+            "Personal build: 3/3 runs fail. Public build: line-46 test fails in both public runs. "
+            "Assertion: `expect(locator).toHaveCount(expected) failed`, Expected 2, Received 1. "
+            "It fails on both builds, not personal-only. The other css_zoom test (line 5) passes.",
+            "",
+            "The Round 4 skipped test was `personal_polish.spec.ts` > `An empty model address does "
+            "not phone home`; in Round 6 that spec is no longer skipped and `personal_polish` "
+            "passes.",
+            "",
+            "### Step 4: loose ends",
+            "",
+            "All five required strings are present in `personal_direct_question.rs`: "
+            "`Sounds good.`, `Wait for it...`, `What I mean is this.`, "
+            "`I wonder what time it is.`, `Is this ok?`. `How to install` is also present and "
+            "flags as a known false positive. Code lines 76, test lines 46, total 121.",
+            "",
+            "Final build timestamps: full `2026-11-22T14:53:27+05:30`, slim "
+            "`2026-11-22T14:56:16+05:30`, harper.js `2026-11-22T14:57:15+05:30`, chrome "
+            "`2026-11-22T15:02:12+05:30`. Last Rust commit: `2026-11-22T09:41:16+05:30`.",
+            "",
+            "### Step 5: regressions",
+            "",
+            "- `cargo test -p harper-core`: exit 0.",
+            "- `cargo test --test linters test_most_lints`: 1 passed.",
+            "- Personal: **31/31**.",
+            "- GEC unchanged from Round 5: CWEB-S 5.93 / 8.80 / 6.35.",
+            "- `pnpm check`: 0 errors; `tsc`: exit 0.",
+            "- Extension: 11 passed / 3 failed (Gmail and LinkedIn load gates).",
+            "- 12 specs: 23 passed / 11 failed / 0 skipped; failures are css_zoom, github x2, "
+            "hn, nested_elements, simple_textarea wrap, typst x5.",
+            "",
+            "### Known failures",
+            "",
+            "- Gmail focused, Gmail unfocused, and LinkedIn unfocused exceed 700 ms.",
+            "- `css_zoom` line 46 fails on both personal and public builds.",
+            "- The 10 long-standing specs remain (github x2, hn, nested_elements, "
+            "simple_textarea wrap, typst x5).",
+            "- Gmail search input gets 1 highlight (Round 5 measurement; not fixed).",
+            "- `How to install` is a heading-like false positive.",
+            "",
+            "### Still not measured",
+            "",
+            "SpellCheck name suppression (`ALLOW_SPELLCHECK_NAME_SUPPRESSION=no`), LanguageTool "
+            "(`ALLOW_LT_DOWNLOAD=no`), ErAConD, FCE and CoNLL-2013 scoring, JFLEG, TETRA, "
+            "`just dogfood`, and tone/clarity.",
+            "",
+        ]
+    )
+
+
 def gec_section(payload) -> str:
     lines = ["## Public GEC corpora (ERRANT, token-level)", ""]
     if payload is None:
@@ -1117,6 +1223,7 @@ def main(argv: list[str] | None = None) -> int:
         round3_section(),
         round4_section(),
         round5_section(),
+        round6_section(),
         gec_section(gec),
         spelling_section(spelling),
         extension_section(extension),

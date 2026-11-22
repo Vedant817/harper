@@ -1,35 +1,35 @@
 {
   "passed": false,
   "metrics": {
-    "cardOpenMs": 19,
-    "cardWidthPx": 266.0947799682617,
+    "cardOpenMs": 129,
+    "cardWidthPx": 279.99999237060547,
     "dialogCalls": [],
     "fullDraftTailUnderlined": true,
     "fullDraftWords": 142,
-    "gmailLoadMs": 893,
-    "gmailUnfocusedMs": 845,
+    "gmailLoadMs": 845,
+    "gmailUnfocusedMs": 1371,
     "highlightInShadowRoot": true,
-    "linkedinComboboxMs": 19,
-    "linkedinPasteMs": 13,
-    "linkedinUnfocusedMs": 846,
+    "linkedinComboboxMs": 15,
+    "linkedinPasteMs": 17,
+    "linkedinUnfocusedMs": 1364,
     "localhostUnfocusedHighlights": 0,
     "openDialogElements": 0,
-    "pasteUnderlineMs": 18,
-    "repeatedPunctuationMs": 314,
+    "pasteUnderlineMs": 16,
+    "repeatedPunctuationMs": 331,
     "searchInputHighlights": 1,
     "shadowEditorUnderlined": true
   },
   "checks": [
     {
       "check": "paste underline <= 700 ms",
-      "observed": 18,
+      "observed": 16,
       "pass": true,
       "status": "PASS",
       "limit": 700
     },
     {
       "check": "repeated !!! underline <= 700 ms",
-      "observed": 314,
+      "observed": 331,
       "pass": true,
       "status": "PASS",
       "limit": 700
@@ -57,35 +57,35 @@
     },
     {
       "check": "LinkedIn dialog paste <= 700 ms",
-      "observed": 13,
+      "observed": 17,
       "pass": true,
       "status": "PASS",
       "limit": 700
     },
     {
       "check": "LinkedIn combobox paste <= 700 ms",
-      "observed": 19,
+      "observed": 15,
       "pass": true,
       "status": "PASS",
       "limit": 700
     },
     {
       "check": "Gmail prefilled draft <= 700 ms",
-      "observed": 893,
-      "pass": false,
-      "status": "FAIL",
-      "limit": 700
-    },
-    {
-      "check": "Gmail pre-filled without focus",
       "observed": 845,
       "pass": false,
       "status": "FAIL",
       "limit": 700
     },
     {
+      "check": "Gmail pre-filled without focus",
+      "observed": 1371,
+      "pass": false,
+      "status": "FAIL",
+      "limit": 700
+    },
+    {
       "check": "LinkedIn pre-filled without focus",
-      "observed": 846,
+      "observed": 1364,
       "pass": false,
       "status": "FAIL",
       "limit": 700
@@ -99,14 +99,14 @@
     },
     {
       "check": "card width <= 280 px",
-      "observed": 266.0947799682617,
+      "observed": 279.99999237060547,
       "pass": true,
       "status": "PASS",
       "limit": 280
     },
     {
       "check": "card opens <= 300 ms",
-      "observed": 19,
+      "observed": 129,
       "pass": true,
       "status": "PASS",
       "limit": 300
