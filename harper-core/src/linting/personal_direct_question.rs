@@ -1,10 +1,10 @@
 use super::{Lint, LintKind, Linter, Suggestion};
-use crate::{CharStringExt, Document, Span};
 use crate::TokenKind;
+use crate::{CharStringExt, Document, Span};
 
 const QUESTION_WORDS: &[&str] = &[
-    "what", "when", "where", "who", "why", "how", "which", "is", "are", "do", "does", "did",
-    "can", "could", "will", "would", "should",
+    "what", "when", "where", "who", "why", "how", "which", "is", "are", "do", "does", "did", "can",
+    "could", "will", "would", "should",
 ];
 
 /// Adds a question mark to an unpunctuated question-word line.
@@ -47,10 +47,7 @@ impl Linter for PersonalDirectQuestion {
                         .iter()
                         .any(|token| token.kind.is_sentence_terminator())
                 {
-                    let span = Span::new(
-                        tokens[last - 1].span.start,
-                        tokens[last - 1].span.end,
-                    );
+                    let span = Span::new(tokens[last - 1].span.start, tokens[last - 1].span.end);
                     lints.push(Lint {
                         span,
                         lint_kind: LintKind::Punctuation,
@@ -104,7 +101,11 @@ mod tests {
 
     #[test]
     fn allows_a_question_word_inside_a_sentence() {
-        assert_lint_count("I wonder what time it is.", PersonalDirectQuestion::default(), 0);
+        assert_lint_count(
+            "I wonder what time it is.",
+            PersonalDirectQuestion::default(),
+            0,
+        );
     }
 
     #[test]

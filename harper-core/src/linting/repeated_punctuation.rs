@@ -25,9 +25,7 @@ impl Linter for RepeatedPunctuation {
                 }
 
                 let mut end = index + 1;
-                while end < chunk.len()
-                    && chunk[end].kind.as_punctuation().copied() == Some(mark)
-                {
+                while end < chunk.len() && chunk[end].kind.as_punctuation().copied() == Some(mark) {
                     end += 1;
                 }
 
@@ -82,11 +80,7 @@ mod tests {
 
     #[test]
     fn collapses_three_exclamation_marks() {
-        assert_suggestion_result(
-            "urgent!!!",
-            RepeatedPunctuation::default(),
-            "urgent!",
-        );
+        assert_suggestion_result("urgent!!!", RepeatedPunctuation::default(), "urgent!");
     }
 
     #[test]
@@ -96,11 +90,7 @@ mod tests {
 
     #[test]
     fn collapses_longer_runs() {
-        assert_suggestion_result(
-            "Wait!!!!",
-            RepeatedPunctuation::default(),
-            "Wait!",
-        );
+        assert_suggestion_result("Wait!!!!", RepeatedPunctuation::default(), "Wait!");
     }
 
     #[test]
