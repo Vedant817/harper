@@ -82,6 +82,7 @@ const PRESET_RULES: Record<Exclude<PersonalPresetId, 'off'>, Record<string, bool
 		AvoidCurses: false,
 		Gonna: false,
 		Gotta: false,
+		PersonalDirectQuestion: true,
 		Wanna: false,
 	},
 	linkedin: {

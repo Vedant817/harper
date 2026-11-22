@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-21T13:16:16Z",
+  "generatedAt": "2026-11-21T16:28:46Z",
   "sources": {
     "codespell": "64966 pairs",
     "wikipedia": "4276 pairs",
@@ -72,7 +72,27 @@
         "correct": "supporting",
         "source": "codespell"
       }
-    ]
+    ],
+    "suppression": {
+      "capitalized_mid": {
+        "detected": 287,
+        "detection": 0.9566666666666667,
+        "suggestion_at_1": 0.7233333333333334,
+        "suggestion_at_3": 0.8466666666666667
+      },
+      "acronym_2_5": {
+        "detected": 288,
+        "detection": 0.96,
+        "suggestion_at_1": 0.7266666666666667,
+        "suggestion_at_3": 0.85
+      },
+      "both": {
+        "detected": 287,
+        "detection": 0.9566666666666667,
+        "suggestion_at_1": 0.7233333333333334,
+        "suggestion_at_3": 0.8466666666666667
+      }
+    }
   },
   "developer_fixtures": {
     "fixtures": 60,
@@ -226,28 +246,104 @@
         "suggestion": "OKAY",
         "sentence": "\"you\" is subject and object both OK before \"want\"."
       }
-    ]
+    ],
+    "suppression": {
+      "capitalized_mid": {
+        "detected": 51,
+        "recall": 0.85,
+        "suggestion_at_1": 0.75,
+        "suggestion_at_3": 0.7833333333333333
+      },
+      "acronym_2_5": {
+        "detected": 51,
+        "recall": 0.85,
+        "suggestion_at_1": 0.75,
+        "suggestion_at_3": 0.7833333333333333
+      },
+      "both": {
+        "detected": 51,
+        "recall": 0.85,
+        "suggestion_at_1": 0.75,
+        "suggestion_at_3": 0.7833333333333333
+      }
+    }
   },
   "birkbeck_detection": {
     "missp": {
       "words": 200,
       "detected": 169,
-      "detection": 0.845
+      "detection": 0.845,
+      "suppression": {
+        "capitalized_mid": {
+          "detected": 169,
+          "detection": 0.845
+        },
+        "acronym_2_5": {
+          "detected": 169,
+          "detection": 0.845
+        },
+        "both": {
+          "detected": 169,
+          "detection": 0.845
+        }
+      }
     },
     "holbrook": {
       "words": 200,
       "detected": 116,
-      "detection": 0.58
+      "detection": 0.58,
+      "suppression": {
+        "capitalized_mid": {
+          "detected": 104,
+          "detection": 0.52
+        },
+        "acronym_2_5": {
+          "detected": 116,
+          "detection": 0.58
+        },
+        "both": {
+          "detected": 104,
+          "detection": 0.52
+        }
+      }
     },
     "aspell": {
       "words": 200,
       "detected": 183,
-      "detection": 0.915
+      "detection": 0.915,
+      "suppression": {
+        "capitalized_mid": {
+          "detected": 183,
+          "detection": 0.915
+        },
+        "acronym_2_5": {
+          "detected": 183,
+          "detection": 0.915
+        },
+        "both": {
+          "detected": 183,
+          "detection": 0.915
+        }
+      }
     },
     "wikipedia": {
       "words": 200,
       "detected": 187,
-      "detection": 0.935
+      "detection": 0.935,
+      "suppression": {
+        "capitalized_mid": {
+          "detected": 184,
+          "detection": 0.92
+        },
+        "acronym_2_5": {
+          "detected": 187,
+          "detection": 0.935
+        },
+        "both": {
+          "detected": 184,
+          "detection": 0.92
+        }
+      }
     }
   },
   "developer_clean_prose": {

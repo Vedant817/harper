@@ -245,6 +245,499 @@ def followup_section() -> str:
     return "\n".join(lines)
 
 
+def round3_section() -> str:
+    rows = [
+        [
+            "1 regression",
+            "12 suite failures never compared before 5b7a6ff3",
+            "temporarily restored lintPage.ts, Highlights.ts, domUtils.ts to 5b7a6ff3^; rebuilt; ran the 12; restored; rebuilt",
+            "before 21 pass / 12 fail; after 22 pass / 11 fail; css_zoom passes only after; no pass->fail",
+            "Playwright 12 specs",
+            "PASS",
+        ],
+        [
+            "2 LinkedIn combobox",
+            "role=textbox fixture only",
+            "added linkedin_combobox.html (role=combobox) + gate",
+            "12 ms; all executable gates pass",
+            "run_extension.py",
+            "PASS",
+        ],
+        [
+            "3 unfocused draft",
+            "unfocused Gmail gate failed in round 2",
+            "added fixme gate; no product change (FIX_UNFOCUSED_DRAFTS=no)",
+            "FIXME known failure; focused gate still 202 ms",
+            "run_extension.py",
+            "FIXME",
+        ],
+        [
+            "4a preset check",
+            "round 2 claimed core without showing it",
+            "read cases.json and personalCases.test.ts",
+            "urgent/what are core; core loads no personal pack; direct is casual",
+            "python -c cases.json",
+            "PASS",
+        ],
+        [
+            "4b/4c stopped cases",
+            "? unsupported in expressions; ! is Not",
+            "probed a temporary Weirpack; core linters gated off",
+            "3 cases still fail; personal 28/31",
+            "run_personal.py",
+            "STOPPED",
+        ],
+        [
+            "5 SpellCheck split",
+            "1,189 / 1,250 / 838 gold FPs, no categories",
+            "run_gec.py + report.py classify by capitalization and compute diagnosis counts",
+            "breakdown below; GEC scores unchanged",
+            "report.py + gec.json",
+            "PASS",
+        ],
+        [
+            "6 LanguageTool",
+            "not installed",
+            "skipped by switch (ALLOW_LT_DOWNLOAD=no)",
+            "not measured",
+            "none",
+            "SKIPPED-BY-SWITCH",
+        ],
+    ]
+    spec_rows = [
+        ["css_zoom: scaled/zoomed ancestor", "FAIL", "PASS", "fix improved this spec"],
+        ["github: Wraps correctly", "FAIL", "FAIL", "expect(received).toBe(expected)"],
+        ["github: Scrolls correctly", "FAIL", "FAIL", "Test timeout of 30000ms exceeded"],
+        ["hn: Hacker News wraps correctly", "FAIL", "FAIL", "expect(received).toBe(expected)"],
+        ["nested_elements: oddly nested page", "FAIL", "FAIL", "expect(received).toBe(expected)"],
+        ["personal_polish: Polish quiet", "FAIL", "FAIL", "Test timeout of 100000ms exceeded"],
+        ["simple_textarea: Wraps correctly", "FAIL", "FAIL", "expect(received).toBe(expected)"],
+        ["typst: apply a suggestion", "FAIL", "FAIL", "expect(locator).toHaveCount failed"],
+        ["typst: 1 blank line", "FAIL", "FAIL", "expect(locator).toHaveCount failed"],
+        ["typst: 3 blank lines", "FAIL", "FAIL", "expect(locator).toHaveCount failed"],
+        ["typst: 5 blank lines", "FAIL", "FAIL", "expect(locator).toHaveCount failed"],
+        ["typst: multiline suggestions", "FAIL", "FAIL", "expect(locator).toHaveCount failed"],
+    ]
+    return "\n".join(
+        [
+            "## Round 3",
+            "",
+            markdown_table(
+                ["item", "evidence before", "change", "result after", "acceptance", "status"],
+                rows,
+            ),
+            "",
+            "### Twelve-spec before/after 5b7a6ff3",
+            "",
+            markdown_table(["spec", "before", "after", "first error when failing"], spec_rows),
+            "",
+            "No spec passes before and fails after. The one change is `css_zoom`, which fails "
+            "before and passes after. The 11 remaining failures are environment failures under "
+            "the Windows eval config and were left alone.",
+            "",
+            "### Known failures",
+            "",
+            "- `pre-filled draft is underlined without focus` is a FIXME gate because "
+            "FIX_UNFOCUSED_DRAFTS=no. It is not counted as a passing gate.",
+            "- The 11 chrome-plugin environment failures above remain.",
+            "",
+            "### Switches",
+            "",
+            "- ALLOW_LT_DOWNLOAD=no: Step 6 skipped by switch.",
+            "- ALLOW_CORE_LINTERS=no: Step 4c skipped by switch.",
+            "- FIX_UNFOCUSED_DRAFTS=no: Step 3 records the unfocused draft as FIXME.",
+            "",
+            "### Still not measured",
+            "",
+            "ErAConD, FCE and CoNLL-2013 scoring, JFLEG, TETRA, LanguageTool rule tests, "
+            "`just dogfood`, and tone/clarity. These remain out of scope.",
+            "",
+        ]
+    )
+
+
+def round4_section() -> str:
+    rows = [
+        [
+            "0 baseline",
+            "personal 28/31; extension 9 pass + 1 fixme",
+            "fresh runs",
+            "28/31; extension table below",
+            "run_personal.py; run_extension.py",
+            "PASS",
+        ],
+        [
+            "1 Weir probe",
+            "round 3 probed with a space before ???",
+            "adjacent-token probes for ??? and !!!, plus known-good pack",
+            "? loads but produces no lint; ! is a parser error",
+            "harper-cli --weirpacks",
+            "PASS (measurement)",
+        ],
+        [
+            "2 SpellCheck counterfactual",
+            "1,189 / 1,250 / 838 SpellCheck gold FPs",
+            "eval/run_gec.py, run_spelling.py, report.py compute suppression scenarios",
+            "counterfactual table and top-20 below; real GEC unchanged",
+            "run_gec.py; run_spelling.py; report.py",
+            "PASS",
+        ],
+        [
+            "3a repeated punctuation",
+            "urgent/what failed (core preset)",
+            "Rust RepeatedPunctuation in harper-core, curated default on",
+            "both pass; personal 30/31; GEC precision -0.06 max",
+            "cargo test; run_personal.py; run_gec.py",
+            "PASS",
+        ],
+        [
+            "3b direct question",
+            "direct-question failed (casual preset)",
+            "STOPPED: default-OFF core rule cannot reach personalCases.test.ts, which does not apply the preset overlay",
+            "still fails; personal 30/31",
+            "run_personal.py",
+            "STOPPED",
+        ],
+        [
+            "4 unfocused draft",
+            "Gmail without focus was fixme",
+            "host-limited arming/discovery; routed Gmail gate; localhost negative gate",
+            "unfocused 355 ms; localhost 0; all gates pass",
+            "run_extension.py",
+            "PASS",
+        ],
+        [
+            "5 LanguageTool",
+            "not installed",
+            "skipped by switch (ALLOW_LT_DOWNLOAD=no)",
+            "not measured",
+            "none",
+            "SKIPPED-BY-SWITCH",
+        ],
+        [
+            "6 regressions",
+            "pending",
+            "cargo tests, chrome checks, tsc, 12 specs",
+            "all pass; 12 specs 22/11/1, same as round 3",
+            "step 6 commands",
+            "PASS",
+        ],
+    ]
+    probes = [
+        [
+            "known-good",
+            "expr main (alpha beta)",
+            "alpha beta",
+            "lint KnownGood -> gamma",
+            "yes",
+        ],
+        [
+            "three question marks",
+            "expr main (What???)",
+            "What???",
+            '{"lint_count":0,"lints":[]}',
+            "no",
+        ],
+        [
+            "three bangs",
+            "expr main (urgent!!!)",
+            "urgent!!!",
+            "Reached the end of the input token stream prematurely.",
+            "no",
+        ],
+        [
+            "escaped bangs",
+            r"expr main (urgent \!\!\!)",
+            "urgent!!!",
+            "Reached the end of the input token stream prematurely.",
+            "no",
+        ],
+        [
+            "sentence scope on question",
+            "expr main (What???) + let scope \"Sentence\"",
+            "What???",
+            "Expected a valid keyword. Got:",
+            "no",
+        ],
+    ]
+    return "\n".join(
+        [
+            "## Round 4",
+            "",
+            markdown_table(
+                ["item", "evidence before", "change", "result after", "acceptance", "status"],
+                rows,
+            ),
+            "",
+            "### Step 1 Weir punctuation probe",
+            "",
+            markdown_table(["probe", "rule", "input", "exact output", "works"], probes),
+            "",
+            "The known-good pack proves the loader; adding the `?` or `!` rules does not produce "
+            "a usable match. Step 3a therefore used a Rust linter.",
+            "",
+            "### Step 2 counterfactual and spelling recall",
+            "",
+            "The counterfactual table and top-20 lowercase list appear in the GEC section below; "
+            "the spelling suppression table appears in the spelling section. Real GEC scores are "
+            "unchanged by Step 2.",
+            "",
+            "### Step 3 personal cases: 28/31 -> 30/31",
+            "",
+            "`urgent!!!` and `What???` are fixed by `RepeatedPunctuation`. `direct-question` is "
+            "stopped: a default-OFF core rule cannot run in `personalCases.test.ts` because that "
+            "test does not apply `overlayLintConfig`; enabling it by default would violate the "
+            "step and change GEC. GEC precision moved at most 0.06 points (GMEG FCE).",
+            "",
+            "### Step 4 extension gates",
+            "",
+            "Unfocused Gmail draft: 355 ms. Localhost unfocused: 0 highlights. All executable "
+            "gates pass; there is no FIXME row this round.",
+            "",
+            "### Known failures",
+            "",
+            "- `direct-question` remains failing; see 3b above.",
+            "- The 11 chrome-plugin environment failures remain; the 12-spec run after Steps 3-4 "
+            "is 22 passed / 11 failed / 1 skipped, identical to Round 3.",
+            "",
+            "### Switches",
+            "",
+            "- ALLOW_LT_DOWNLOAD=no: Step 5 skipped by switch.",
+            "- ALLOW_CORE_LINTERS=yes: Step 3a implemented; Step 3b stopped for the harness reason.",
+            "- FIX_UNFOCUSED_DRAFTS=yes: Step 4 implemented and verified.",
+            "",
+            "### Still not measured",
+            "",
+            "ErAConD, FCE and CoNLL-2013 scoring, JFLEG, TETRA, LanguageTool rule tests, "
+            "`just dogfood`, and tone/clarity.",
+            "",
+        ]
+    )
+
+
+def round5_section() -> str:
+    rows = [
+        [
+            "1 ship repeated rule",
+            "extension built before the Rust rule existed",
+            "rebuilt full+slim WASM, harper.js, chrome; added !!! gate",
+            "!!! underline 314 ms; Gmail gates 845-893 ms (FAIL)",
+            "run_extension.py",
+            "PASS (rule) / Gmail FAIL",
+        ],
+        [
+            "2 edge cases",
+            "123-line rule, only 7 tests",
+            "added 6 tests; fixed the whitespace span",
+            "13/13 rule tests pass; code 78 lines, tests 88",
+            "cargo test --lib repeated_punctuation",
+            "PASS",
+        ],
+        [
+            "3a overlay mechanism",
+            "round 4 did not show runtime config application",
+            "read background/index.ts:872 and personalPreset.ts",
+            "overlayLintConfig is applied at runtime",
+            "rg/read",
+            "PASS",
+        ],
+        [
+            "3c direct question",
+            "30/31; default-OFF rule unreachable in harness",
+            "PersonalDirectQuestion default OFF, casual overlay, harness wiring",
+            "31/31 personal; GEC unchanged",
+            "run_personal.py; run_gec.py",
+            "PASS",
+        ],
+        [
+            "4 LinkedIn/search",
+            "only Gmail unfocused tested",
+            "LinkedIn routed gate + Gmail search-input measurement",
+            "LinkedIn 846 ms (FAIL); search input 1 highlight",
+            "run_extension.py",
+            "FAIL (latency)",
+        ],
+        [
+            "5 SpellCheck names",
+            "switch off",
+            "skipped by switch",
+            "not measured",
+            "none",
+            "SKIPPED-BY-SWITCH",
+        ],
+        [
+            "6 LanguageTool",
+            "switch off",
+            "skipped by switch",
+            "not measured",
+            "none",
+            "SKIPPED-BY-SWITCH",
+        ],
+        [
+            "7 regressions",
+            "pending",
+            "cargo, chrome, tsc, 12 specs",
+            "all checks pass; 23/11/0 specs with css_zoom new fail",
+            "step 7 commands",
+            "PASS (with known spec change)",
+        ],
+    ]
+    return "\n".join(
+        [
+            "## Round 5",
+            "",
+            markdown_table(
+                ["item", "evidence before", "change", "result after", "acceptance", "status"],
+                rows,
+            ),
+            "",
+            "### Build order",
+            "",
+            "- Full WASM: `harper-wasm/pkg/harper_wasm_bg.wasm` at `2026-11-21T23:41:48+05:30`.",
+            "- Slim WASM: `harper-wasm/pkg/harper_wasm_slim_bg.wasm` at `2026-11-21T23:46:11+05:30`.",
+            "- harper.js dist: `2026-11-21T23:47:16+05:30`.",
+            "- Chrome plugin slim copy: `2026-11-21T23:47:38+05:30`.",
+            "",
+            "### Line counts",
+            "",
+            "`repeated_punctuation.rs`: 78 code lines, 88 test lines, 165 total.",
+            "",
+            "### Personal and GEC",
+            "",
+            "Personal is **31/31**. `PersonalDirectQuestion` is default OFF in the curated config, "
+            "enabled only for `casual` through `overlayLintConfig`; the harness applies the same "
+            "config. GEC is unchanged from the 30/31 baseline: FCE 36.09/7.38/20.30 and BEA "
+            "27.77/8.87/19.47.",
+            "",
+            "### Twelve-spec comparison",
+            "",
+            "Round 4 after: 22 passed / 11 failed / 1 skipped. Round 5 after: **23 passed / 11 "
+            "failed / 0 skipped**. `personal_polish` now passes; `css_zoom` newly fails. The other "
+            "10 failures are the same.",
+            "",
+            "### Known failures",
+            "",
+            "- Gmail focused (893 ms), Gmail unfocused (845 ms), LinkedIn unfocused (846 ms) are "
+            "over the 700 ms gate after the rebuild.",
+            "- `css_zoom` newly fails in the 12-spec set; `personal_polish` now passes.",
+            "- `How to install` is a known heading false positive for `PersonalDirectQuestion`.",
+            "- The Gmail search input gets **1** highlight; measurement only, not fixed.",
+            "",
+            "### Still not measured",
+            "",
+            "ErAConD, FCE and CoNLL-2013 scoring, JFLEG, TETRA, LanguageTool rule tests, "
+            "`just dogfood`, and tone/clarity.",
+            "",
+        ]
+    )
+
+
+def round6_section() -> str:
+    one_a = [
+        ["gmailLoadMs", "846", "828", "861"],
+        ["gmailUnfocusedMs", "1359", "854", "869"],
+        ["linkedinUnfocusedMs", "1364", "864", "862"],
+    ]
+    one_b = [
+        ["run 1", "845", "838"],
+        ["run 2", "871", "850"],
+        ["run 3", "851", "825"],
+    ]
+    one_c = [
+        ["gmailLoadMs", "864", "854", "825"],
+        ["gmailUnfocusedMs", "846", "855", "843"],
+        ["linkedinUnfocusedMs", "1378", "860", "847"],
+    ]
+    return "\n".join(
+        [
+            "## Round 6",
+            "",
+            "### Step 1a: baseline on the fresh personal build",
+            "",
+            markdown_table(["metric", "run 1", "run 2", "run 3"], one_a),
+            "",
+            "Round 4 recorded `gmailLoadMs` 330 and `gmailUnfocusedMs` 355.",
+            "",
+            "### Step 1b: two navigations in one context",
+            "",
+            markdown_table(["run", "first navigation", "second navigation"], one_b),
+            "",
+            "Warm navigation is still 825-850 ms.",
+            "",
+            "### Step 1c: both new rule registrations commented out",
+            "",
+            markdown_table(["metric", "run 1", "run 2", "run 3"], one_c),
+            "",
+            "Without the rules the load gates are still ~850 ms. The registration file was "
+            "restored (`git diff --stat` empty) and the full four-step rebuild was rerun.",
+            "",
+            "### Step 1d: artifacts",
+            "",
+            "- Largest built JS chunk: `build/assets/chunk-CWFsjbiE.js`, **44,422,944 bytes**.",
+            "- Built JS references `harper_wasm_slim_bg.wasm` in `chunk-BI3EVHd8.js`; the large "
+            "chunk references both full and slim URLs.",
+            "- `build/wasm/harper_wasm_bg.wasm` 16,605,637 bytes; "
+            "`build/wasm/harper_wasm_slim_bg.wasm` 16,372,832 bytes.",
+            "",
+            "### Conclusion: (C) something else",
+            "",
+            "The two rules are not the cause: with both registrations commented out the same "
+            "three gates stay at 825-1378 ms. Simple cold start is not the cause either: the "
+            "second navigation in the same context stays at 825-850 ms. The measured artifact is "
+            "a 44.4 MB JS chunk in the extension bundle. Step 2 is STOPPED: cause is C, not the "
+            "rules.",
+            "",
+            "### Step 3: css_zoom",
+            "",
+            "Personal build: 3/3 runs fail. Public build: line-46 test fails in both public runs. "
+            "Assertion: `expect(locator).toHaveCount(expected) failed`, Expected 2, Received 1. "
+            "It fails on both builds, not personal-only. The other css_zoom test (line 5) passes.",
+            "",
+            "The Round 4 skipped test was `personal_polish.spec.ts` > `An empty model address does "
+            "not phone home`; in Round 6 that spec is no longer skipped and `personal_polish` "
+            "passes.",
+            "",
+            "### Step 4: loose ends",
+            "",
+            "All five required strings are present in `personal_direct_question.rs`: "
+            "`Sounds good.`, `Wait for it...`, `What I mean is this.`, "
+            "`I wonder what time it is.`, `Is this ok?`. `How to install` is also present and "
+            "flags as a known false positive. Code lines 76, test lines 46, total 121.",
+            "",
+            "Final build timestamps: full `2026-11-22T14:53:27+05:30`, slim "
+            "`2026-11-22T14:56:16+05:30`, harper.js `2026-11-22T14:57:15+05:30`, chrome "
+            "`2026-11-22T15:02:12+05:30`. Last Rust commit: `2026-11-22T09:41:16+05:30`.",
+            "",
+            "### Step 5: regressions",
+            "",
+            "- `cargo test -p harper-core`: exit 0.",
+            "- `cargo test --test linters test_most_lints`: 1 passed.",
+            "- Personal: **31/31**.",
+            "- GEC unchanged from Round 5: CWEB-S 5.93 / 8.80 / 6.35.",
+            "- `pnpm check`: 0 errors; `tsc`: exit 0.",
+            "- Extension: 11 passed / 3 failed (Gmail and LinkedIn load gates).",
+            "- 12 specs: 23 passed / 11 failed / 0 skipped; failures are css_zoom, github x2, "
+            "hn, nested_elements, simple_textarea wrap, typst x5.",
+            "",
+            "### Known failures",
+            "",
+            "- Gmail focused, Gmail unfocused, and LinkedIn unfocused exceed 700 ms.",
+            "- `css_zoom` line 46 fails on both personal and public builds.",
+            "- The 10 long-standing specs remain (github x2, hn, nested_elements, "
+            "simple_textarea wrap, typst x5).",
+            "- Gmail search input gets 1 highlight (Round 5 measurement; not fixed).",
+            "- `How to install` is a heading-like false positive.",
+            "",
+            "### Still not measured",
+            "",
+            "SpellCheck name suppression (`ALLOW_SPELLCHECK_NAME_SUPPRESSION=no`), LanguageTool "
+            "(`ALLOW_LT_DOWNLOAD=no`), ErAConD, FCE and CoNLL-2013 scoring, JFLEG, TETRA, "
+            "`just dogfood`, and tone/clarity.",
+            "",
+        ]
+    )
+
+
 def gec_section(payload) -> str:
     lines = ["## Public GEC corpora (ERRANT, token-level)", ""]
     if payload is None:
@@ -288,11 +781,35 @@ def gec_section(payload) -> str:
     lines.append("")
     lines.extend(per_type_section(payload))
     lines.extend(fp_rule_section(payload))
-    lines.extend(fp_diagnosis_section())
+    lines.extend(fp_diagnosis_section(payload))
+    lines.extend(spellcheck_breakdown_section(payload))
+    lines.extend(counterfactual_section(payload))
+    lines.extend(lowercase_top_section(payload))
     return "\n".join(lines)
 
 
-def fp_diagnosis_section() -> list[str]:
+def _rule_counts(payload, rule: str) -> list[int]:
+    counts = []
+    for corpus in ("cweb-s-dev", "cweb-g-dev", "gmeg-wiki"):
+        result = payload.get("corpora", {}).get(corpus, {})
+        entry = (result.get("gold_fp_by_rule") or {}).get(rule, {})
+        counts.append(int(entry.get("count", 0)))
+    return counts
+
+
+def fp_diagnosis_section(payload) -> list[str]:
+    spell = _rule_counts(payload, "SpellCheck")
+    long_sentences = _rule_counts(payload, "LongSentences")
+    split_words = _rule_counts(payload, "SplitWords")
+    oxford = _rule_counts(payload, "OxfordComma")
+    quotes = _rule_counts(payload, "UnclosedQuotes")
+    en_dash = _rule_counts(payload, "NumericRangeEnDash")
+    dashes = _rule_counts(payload, "Dashes")
+    prefixes = _rule_counts(payload, "DisjointPrefixes")
+    mass = _rule_counts(payload, "MassNouns")
+    orthographic = _rule_counts(payload, "OrthographicConsistency")
+    compounds = _rule_counts(payload, "CompoundNouns")
+    capitalization = _rule_counts(payload, "SentenceCapitalization")
     return [
         "### False-positive diagnosis",
         "",
@@ -300,33 +817,144 @@ def fp_diagnosis_section() -> list[str]:
         "corpus-level policy or a spellcheck allowlist that is broader than one rule or one data "
         "file, and a global SpellCheck change risks recall.",
         "",
-        "- `SpellCheck` (1,189 CWEB-S, 1,250 CWEB-G, 838 GMEG wiki): proper nouns, acronyms, "
-        "and technical terms are unknown to the curated dictionary. Examples include Udaipur, "
-        "Jodhpur, Jaisalmer, Havelis, CSA, and Paloukia. Proposed: a separate proper-noun/acronym "
-        "allowlist or a name-aware spellcheck path, not a global suppression.",
-        "- `LongSentences` (148 / 72 / 44): a style rule firing on naturally long website and "
-        "encyclopedia sentences. It is not a grammar edit and should be excluded from a GEC "
-        "precision gate or reported separately.",
-        "- `SplitWords` (88 / 61 / 13): compound-word policy disagreements such as oversample, "
-        "microcapsules, and defenseman. Proposed: extend the compound dictionary rather than "
-        "loosen the splitter.",
-        "- `OxfordComma` (64 / 97): inserts a serial comma where the reference text omits it. "
-        "This is a style preference, not a grammatical error; keep it out of the GEC gate.",
-        "- `UnclosedQuotes` (56 / 46): quotes embedded in long, sometimes malformed source text. "
-        "Needs a quote-balance analysis before changing the rule.",
-        "- `NumericRangeEnDash` (30) and `Dashes` (28 / 34): typographic preferences (hyphen vs "
-        "en dash, doubled hyphen). Style-only for this gate.",
-        "- `DisjointPrefixes` (17 / 27 / 19): prefers closed forms such as reimagining, antiwar, "
-        "and nonprofit. Policy disagreement; proposed dictionary review.",
-        "- `MassNouns` (16 / 21): over-applies mass-noun corrections such as `One might` to "
-        "`One piece of might`; rule-specific and needs its own test corpus.",
-        "- `OrthographicConsistency` (13): flags `Ph` in `Ph.D.` as `pH`; a narrow capitalization "
-        "fix is possible but was not attempted because it needs rule-level tests and a decision "
-        "on degree abbreviations.",
-        "- `CompoundNouns` (32) and `SentenceCapitalization` (24): closed-compound and "
-        "sentence-start policy disagreements; no narrow fix.",
+        f"- `SpellCheck` ({spell[0]:,} CWEB-S, {spell[1]:,} CWEB-G, {spell[2]:,} GMEG wiki): "
+        "proper nouns, acronyms, and technical terms are unknown to the curated dictionary. "
+        "Examples include Udaipur, Jodhpur, Jaisalmer, Havelis, CSA, and Paloukia. Proposed: a "
+        "separate proper-noun/acronym allowlist or a name-aware spellcheck path, not a global "
+        "suppression.",
+        f"- `LongSentences` ({long_sentences[0]} / {long_sentences[1]} / {long_sentences[2]}): "
+        "a style rule firing on naturally long website and encyclopedia sentences. It is not a "
+        "grammar edit and should be excluded from a GEC precision gate or reported separately.",
+        f"- `SplitWords` ({split_words[0]} / {split_words[1]} / {split_words[2]}): "
+        "compound-word policy disagreements such as oversample, microcapsules, and defenseman. "
+        "Proposed: extend the compound dictionary rather than loosen the splitter.",
+        f"- `OxfordComma` ({oxford[0]} / {oxford[1]}): inserts a serial comma where the "
+        "reference text omits it. This is a style preference, not a grammatical error; keep it "
+        "out of the GEC gate.",
+        f"- `UnclosedQuotes` ({quotes[0]} / {quotes[1]}): quotes embedded in long, sometimes "
+        "malformed source text. Needs a quote-balance analysis before changing the rule.",
+        f"- `NumericRangeEnDash` ({en_dash[0]}) and `Dashes` ({dashes[0]} / {dashes[1]}): "
+        "typographic preferences (hyphen vs en dash, doubled hyphen). Style-only for this gate.",
+        f"- `DisjointPrefixes` ({prefixes[0]} / {prefixes[1]} / {prefixes[2]}): prefers closed "
+        "forms such as reimagining, antiwar, and nonprofit. Policy disagreement; proposed "
+        "dictionary review.",
+        f"- `MassNouns` ({mass[0]} / {mass[1]}): over-applies mass-noun corrections such as "
+        "`One might` to `One piece of might`; rule-specific and needs its own test corpus.",
+        f"- `OrthographicConsistency` ({orthographic[0]}): flags `Ph` in `Ph.D.` as `pH`; a "
+        "narrow capitalization fix is possible but was not attempted because it needs rule-level "
+        "tests and a decision on degree abbreviations.",
+        f"- `CompoundNouns` ({compounds[0]}) and `SentenceCapitalization` "
+        f"({capitalization[0]}): closed-compound and sentence-start policy disagreements; no "
+        "narrow fix.",
         "",
     ]
+
+
+def spellcheck_breakdown_section(payload) -> list[str]:
+    lines = ["### SpellCheck false-positive breakdown", ""]
+    categories = ["sentence_initial", "acronym", "capitalized_mid", "lowercase", "other"]
+    rows = []
+    for corpus in ("cweb-s-dev", "cweb-g-dev", "gmeg-wiki"):
+        result = payload.get("corpora", {}).get(corpus, {})
+        data = result.get("spellcheck_fp_categories") or {}
+        total = int(data.get("total", 0))
+        counts = data.get("categories") or {}
+        row = [corpus, str(total)]
+        for category in categories:
+            count = int(counts.get(category, 0))
+            share = (100.0 * count / total) if total else 0.0
+            row.append(f"{count} ({share:.1f}%)")
+        rows.append(row)
+    if not rows:
+        return lines + ["Not measured.", ""]
+    lines.append(
+        markdown_table(
+            [
+                "corpus",
+                "SpellCheck FPs",
+                "sentence-initial",
+                "ALL-CAPS acronym",
+                "capitalized mid",
+                "lowercase",
+                "other",
+            ],
+            rows,
+        )
+    )
+    lines.append("")
+    lines.append(
+        "The breakdown is measurement only; no SpellCheck or dictionary change was made."
+    )
+    lines.append("")
+    return lines
+
+
+def counterfactual_section(payload) -> list[str]:
+    lines = ["### SpellCheck suppression counterfactual", ""]
+    rows = []
+    policies = (
+        ("capitalized_mid", "capitalized mid"),
+        ("acronym_2_5", "ALL-CAPS 2-5"),
+        ("both", "both"),
+    )
+    for corpus in ("cweb-s-dev", "cweb-g-dev", "gmeg-wiki", "gmeg-fce"):
+        result = payload.get("corpora", {}).get(corpus)
+        if result is None or not result.get("counterfactuals"):
+            continue
+        actual = result
+        counterfactuals = result["counterfactuals"]
+        for label, key in (
+            ("P", "precision"),
+            ("R", "recall"),
+            ("F0.5", "f05"),
+            ("gold FP/1k", "gold_fp_per_1000_words"),
+        ):
+            row = [corpus, label]
+            if key == "gold_fp_per_1000_words":
+                row.append(f"{actual.get(key, 0):.2f}")
+                for policy, _ in policies:
+                    row.append(f"{counterfactuals[policy].get(key, 0):.2f}")
+            else:
+                row.append(f"{actual.get(key, 0) * 100:.2f}%")
+                for policy, _ in policies:
+                    row.append(f"{counterfactuals[policy].get(key, 0) * 100:.2f}%")
+            rows.append(row)
+    if not rows:
+        return lines + ["Not measured.", ""]
+    lines.append(
+        markdown_table(
+            [
+                "corpus",
+                "metric",
+                "actual",
+                "suppress cap mid",
+                "suppress ALL-CAPS 2-5",
+                "suppress both",
+            ],
+            rows,
+        )
+    )
+    lines.append("")
+    lines.append(
+        "Counterfactual only: SpellCheck lints in the named category are dropped before "
+        "suggestion application and gold false-positive counting. Product code is unchanged."
+    )
+    lines.append("")
+    return lines
+
+
+def lowercase_top_section(payload) -> list[str]:
+    lines = ["### Top lowercase SpellCheck false positives", ""]
+    rows = []
+    for corpus in ("cweb-s-dev", "cweb-g-dev", "gmeg-wiki"):
+        result = payload.get("corpora", {}).get(corpus, {})
+        for item in (result.get("spellcheck_lowercase_top") or [])[:20]:
+            rows.append([corpus, f"`{item.get('word')}`", str(item.get("count", 0))])
+    if not rows:
+        return lines + ["Not measured.", ""]
+    lines.append(markdown_table(["corpus", "word", "count"], rows))
+    lines.append("")
+    return lines
 
 
 def _cell(text, limit: int = 160) -> str:
@@ -477,7 +1105,49 @@ def spelling_section(payload) -> str:
     if sources:
         lines.append("Sources: " + ", ".join(f"{name} ({count})" for name, count in sources.items()) + ".")
         lines.append("")
+    lines.extend(spelling_suppression_section(payload))
     return "\n".join(lines)
+
+
+def spelling_suppression_section(payload) -> list[str]:
+    lines = ["### Spelling recall under SpellCheck suppression", ""]
+    rows = []
+    word = payload.get("word_level", {})
+    fixture = payload.get("developer_fixtures", {})
+    for label, data, metric in (
+        ("word-level", word, "detection"),
+        ("developer prose", fixture, "recall"),
+    ):
+        suppression = data.get("suppression") or {}
+        if not suppression:
+            continue
+        row = [label, "detection"]
+        row.append(f"{data.get(metric, 0) * 100:.2f}%")
+        for policy in ("capitalized_mid", "acronym_2_5", "both"):
+            row.append(f"{suppression.get(policy, {}).get(metric, 0) * 100:.2f}%")
+        rows.append(row)
+    birkbeck = payload.get("birkbeck_detection", {})
+    for name, data in birkbeck.items():
+        if "error" in data:
+            continue
+        suppression = data.get("suppression") or {}
+        if not suppression:
+            continue
+        row = [f"Birkbeck {name}", "detection"]
+        row.append(f"{data.get('detection', 0) * 100:.2f}%")
+        for policy in ("capitalized_mid", "acronym_2_5", "both"):
+            row.append(f"{suppression.get(policy, {}).get('detection', 0) * 100:.2f}%")
+        rows.append(row)
+    if not rows:
+        return lines + ["Not measured.", ""]
+    lines.append(
+        markdown_table(
+            ["set", "metric", "actual", "suppress cap mid", "suppress ALL-CAPS 2-5", "suppress both"],
+            rows,
+        )
+    )
+    lines.append("")
+    return lines
 
 
 def extension_section(payload) -> str:
@@ -491,12 +1161,15 @@ def extension_section(payload) -> str:
                 item["check"],
                 str(item["observed"]),
                 str(item["limit"]),
-                "PASS" if item["pass"] else "FAIL",
+                item.get("status") or ("PASS" if item["pass"] else "FAIL"),
             ]
         )
     lines.append(markdown_table(["gate", "observed", "limit", "result"], rows))
     lines.append("")
-    lines.append(f"**{'All gates passed.' if payload.get('passed') else 'One or more gates failed.'}**")
+    if payload.get("passed"):
+        lines.append("**All executable gates passed; FIXME rows are known failures.**")
+    else:
+        lines.append("**One or more gates failed.**")
     lines.append("")
     return "\n".join(lines)
 
@@ -547,6 +1220,10 @@ def main(argv: list[str] | None = None) -> int:
         "",
         personal_section(personal),
         followup_section(),
+        round3_section(),
+        round4_section(),
+        round5_section(),
+        round6_section(),
         gec_section(gec),
         spelling_section(spelling),
         extension_section(extension),

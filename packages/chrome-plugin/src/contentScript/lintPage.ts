@@ -157,10 +157,12 @@ function scheduleDocsSync() {
 }
 
 /** True when `element` is the focused editor, or sits inside it, or contains it. */
+const UNFOCUSED_DRAFT_HOSTS = new Set(['mail.google.com', 'www.linkedin.com', 'linkedin.com']);
+
 function relatesToFocusedEditor(element: Element): boolean {
 	const active = focusedEditor();
 	if (!active) {
-		return false;
+		return UNFOCUSED_DRAFT_HOSTS.has(window.location.hostname);
 	}
 
 	return element === active || element.contains(active) || active.contains(element);

@@ -1857,6 +1857,13 @@
 						},
 						{
 							"Bool": {
+								"name": "PersonalDirectQuestion",
+								"state": false,
+								"label": "Personal Direct Question"
+							}
+						},
+						{
+							"Bool": {
 								"name": "PortAuPrince",
 								"state": true,
 								"label": "Port Au Prince"
@@ -1895,6 +1902,13 @@
 								"name": "RapidFire",
 								"state": true,
 								"label": "Rapid Fire"
+							}
+						},
+						{
+							"Bool": {
+								"name": "RepeatedPunctuation",
+								"state": true,
+								"label": "Repeated Punctuation"
 							}
 						},
 						{

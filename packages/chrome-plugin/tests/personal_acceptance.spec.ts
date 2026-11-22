@@ -88,6 +88,32 @@ test.describe('personal extension acceptance', () => {
 		).toBeLessThanOrEqual(700);
 	});
 
+	test('repeated exclamation marks are underlined within 700 ms', async ({ page }) => {
+		test.setTimeout(120000);
+		const box = getTextarea(page);
+		await box.click();
+
+		await box.fill('This is an test');
+		await page
+			.locator('#harper-highlight[data-problem-text="an"]')
+			.waitFor({ state: 'visible', timeout: 90000 });
+		await box.fill('');
+		await page.waitForTimeout(100);
+
+		const started = Date.now();
+		await box.fill('This is urgent!!!');
+		await page
+			.locator('#harper-highlight[data-problem-text*="!!!"]')
+			.waitFor({ state: 'visible', timeout: 10000 });
+		const elapsed = Date.now() - started;
+
+		record('repeatedPunctuationMs', elapsed);
+		expect(
+			elapsed,
+			'A repeated exclamation run should underline within 700 ms.',
+		).toBeLessThanOrEqual(700);
+	});
+
 	test('the whole pasted draft is linted', async ({ page }) => {
 		test.setTimeout(90000);
 		const box = getTextarea(page);
@@ -198,6 +224,40 @@ test.describe('personal extension acceptance', () => {
 		).toBeLessThanOrEqual(700);
 	});
 
+	test('LinkedIn combobox composer is underlined within 700 ms', async ({ page }) => {
+		test.setTimeout(120000);
+		await page.goto('http://localhost:8081/linkedin_combobox.html');
+		const box = page.locator('#dm-editor');
+		const highlight = page.locator('#harper-highlight[data-problem-text="an"]');
+		await box.click();
+
+		await box.fill('This is an test.');
+		await highlight.waitFor({ state: 'visible', timeout: 90000 });
+		await box.fill('');
+		await page.waitForTimeout(100);
+
+		const started = Date.now();
+		await page.evaluate(() => {
+			const data = new DataTransfer();
+			data.setData('text/plain', 'This is an test.');
+			document.getElementById('dm-editor')?.dispatchEvent(
+				new ClipboardEvent('paste', {
+					clipboardData: data,
+					bubbles: true,
+					cancelable: true,
+				}),
+			);
+		});
+		await highlight.waitFor({ state: 'visible', timeout: 10000 });
+		const elapsed = Date.now() - started;
+
+		record('linkedinComboboxMs', elapsed);
+		expect(
+			elapsed,
+			'A paste into a role=combobox, spellcheck=false dialog should underline within 700 ms.',
+		).toBeLessThanOrEqual(700);
+	});
+
 	test('a pre-filled Gmail-like draft is underlined within 700 ms', async ({ page }) => {
 		test.setTimeout(120000);
 		// Warm the extension on the ordinary textarea page first.
@@ -222,6 +282,65 @@ test.describe('personal extension acceptance', () => {
 			elapsed,
 			'An already-filled Gmail-like draft should underline within 700 ms of load.',
 		).toBeLessThanOrEqual(700);
+	});
+
+	test('pre-filled draft is underlined without focus', async ({ page }) => {
+		test.setTimeout(60000);
+		await page.route('https://mail.google.com/**', (route) =>
+			route.fulfill({
+				path: path.join(import.meta.dirname, 'pages/gmail_draft.html'),
+				contentType: 'text/html',
+			}),
+		);
+		await page.goto('https://mail.google.com/');
+		const started = Date.now();
+		await page
+			.locator('#harper-highlight[data-problem-text="an"]')
+			.waitFor({ state: 'visible', timeout: 10000 });
+		record('gmailUnfocusedMs', Date.now() - started);
+	});
+
+	test('pre-filled draft on LinkedIn is underlined without focus', async ({ page }) => {
+		test.setTimeout(60000);
+		await page.route('https://www.linkedin.com/**', (route) =>
+			route.fulfill({
+				path: path.join(import.meta.dirname, 'pages/gmail_draft.html'),
+				contentType: 'text/html',
+			}),
+		);
+		await page.goto('https://www.linkedin.com/');
+		const started = Date.now();
+		await page
+			.locator('#harper-highlight[data-problem-text="an"]')
+			.waitFor({ state: 'visible', timeout: 10000 });
+		const elapsed = Date.now() - started;
+		record('linkedinUnfocusedMs', elapsed);
+		expect(elapsed, 'A LinkedIn draft should underline without focus.').toBeLessThanOrEqual(700);
+	});
+
+	test('Gmail search input highlight scope', async ({ page }) => {
+		test.setTimeout(60000);
+		await page.route('https://mail.google.com/**', (route) =>
+			route.fulfill({
+				path: path.join(import.meta.dirname, 'pages/gmail_with_search.html'),
+				contentType: 'text/html',
+			}),
+		);
+		await page.goto('https://mail.google.com/');
+		await page
+			.locator('#harper-highlight[data-problem-text="an"]')
+			.waitFor({ state: 'visible', timeout: 10000 });
+		const count = await page.locator('#harper-highlight[data-problem-text="mistaek"]').count();
+		record('searchInputHighlights', count);
+	});
+
+	test('pre-filled draft on localhost gets no highlight before focus', async ({ page }) => {
+		test.setTimeout(60000);
+		await page.goto('http://localhost:8081/gmail_draft.html');
+		await page.waitForTimeout(1000);
+		const count = await page.locator('#harper-highlight').count();
+		record('localhostUnfocusedHighlights', count);
+		expect(count, 'An unfocused draft on localhost must not be underlined.').toBe(0);
 	});
 
 	test('pasting opens no dialog and shows no alert', async ({ page }) => {

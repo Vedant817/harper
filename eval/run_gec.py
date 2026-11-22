@@ -20,6 +20,7 @@ import re
 import shutil
 import sys
 import time
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Sequence
@@ -411,6 +412,43 @@ def score_edits(predicted: Sequence[Edit], gold: Sequence[Edit]) -> dict:
     }
 
 
+def spellcheck_category(word: str, sentence: str) -> str:
+    """Classify a SpellCheck false positive without changing the product rule."""
+    cleaned = word.strip(".,;:!?()[]{}'\"")
+    tokens = re.findall(r"[A-Za-z][A-Za-z'\u2019-]*", sentence)
+    first = tokens[0] if tokens else ""
+    if cleaned and cleaned.lower() == first.lower() and cleaned[:1].isupper():
+        return "sentence_initial"
+    if len(cleaned) >= 2 and cleaned.isupper():
+        return "acronym"
+    if cleaned[:1].isupper():
+        return "capitalized_mid"
+    if cleaned[:1].islower():
+        return "lowercase"
+    return "other"
+
+
+COUNTERFACTUAL_POLICIES = ("capitalized_mid", "acronym_2_5", "both")
+COUNTERFACTUAL_CORPORA = {"cweb-s-dev", "cweb-g-dev", "gmeg-wiki", "gmeg-fce"}
+
+
+def _clean_word(lint: dict) -> str:
+    return (lint.get("matched_text") or "").strip(".,;:!?()[]{}'\"")
+
+
+def suppressed_by_policy(lint: dict, sentence: str, policy: str) -> bool:
+    if (lint.get("rule") or "") != "SpellCheck":
+        return False
+    word = _clean_word(lint)
+    category = spellcheck_category(word, sentence)
+    acronym = category == "acronym" and 2 <= len(word) <= 5
+    if policy == "capitalized_mid":
+        return category == "capitalized_mid"
+    if policy == "acronym_2_5":
+        return acronym
+    return category == "capitalized_mid" or acronym
+
+
 def run_corpus(name: str, examples: list[Example], annotator) -> dict:
     sources = [example.source for example in examples]
     lints = lint_texts(sources)
@@ -441,6 +479,7 @@ def run_corpus(name: str, examples: list[Example], annotator) -> dict:
 
     # False positives on the gold text: any lint on an already-correct sentence.
     gold_texts = [detokenize(example.target) for example in examples if example.target]
+    gold_lints: list[dict] = []
     if gold_texts:
         gold_lints = lint_texts(gold_texts)
         result["gold_false_positives"] = len(gold_lints)
@@ -450,8 +489,14 @@ def run_corpus(name: str, examples: list[Example], annotator) -> dict:
             1000.0 * len(gold_lints) / result["gold_words"] if result["gold_words"] else 0.0
         )
         fp_by_rule: dict[str, dict] = {}
+        spellcheck_counts: Counter[str] = Counter()
         for lint in gold_lints:
             rule = lint.get("rule") or "unknown"
+            if rule == "SpellCheck":
+                word = lint.get("matched_text") or ""
+                spellcheck_counts[
+                    spellcheck_category(word, gold_texts[lint["index"]])
+                ] += 1
             entry = fp_by_rule.setdefault(rule, {"count": 0, "examples": []})
             entry["count"] += 1
             if len(entry["examples"]) >= 3:
@@ -471,8 +516,52 @@ def run_corpus(name: str, examples: list[Example], annotator) -> dict:
         result["gold_fp_by_rule"] = dict(
             sorted(fp_by_rule.items(), key=lambda item: (-item[1]["count"], item[0]))
         )
+        result["spellcheck_fp_categories"] = {
+            "total": sum(spellcheck_counts.values()),
+            "categories": dict(spellcheck_counts),
+        }
     else:
         result["gold_false_positives"] = None
+
+    if gold_lints:
+        lower_words: Counter[str] = Counter()
+        for lint in gold_lints:
+            if (lint.get("rule") or "") != "SpellCheck":
+                continue
+            word = _clean_word(lint)
+            if word and word.islower():
+                lower_words[word] += 1
+        result["spellcheck_lowercase_top"] = [
+            {"word": word, "count": count} for word, count in lower_words.most_common(20)
+        ]
+
+    if name in COUNTERFACTUAL_CORPORA and gold_lints:
+        result["counterfactuals"] = {}
+        for policy in COUNTERFACTUAL_POLICIES:
+            counterfactual_predicted: list[Edit] = []
+            for index, example in enumerate(examples):
+                filtered = [
+                    lint
+                    for lint in by_index[index]
+                    if not suppressed_by_policy(lint, example.source, policy)
+                ]
+                hypothesis_tokens, _ = apply_token_suggestions(example.source, filtered)
+                counterfactual_predicted.extend(
+                    errant_edits(annotator, tokenize(example.source), hypothesis_tokens)
+                )
+            counterfactual = score_edits(counterfactual_predicted, gold_edits)
+            gold_fp = sum(
+                1
+                for lint in gold_lints
+                if not suppressed_by_policy(
+                    lint, gold_texts[lint["index"]], policy
+                )
+            )
+            counterfactual["gold_false_positives"] = gold_fp
+            counterfactual["gold_fp_per_1000_words"] = (
+                1000.0 * gold_fp / result["gold_words"] if result["gold_words"] else 0.0
+            )
+            result["counterfactuals"][policy] = counterfactual
 
     return result
 

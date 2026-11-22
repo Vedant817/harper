@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <dialog open id="compose-dialog" aria-label="New message">
+      <div
+        id="dm-editor"
+        contenteditable="true"
+        role="combobox"
+        spellcheck="false"
+        aria-label="Write a message"
+        style="min-height: 80px; width: 360px; border: 1px solid #ccc; padding: 8px"
+      ></div>
+    </dialog>
+    <script>
+      const editor = document.getElementById('dm-editor');
+      editor.addEventListener('paste', (event) => {
+        event.preventDefault();
+        const text = event.clipboardData?.getData('text/plain') ?? '';
+        editor.textContent += text;
+        editor.dispatchEvent(
+          new InputEvent('input', {
+            bubbles: true,
+            inputType: 'insertFromPaste',
+            data: text,
+          }),
+        );
+      });
+    </script>
+  </body>
+</html>

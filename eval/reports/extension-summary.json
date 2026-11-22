@@ -1,16 +1,22 @@
 {
-  "passed": true,
+  "passed": false,
   "metrics": {
-    "cardOpenMs": 28,
-    "cardWidthPx": 266.09532928466797,
+    "cardOpenMs": 129,
+    "cardWidthPx": 279.99999237060547,
     "dialogCalls": [],
     "fullDraftTailUnderlined": true,
     "fullDraftWords": 142,
-    "gmailLoadMs": 201,
+    "gmailLoadMs": 845,
+    "gmailUnfocusedMs": 1371,
     "highlightInShadowRoot": true,
-    "linkedinPasteMs": 9,
+    "linkedinComboboxMs": 15,
+    "linkedinPasteMs": 17,
+    "linkedinUnfocusedMs": 1364,
+    "localhostUnfocusedHighlights": 0,
     "openDialogElements": 0,
     "pasteUnderlineMs": 16,
+    "repeatedPunctuationMs": 331,
+    "searchInputHighlights": 1,
     "shadowEditorUnderlined": true
   },
   "checks": [
@@ -18,60 +24,105 @@
       "check": "paste underline <= 700 ms",
       "observed": 16,
       "pass": true,
+      "status": "PASS",
+      "limit": 700
+    },
+    {
+      "check": "repeated !!! underline <= 700 ms",
+      "observed": 331,
+      "pass": true,
+      "status": "PASS",
       "limit": 700
     },
     {
       "check": "full draft tail underlined",
       "observed": true,
       "pass": true,
+      "status": "PASS",
       "limit": true
     },
     {
       "check": "highlight in shadow root",
       "observed": true,
       "pass": true,
+      "status": "PASS",
       "limit": true
     },
     {
       "check": "shadow-root editor linted",
       "observed": true,
       "pass": true,
+      "status": "PASS",
       "limit": true
     },
     {
       "check": "LinkedIn dialog paste <= 700 ms",
-      "observed": 9,
+      "observed": 17,
       "pass": true,
+      "status": "PASS",
+      "limit": 700
+    },
+    {
+      "check": "LinkedIn combobox paste <= 700 ms",
+      "observed": 15,
+      "pass": true,
+      "status": "PASS",
       "limit": 700
     },
     {
       "check": "Gmail prefilled draft <= 700 ms",
-      "observed": 201,
-      "pass": true,
+      "observed": 845,
+      "pass": false,
+      "status": "FAIL",
       "limit": 700
     },
     {
-      "check": "card width <= 280 px",
-      "observed": 266.09532928466797,
+      "check": "Gmail pre-filled without focus",
+      "observed": 1371,
+      "pass": false,
+      "status": "FAIL",
+      "limit": 700
+    },
+    {
+      "check": "LinkedIn pre-filled without focus",
+      "observed": 1364,
+      "pass": false,
+      "status": "FAIL",
+      "limit": 700
+    },
+    {
+      "check": "Gmail localhost unfocused no highlight",
+      "observed": 0,
       "pass": true,
+      "status": "PASS",
+      "limit": 0
+    },
+    {
+      "check": "card width <= 280 px",
+      "observed": 279.99999237060547,
+      "pass": true,
+      "status": "PASS",
       "limit": 280
     },
     {
       "check": "card opens <= 300 ms",
-      "observed": 28,
+      "observed": 129,
       "pass": true,
+      "status": "PASS",
       "limit": 300
     },
     {
       "check": "no dialog calls",
       "observed": [],
       "pass": true,
+      "status": "PASS",
       "limit": []
     },
     {
       "check": "no open dialog elements",
       "observed": 0,
       "pass": true,
+      "status": "PASS",
       "limit": 0
     }
   ]

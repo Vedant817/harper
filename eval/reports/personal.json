@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-21T14:02:40.760Z",
+  "generatedAt": "2026-11-22T09:41:29.235Z",
   "cases": [
     {
       "id": "comma-splice",
@@ -20,9 +20,15 @@
       "id": "direct-question",
       "text": "What time is the call",
       "preset": "casual",
-      "pass": false,
-      "observed": [],
-      "reason": "expected PersonalDirectQuestion -> \"?\""
+      "pass": true,
+      "observed": [
+        {
+          "rule": "PersonalDirectQuestion",
+          "suggestions": [
+            "?"
+          ]
+        }
+      ]
     },
     {
       "id": "greeting-comma",
@@ -162,17 +168,29 @@
       "id": "urgent-marks",
       "text": "urgent!!!",
       "preset": "core",
-      "pass": false,
-      "observed": [],
-      "reason": "expected a suggestion containing \"urgent!\""
+      "pass": true,
+      "observed": [
+        {
+          "rule": "RepeatedPunctuation",
+          "suggestions": [
+            "urgent!"
+          ]
+        }
+      ]
     },
     {
       "id": "what-marks",
       "text": "What???",
       "preset": "core",
-      "pass": false,
-      "observed": [],
-      "reason": "expected a suggestion containing \"What?\""
+      "pass": true,
+      "observed": [
+        {
+          "rule": "RepeatedPunctuation",
+          "suggestions": [
+            "What?"
+          ]
+        }
+      ]
     },
     {
       "id": "an-test",

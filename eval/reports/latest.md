@@ -1,48 +1,48 @@
 # Harper evaluation report
 
-- Generated: 2026-11-21T14:02:56Z
-- Engine commit: `e0c2101d`
+- Generated: 2026-11-22T10:08:08Z
+- Engine commit: `e7d24c8b`
 - Extension results include the local shadow-root fixes on top of that commit.
 - Scope: spelling, grammar, punctuation, and usage only.
 - This is an evaluation harness, not a claim of Grammarly Premium parity.
 
 ## Personal acceptance cases
 
-| case                 | preset | result | reason                                     |
-| -------------------- | ------ | ------ | ------------------------------------------ |
-| comma-splice         | casual | PASS   |                                            |
-| direct-question      | casual | FAIL   | expected PersonalDirectQuestion -> "?"     |
-| greeting-comma       | casual | PASS   |                                            |
-| object-case          | casual | PASS   |                                            |
-| less-fewer           | casual | PASS   |                                            |
-| due-to-fact          | casual | PASS   |                                            |
-| in-order-to          | casual | PASS   |                                            |
-| at-this-point        | casual | PASS   |                                            |
-| in-the-event         | casual | PASS   |                                            |
-| could-care-less      | casual | PASS   |                                            |
-| irregardless         | casual | PASS   |                                            |
-| urgent-marks         | core   | FAIL   | expected a suggestion containing "urgent!" |
-| what-marks           | core   | FAIL   | expected a suggestion containing "What?"   |
-| an-test              | core   | PASS   |                                            |
-| could-of             | core   | PASS   |                                            |
-| hope-well            | email  | PASS   |                                            |
-| wanted-follow-up     | email  | PASS   |                                            |
-| per-last-email       | email  | PASS   |                                            |
-| circling-back        | email  | PASS   |                                            |
-| reach-out            | email  | PASS   |                                            |
-| greeting-ok          | casual | PASS   |                                            |
-| sounds-good          | casual | PASS   |                                            |
-| wait-for-it          | casual | PASS   |                                            |
-| suspect              | casual | PASS   |                                            |
-| imagine              | casual | PASS   |                                            |
-| never-due            | casual | PASS   |                                            |
-| seems-due            | casual | PASS   |                                            |
-| care-less-comparison | casual | PASS   |                                            |
-| reach-out-mile       | email  | PASS   |                                            |
-| about-hour           | email  | PASS   |                                            |
-| stock-off            | casual | PASS   |                                            |
+| case                 | preset | result | reason |
+| -------------------- | ------ | ------ | ------ |
+| comma-splice         | casual | PASS   |        |
+| direct-question      | casual | PASS   |        |
+| greeting-comma       | casual | PASS   |        |
+| object-case          | casual | PASS   |        |
+| less-fewer           | casual | PASS   |        |
+| due-to-fact          | casual | PASS   |        |
+| in-order-to          | casual | PASS   |        |
+| at-this-point        | casual | PASS   |        |
+| in-the-event         | casual | PASS   |        |
+| could-care-less      | casual | PASS   |        |
+| irregardless         | casual | PASS   |        |
+| urgent-marks         | core   | PASS   |        |
+| what-marks           | core   | PASS   |        |
+| an-test              | core   | PASS   |        |
+| could-of             | core   | PASS   |        |
+| hope-well            | email  | PASS   |        |
+| wanted-follow-up     | email  | PASS   |        |
+| per-last-email       | email  | PASS   |        |
+| circling-back        | email  | PASS   |        |
+| reach-out            | email  | PASS   |        |
+| greeting-ok          | casual | PASS   |        |
+| sounds-good          | casual | PASS   |        |
+| wait-for-it          | casual | PASS   |        |
+| suspect              | casual | PASS   |        |
+| imagine              | casual | PASS   |        |
+| never-due            | casual | PASS   |        |
+| seems-due            | casual | PASS   |        |
+| care-less-comparison | casual | PASS   |        |
+| reach-out-mile       | email  | PASS   |        |
+| about-hour           | email  | PASS   |        |
+| stock-off            | casual | PASS   |        |
 
-**28/31 passed.** A failure here means the browser build does not meet the stated personal contract.
+**31/31 passed.** A failure here means the browser build does not meet the stated personal contract.
 
 ## Follow-up changes
 
@@ -91,6 +91,223 @@ ErAConD, FCE and CoNLL-2013 scoring, JFLEG, TETRA, LanguageTool rule tests, `jus
 - `f7a84153` test(chrome-plugin): cover LinkedIn and Gmail-like composers
 - this report commit
 
+## Round 3
+
+| item                | evidence before                                  | change                                                                                                            | result after                                                                                 | acceptance           | status            |
+| ------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | -------------------- | ----------------- |
+| 1 regression        | 12 suite failures never compared before 5b7a6ff3 | temporarily restored lintPage.ts, Highlights.ts, domUtils.ts to 5b7a6ff3^; rebuilt; ran the 12; restored; rebuilt | before 21 pass / 12 fail; after 22 pass / 11 fail; css_zoom passes only after; no pass->fail | Playwright 12 specs  | PASS              |
+| 2 LinkedIn combobox | role=textbox fixture only                        | added linkedin_combobox.html (role=combobox) + gate                                                               | 12 ms; all executable gates pass                                                             | run_extension.py     | PASS              |
+| 3 unfocused draft   | unfocused Gmail gate failed in round 2           | added fixme gate; no product change (FIX_UNFOCUSED_DRAFTS=no)                                                     | FIXME known failure; focused gate still 202 ms                                               | run_extension.py     | FIXME             |
+| 4a preset check     | round 2 claimed core without showing it          | read cases.json and personalCases.test.ts                                                                         | urgent/what are core; core loads no personal pack; direct is casual                          | python -c cases.json | PASS              |
+| 4b/4c stopped cases | ? unsupported in expressions; ! is Not           | probed a temporary Weirpack; core linters gated off                                                               | 3 cases still fail; personal 28/31                                                           | run_personal.py      | STOPPED           |
+| 5 SpellCheck split  | 1,189 / 1,250 / 838 gold FPs, no categories      | run_gec.py + report.py classify by capitalization and compute diagnosis counts                                    | breakdown below; GEC scores unchanged                                                        | report.py + gec.json | PASS              |
+| 6 LanguageTool      | not installed                                    | skipped by switch (ALLOW_LT_DOWNLOAD=no)                                                                          | not measured                                                                                 | none                 | SKIPPED-BY-SWITCH |
+
+### Twelve-spec before/after 5b7a6ff3
+
+| spec                               | before | after | first error when failing           |
+| ---------------------------------- | ------ | ----- | ---------------------------------- |
+| css_zoom: scaled/zoomed ancestor   | FAIL   | PASS  | fix improved this spec             |
+| github: Wraps correctly            | FAIL   | FAIL  | expect(received).toBe(expected)    |
+| github: Scrolls correctly          | FAIL   | FAIL  | Test timeout of 30000ms exceeded   |
+| hn: Hacker News wraps correctly    | FAIL   | FAIL  | expect(received).toBe(expected)    |
+| nested_elements: oddly nested page | FAIL   | FAIL  | expect(received).toBe(expected)    |
+| personal_polish: Polish quiet      | FAIL   | FAIL  | Test timeout of 100000ms exceeded  |
+| simple_textarea: Wraps correctly   | FAIL   | FAIL  | expect(received).toBe(expected)    |
+| typst: apply a suggestion          | FAIL   | FAIL  | expect(locator).toHaveCount failed |
+| typst: 1 blank line                | FAIL   | FAIL  | expect(locator).toHaveCount failed |
+| typst: 3 blank lines               | FAIL   | FAIL  | expect(locator).toHaveCount failed |
+| typst: 5 blank lines               | FAIL   | FAIL  | expect(locator).toHaveCount failed |
+| typst: multiline suggestions       | FAIL   | FAIL  | expect(locator).toHaveCount failed |
+
+No spec passes before and fails after. The one change is `css_zoom`, which fails before and passes after. The 11 remaining failures are environment failures under the Windows eval config and were left alone.
+
+### Known failures
+
+- `pre-filled draft is underlined without focus` is a FIXME gate because FIX_UNFOCUSED_DRAFTS=no. It is not counted as a passing gate.
+- The 11 chrome-plugin environment failures above remain.
+
+### Switches
+
+- ALLOW_LT_DOWNLOAD=no: Step 6 skipped by switch.
+- ALLOW_CORE_LINTERS=no: Step 4c skipped by switch.
+- FIX_UNFOCUSED_DRAFTS=no: Step 3 records the unfocused draft as FIXME.
+
+### Still not measured
+
+ErAConD, FCE and CoNLL-2013 scoring, JFLEG, TETRA, LanguageTool rule tests, `just dogfood`, and tone/clarity. These remain out of scope.
+
+## Round 4
+
+| item                        | evidence before                            | change                                                                                                     | result after                                              | acceptance                              | status             |
+| --------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- | --------------------------------------- | ------------------ |
+| 0 baseline                  | personal 28/31; extension 9 pass + 1 fixme | fresh runs                                                                                                 | 28/31; extension table below                              | run_personal.py; run_extension.py       | PASS               |
+| 1 Weir probe                | round 3 probed with a space before ???     | adjacent-token probes for ??? and !!!, plus known-good pack                                                | ? loads but produces no lint; ! is a parser error         | harper-cli --weirpacks                  | PASS (measurement) |
+| 2 SpellCheck counterfactual | 1,189 / 1,250 / 838 SpellCheck gold FPs    | eval/run_gec.py, run_spelling.py, report.py compute suppression scenarios                                  | counterfactual table and top-20 below; real GEC unchanged | run_gec.py; run_spelling.py; report.py  | PASS               |
+| 3a repeated punctuation     | urgent/what failed (core preset)           | Rust RepeatedPunctuation in harper-core, curated default on                                                | both pass; personal 30/31; GEC precision -0.06 max        | cargo test; run_personal.py; run_gec.py | PASS               |
+| 3b direct question          | direct-question failed (casual preset)     | STOPPED: default-OFF core rule cannot reach personalCases.test.ts, which does not apply the preset overlay | still fails; personal 30/31                               | run_personal.py                         | STOPPED            |
+| 4 unfocused draft           | Gmail without focus was fixme              | host-limited arming/discovery; routed Gmail gate; localhost negative gate                                  | unfocused 355 ms; localhost 0; all gates pass             | run_extension.py                        | PASS               |
+| 5 LanguageTool              | not installed                              | skipped by switch (ALLOW_LT_DOWNLOAD=no)                                                                   | not measured                                              | none                                    | SKIPPED-BY-SWITCH  |
+| 6 regressions               | pending                                    | cargo tests, chrome checks, tsc, 12 specs                                                                  | all pass; 12 specs 22/11/1, same as round 3               | step 6 commands                         | PASS               |
+
+### Step 1 Weir punctuation probe
+
+| probe                      | rule                                       | input      | exact output                                           | works |
+| -------------------------- | ------------------------------------------ | ---------- | ------------------------------------------------------ | ----- |
+| known-good                 | expr main (alpha beta)                     | alpha beta | lint KnownGood -> gamma                                | yes   |
+| three question marks       | expr main (What???)                        | What???    | {"lint_count":0,"lints":[]}                            | no    |
+| three bangs                | expr main (urgent!!!)                      | urgent!!!  | Reached the end of the input token stream prematurely. | no    |
+| escaped bangs              | expr main (urgent \!\!\!)                  | urgent!!!  | Reached the end of the input token stream prematurely. | no    |
+| sentence scope on question | expr main (What???) + let scope "Sentence" | What???    | Expected a valid keyword. Got:                         | no    |
+
+The known-good pack proves the loader; adding the `?` or `!` rules does not produce a usable match. Step 3a therefore used a Rust linter.
+
+### Step 2 counterfactual and spelling recall
+
+The counterfactual table and top-20 lowercase list appear in the GEC section below; the spelling suppression table appears in the spelling section. Real GEC scores are unchanged by Step 2.
+
+### Step 3 personal cases: 28/31 -> 30/31
+
+`urgent!!!` and `What???` are fixed by `RepeatedPunctuation`. `direct-question` is stopped: a default-OFF core rule cannot run in `personalCases.test.ts` because that test does not apply `overlayLintConfig`; enabling it by default would violate the step and change GEC. GEC precision moved at most 0.06 points (GMEG FCE).
+
+### Step 4 extension gates
+
+Unfocused Gmail draft: 355 ms. Localhost unfocused: 0 highlights. All executable gates pass; there is no FIXME row this round.
+
+### Known failures
+
+- `direct-question` remains failing; see 3b above.
+- The 11 chrome-plugin environment failures remain; the 12-spec run after Steps 3-4 is 22 passed / 11 failed / 1 skipped, identical to Round 3.
+
+### Switches
+
+- ALLOW_LT_DOWNLOAD=no: Step 5 skipped by switch.
+- ALLOW_CORE_LINTERS=yes: Step 3a implemented; Step 3b stopped for the harness reason.
+- FIX_UNFOCUSED_DRAFTS=yes: Step 4 implemented and verified.
+
+### Still not measured
+
+ErAConD, FCE and CoNLL-2013 scoring, JFLEG, TETRA, LanguageTool rule tests, `just dogfood`, and tone/clarity.
+
+## Round 5
+
+| item                 | evidence before                                 | change                                                             | result after                                          | acceptance                            | status                        |
+| -------------------- | ----------------------------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------- | ------------------------------------- | ----------------------------- |
+| 1 ship repeated rule | extension built before the Rust rule existed    | rebuilt full+slim WASM, harper.js, chrome; added !!! gate          | !!! underline 314 ms; Gmail gates 845-893 ms (FAIL)   | run_extension.py                      | PASS (rule) / Gmail FAIL      |
+| 2 edge cases         | 123-line rule, only 7 tests                     | added 6 tests; fixed the whitespace span                           | 13/13 rule tests pass; code 78 lines, tests 88        | cargo test --lib repeated_punctuation | PASS                          |
+| 3a overlay mechanism | round 4 did not show runtime config application | read background/index.ts:872 and personalPreset.ts                 | overlayLintConfig is applied at runtime               | rg/read                               | PASS                          |
+| 3c direct question   | 30/31; default-OFF rule unreachable in harness  | PersonalDirectQuestion default OFF, casual overlay, harness wiring | 31/31 personal; GEC unchanged                         | run_personal.py; run_gec.py           | PASS                          |
+| 4 LinkedIn/search    | only Gmail unfocused tested                     | LinkedIn routed gate + Gmail search-input measurement              | LinkedIn 846 ms (FAIL); search input 1 highlight      | run_extension.py                      | FAIL (latency)                |
+| 5 SpellCheck names   | switch off                                      | skipped by switch                                                  | not measured                                          | none                                  | SKIPPED-BY-SWITCH             |
+| 6 LanguageTool       | switch off                                      | skipped by switch                                                  | not measured                                          | none                                  | SKIPPED-BY-SWITCH             |
+| 7 regressions        | pending                                         | cargo, chrome, tsc, 12 specs                                       | all checks pass; 23/11/0 specs with css_zoom new fail | step 7 commands                       | PASS (with known spec change) |
+
+### Build order
+
+- Full WASM: `harper-wasm/pkg/harper_wasm_bg.wasm` at `2026-11-21T23:41:48+05:30`.
+- Slim WASM: `harper-wasm/pkg/harper_wasm_slim_bg.wasm` at `2026-11-21T23:46:11+05:30`.
+- harper.js dist: `2026-11-21T23:47:16+05:30`.
+- Chrome plugin slim copy: `2026-11-21T23:47:38+05:30`.
+
+### Line counts
+
+`repeated_punctuation.rs`: 78 code lines, 88 test lines, 165 total.
+
+### Personal and GEC
+
+Personal is **31/31**. `PersonalDirectQuestion` is default OFF in the curated config, enabled only for `casual` through `overlayLintConfig`; the harness applies the same config. GEC is unchanged from the 30/31 baseline: FCE 36.09/7.38/20.30 and BEA 27.77/8.87/19.47.
+
+### Twelve-spec comparison
+
+Round 4 after: 22 passed / 11 failed / 1 skipped. Round 5 after: **23 passed / 11 failed / 0 skipped**. `personal_polish` now passes; `css_zoom` newly fails. The other 10 failures are the same.
+
+### Known failures
+
+- Gmail focused (893 ms), Gmail unfocused (845 ms), LinkedIn unfocused (846 ms) are over the 700 ms gate after the rebuild.
+- `css_zoom` newly fails in the 12-spec set; `personal_polish` now passes.
+- `How to install` is a known heading false positive for `PersonalDirectQuestion`.
+- The Gmail search input gets **1** highlight; measurement only, not fixed.
+
+### Still not measured
+
+ErAConD, FCE and CoNLL-2013 scoring, JFLEG, TETRA, LanguageTool rule tests, `just dogfood`, and tone/clarity.
+
+## Round 6
+
+### Step 1a: baseline on the fresh personal build
+
+| metric              | run 1 | run 2 | run 3 |
+| ------------------- | ----- | ----- | ----- |
+| gmailLoadMs         | 846   | 828   | 861   |
+| gmailUnfocusedMs    | 1359  | 854   | 869   |
+| linkedinUnfocusedMs | 1364  | 864   | 862   |
+
+Round 4 recorded `gmailLoadMs` 330 and `gmailUnfocusedMs` 355.
+
+### Step 1b: two navigations in one context
+
+| run   | first navigation | second navigation |
+| ----- | ---------------- | ----------------- |
+| run 1 | 845              | 838               |
+| run 2 | 871              | 850               |
+| run 3 | 851              | 825               |
+
+Warm navigation is still 825-850 ms.
+
+### Step 1c: both new rule registrations commented out
+
+| metric              | run 1 | run 2 | run 3 |
+| ------------------- | ----- | ----- | ----- |
+| gmailLoadMs         | 864   | 854   | 825   |
+| gmailUnfocusedMs    | 846   | 855   | 843   |
+| linkedinUnfocusedMs | 1378  | 860   | 847   |
+
+Without the rules the load gates are still ~850 ms. The registration file was restored (`git diff --stat` empty) and the full four-step rebuild was rerun.
+
+### Step 1d: artifacts
+
+- Largest built JS chunk: `build/assets/chunk-CWFsjbiE.js`, **44,422,944 bytes**.
+- Built JS references `harper_wasm_slim_bg.wasm` in `chunk-BI3EVHd8.js`; the large chunk references both full and slim URLs.
+- `build/wasm/harper_wasm_bg.wasm` 16,605,637 bytes; `build/wasm/harper_wasm_slim_bg.wasm` 16,372,832 bytes.
+
+### Conclusion: (C) something else
+
+The two rules are not the cause: with both registrations commented out the same three gates stay at 825-1378 ms. Simple cold start is not the cause either: the second navigation in the same context stays at 825-850 ms. The measured artifact is a 44.4 MB JS chunk in the extension bundle. Step 2 is STOPPED: cause is C, not the rules.
+
+### Step 3: css_zoom
+
+Personal build: 3/3 runs fail. Public build: line-46 test fails in both public runs. Assertion: `expect(locator).toHaveCount(expected) failed`, Expected 2, Received 1. It fails on both builds, not personal-only. The other css_zoom test (line 5) passes.
+
+The Round 4 skipped test was `personal_polish.spec.ts` > `An empty model address does not phone home`; in Round 6 that spec is no longer skipped and `personal_polish` passes.
+
+### Step 4: loose ends
+
+All five required strings are present in `personal_direct_question.rs`: `Sounds good.`, `Wait for it...`, `What I mean is this.`, `I wonder what time it is.`, `Is this ok?`. `How to install` is also present and flags as a known false positive. Code lines 76, test lines 46, total 121.
+
+Final build timestamps: full `2026-11-22T14:53:27+05:30`, slim `2026-11-22T14:56:16+05:30`, harper.js `2026-11-22T14:57:15+05:30`, chrome `2026-11-22T15:02:12+05:30`. Last Rust commit: `2026-11-22T09:41:16+05:30`.
+
+### Step 5: regressions
+
+- `cargo test -p harper-core`: exit 0.
+- `cargo test --test linters test_most_lints`: 1 passed.
+- Personal: **31/31**.
+- GEC unchanged from Round 5: CWEB-S 5.93 / 8.80 / 6.35.
+- `pnpm check`: 0 errors; `tsc`: exit 0.
+- Extension: 11 passed / 3 failed (Gmail and LinkedIn load gates).
+- 12 specs: 23 passed / 11 failed / 0 skipped; failures are css_zoom, github x2, hn, nested_elements, simple_textarea wrap, typst x5.
+
+### Known failures
+
+- Gmail focused, Gmail unfocused, and LinkedIn unfocused exceed 700 ms.
+- `css_zoom` line 46 fails on both personal and public builds.
+- The 10 long-standing specs remain (github x2, hn, nested_elements, simple_textarea wrap, typst x5).
+- Gmail search input gets 1 highlight (Round 5 measurement; not fixed).
+- `How to install` is a heading-like false positive.
+
+### Still not measured
+
+SpellCheck name suppression (`ALLOW_SPELLCHECK_NAME_SUPPRESSION=no`), LanguageTool (`ALLOW_LT_DOWNLOAD=no`), ErAConD, FCE and CoNLL-2013 scoring, JFLEG, TETRA, `just dogfood`, and tone/clarity.
+
 ## Public GEC corpora (ERRANT, token-level)
 
 | corpus     | n    | P      | R      | F0.5   | gold FP/1k | LanguageTool |
@@ -98,9 +315,9 @@ ErAConD, FCE and CoNLL-2013 scoring, JFLEG, TETRA, LanguageTool rule tests, `jus
 | cweb-s-dev | 2862 | 5.93%  | 8.80%  | 6.35%  | 28.66      | n/a          |
 | cweb-g-dev | 3867 | 10.04% | 10.71% | 10.17% | 26.29      | n/a          |
 | gmeg-wiki  | 992  | 18.76% | 11.77% | 16.77% | 42.49      | n/a          |
-| gmeg-fce   | 968  | 36.15% | 7.38%  | 20.32% | 12.16      | n/a          |
+| gmeg-fce   | 968  | 36.09% | 7.38%  | 20.30% | 12.23      | n/a          |
 | conll2014  | 1312 | 56.65% | 7.20%  | 23.87% | 18.75      | n/a          |
-| bea19      | 4384 | 27.77% | 8.87%  | 19.47% | 29.63      | n/a          |
+| bea19      | 4384 | 27.77% | 8.87%  | 19.47% | 29.67      | n/a          |
 
 LanguageTool: not measured — No local LanguageTool command found. The 252 MB LanguageTool-stable.zip was not downloaded.
 
@@ -315,7 +532,105 @@ No false-positive fix was implemented in this round. The top rules need either a
 - `DisjointPrefixes` (17 / 27 / 19): prefers closed forms such as reimagining, antiwar, and nonprofit. Policy disagreement; proposed dictionary review.
 - `MassNouns` (16 / 21): over-applies mass-noun corrections such as `One might` to `One piece of might`; rule-specific and needs its own test corpus.
 - `OrthographicConsistency` (13): flags `Ph` in `Ph.D.` as `pH`; a narrow capitalization fix is possible but was not attempted because it needs rule-level tests and a decision on degree abbreviations.
-- `CompoundNouns` (32) and `SentenceCapitalization` (24): closed-compound and sentence-start policy disagreements; no narrow fix.
+- `CompoundNouns` (12) and `SentenceCapitalization` (13): closed-compound and sentence-start policy disagreements; no narrow fix.
+
+### SpellCheck false-positive breakdown
+
+| corpus     | SpellCheck FPs | sentence-initial | ALL-CAPS acronym | capitalized mid | lowercase   | other    |
+| ---------- | -------------- | ---------------- | ---------------- | --------------- | ----------- | -------- |
+| cweb-s-dev | 1189           | 100 (8.4%)       | 309 (26.0%)      | 534 (44.9%)     | 246 (20.7%) | 0 (0.0%) |
+| cweb-g-dev | 1250           | 102 (8.2%)       | 195 (15.6%)      | 715 (57.2%)     | 238 (19.0%) | 0 (0.0%) |
+| gmeg-wiki  | 838            | 67 (8.0%)        | 74 (8.8%)        | 584 (69.7%)     | 113 (13.5%) | 0 (0.0%) |
+
+The breakdown is measurement only; no SpellCheck or dictionary change was made.
+
+### SpellCheck suppression counterfactual
+
+| corpus     | metric     | actual | suppress cap mid | suppress ALL-CAPS 2-5 | suppress both |
+| ---------- | ---------- | ------ | ---------------- | --------------------- | ------------- |
+| cweb-s-dev | P          | 5.93%  | 8.94%            | 7.31%                 | 12.15%        |
+| cweb-s-dev | R          | 8.80%  | 8.71%            | 8.80%                 | 8.43%         |
+| cweb-s-dev | F0.5       | 6.35%  | 8.89%            | 7.57%                 | 11.17%        |
+| cweb-s-dev | gold FP/1k | 28.66  | 19.89            | 23.80                 | 15.04         |
+| cweb-g-dev | P          | 10.04% | 16.07%           | 11.25%                | 19.53%        |
+| cweb-g-dev | R          | 10.71% | 10.41%           | 10.71%                | 10.41%        |
+| cweb-g-dev | F0.5       | 10.17% | 14.50%           | 11.14%                | 16.62%        |
+| cweb-g-dev | gold FP/1k | 26.29  | 16.07            | 23.66                 | 13.44         |
+| gmeg-wiki  | P          | 18.76% | 29.40%           | 19.78%                | 32.24%        |
+| gmeg-wiki  | R          | 11.77% | 10.85%           | 11.77%                | 10.85%        |
+| gmeg-wiki  | F0.5       | 16.77% | 21.91%           | 17.41%                | 23.13%        |
+| gmeg-wiki  | gold FP/1k | 42.49  | 17.78            | 39.49                 | 14.77         |
+| gmeg-fce   | P          | 36.09% | 37.43%           | 36.55%                | 37.93%        |
+| gmeg-fce   | R          | 7.38%  | 7.27%            | 7.38%                 | 7.27%         |
+| gmeg-fce   | F0.5       | 20.30% | 20.46%           | 20.41%                | 20.58%        |
+| gmeg-fce   | gold FP/1k | 12.23  | 10.58            | 11.90                 | 10.25         |
+
+Counterfactual only: SpellCheck lints in the named category are dropped before suggestion application and gold false-positive counting. Product code is unchanged.
+
+### Top lowercase SpellCheck false positives
+
+| corpus     | word            | count |
+| ---------- | --------------- | ----- |
+| cweb-s-dev | `s`             | 6     |
+| cweb-s-dev | `analyses`      | 6     |
+| cweb-s-dev | `podia`         | 6     |
+| cweb-s-dev | `ampulla`       | 5     |
+| cweb-s-dev | `clinicals`     | 4     |
+| cweb-s-dev | `ins`           | 4     |
+| cweb-s-dev | `ro`            | 4     |
+| cweb-s-dev | `nucleosomal`   | 3     |
+| cweb-s-dev | `saturations`   | 3     |
+| cweb-s-dev | `madreporite`   | 3     |
+| cweb-s-dev | `r`             | 3     |
+| cweb-s-dev | `cysteine`      | 3     |
+| cweb-s-dev | `visuomotor`    | 3     |
+| cweb-s-dev | `executory`     | 3     |
+| cweb-s-dev | `telepathology` | 3     |
+| cweb-s-dev | `ptot`          | 3     |
+| cweb-s-dev | `behavioural`   | 2     |
+| cweb-s-dev | `behaviour`     | 2     |
+| cweb-s-dev | `lis`           | 2     |
+| cweb-s-dev | `pendens`       | 2     |
+| cweb-g-dev | `s`             | 10    |
+| cweb-g-dev | `vc`            | 6     |
+| cweb-g-dev | `inulin`        | 4     |
+| cweb-g-dev | `scenics`       | 3     |
+| cweb-g-dev | `décor`         | 3     |
+| cweb-g-dev | `thingabobber`  | 3     |
+| cweb-g-dev | `permaculture`  | 3     |
+| cweb-g-dev | `ji`            | 3     |
+| cweb-g-dev | `yerjanik`      | 3     |
+| cweb-g-dev | `robux`         | 3     |
+| cweb-g-dev | `fi`            | 2     |
+| cweb-g-dev | `proteinuria`   | 2     |
+| cweb-g-dev | `mohawk`        | 2     |
+| cweb-g-dev | `prioritise`    | 2     |
+| cweb-g-dev | `bonkbuster`    | 2     |
+| cweb-g-dev | `gunpla`        | 2     |
+| cweb-g-dev | `whatchadoer`   | 2     |
+| cweb-g-dev | `colour`        | 2     |
+| cweb-g-dev | `behaviour`     | 2     |
+| cweb-g-dev | `tai`           | 2     |
+| gmeg-wiki  | `s`             | 14    |
+| gmeg-wiki  | `cancelled`     | 3     |
+| gmeg-wiki  | `shel`          | 2     |
+| gmeg-wiki  | `bivy`          | 1     |
+| gmeg-wiki  | `noctule`       | 1     |
+| gmeg-wiki  | `exapted`       | 1     |
+| gmeg-wiki  | `passerines`    | 1     |
+| gmeg-wiki  | `hortative`     | 1     |
+| gmeg-wiki  | `ie`            | 1     |
+| gmeg-wiki  | `varna`         | 1     |
+| gmeg-wiki  | `u`             | 1     |
+| gmeg-wiki  | `polytope`      | 1     |
+| gmeg-wiki  | `uncreated`     | 1     |
+| gmeg-wiki  | `oligopolistic` | 1     |
+| gmeg-wiki  | `vernix`        | 1     |
+| gmeg-wiki  | `samadhi`       | 1     |
+| gmeg-wiki  | `b.g`           | 1     |
+| gmeg-wiki  | `nm`            | 1     |
+| gmeg-wiki  | `transduce`     | 1     |
+| gmeg-wiki  | `krautrock`     | 1     |
 
 ## Spelling and developer writing
 
@@ -365,22 +680,38 @@ Clean prose false positives: 23 spelling lints in 2345 words (9.81 per 1k).
 
 Sources: codespell (64966 pairs), wikipedia (4276 pairs), typos-cli (95923 pairs).
 
+### Spelling recall under SpellCheck suppression
+
+| set                | metric    | actual | suppress cap mid | suppress ALL-CAPS 2-5 | suppress both |
+| ------------------ | --------- | ------ | ---------------- | --------------------- | ------------- |
+| word-level         | detection | 96.00% | 95.67%           | 96.00%                | 95.67%        |
+| developer prose    | detection | 85.00% | 85.00%           | 85.00%                | 85.00%        |
+| Birkbeck missp     | detection | 84.50% | 84.50%           | 84.50%                | 84.50%        |
+| Birkbeck holbrook  | detection | 58.00% | 52.00%           | 58.00%                | 52.00%        |
+| Birkbeck aspell    | detection | 91.50% | 91.50%           | 91.50%                | 91.50%        |
+| Birkbeck wikipedia | detection | 93.50% | 92.00%           | 93.50%                | 92.00%        |
+
 ## Extension acceptance (Playwright, headed Chromium)
 
-| gate                            | observed           | limit | result |
-| ------------------------------- | ------------------ | ----- | ------ |
-| paste underline <= 700 ms       | 16                 | 700   | PASS   |
-| full draft tail underlined      | True               | True  | PASS   |
-| highlight in shadow root        | True               | True  | PASS   |
-| shadow-root editor linted       | True               | True  | PASS   |
-| LinkedIn dialog paste <= 700 ms | 9                  | 700   | PASS   |
-| Gmail prefilled draft <= 700 ms | 201                | 700   | PASS   |
-| card width <= 280 px            | 266.09532928466797 | 280   | PASS   |
-| card opens <= 300 ms            | 28                 | 300   | PASS   |
-| no dialog calls                 | []                 | []    | PASS   |
-| no open dialog elements         | 0                  | 0     | PASS   |
+| gate                                   | observed           | limit | result |
+| -------------------------------------- | ------------------ | ----- | ------ |
+| paste underline <= 700 ms              | 16                 | 700   | PASS   |
+| repeated !!! underline <= 700 ms       | 331                | 700   | PASS   |
+| full draft tail underlined             | True               | True  | PASS   |
+| highlight in shadow root               | True               | True  | PASS   |
+| shadow-root editor linted              | True               | True  | PASS   |
+| LinkedIn dialog paste <= 700 ms        | 17                 | 700   | PASS   |
+| LinkedIn combobox paste <= 700 ms      | 15                 | 700   | PASS   |
+| Gmail prefilled draft <= 700 ms        | 845                | 700   | FAIL   |
+| Gmail pre-filled without focus         | 1371               | 700   | FAIL   |
+| LinkedIn pre-filled without focus      | 1364               | 700   | FAIL   |
+| Gmail localhost unfocused no highlight | 0                  | 0     | PASS   |
+| card width <= 280 px                   | 279.99999237060547 | 280   | PASS   |
+| card opens <= 300 ms                   | 129                | 300   | PASS   |
+| no dialog calls                        | []                 | []    | PASS   |
+| no open dialog elements                | 0                  | 0     | PASS   |
 
-**All gates passed.**
+**One or more gates failed.**
 
 ## Commands
 

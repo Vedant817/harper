@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import { buildPresetFiles } from '../../chrome-plugin/src/personalWeir';
+import { overlayLintConfig } from '../../chrome-plugin/src/personalPreset';
 import type { PersonalPresetId } from '../../chrome-plugin/src/protocol';
 import { binaryInlined } from './binaries/binaryInlined';
 import LocalLinter from './LocalLinter';
@@ -57,7 +58,9 @@ async function makeLinter(preset: PersonalCase['preset']): Promise<LocalLinter> 
 	const linter = new LocalLinter({ binary: binaryInlined });
 	await linter.setup();
 	if (preset !== 'core') {
-		const files = buildPresetFiles(preset as PersonalPresetId);
+		const presetId = preset as PersonalPresetId;
+		await linter.setLintConfig(overlayLintConfig(await linter.getLintConfig(), presetId));
+		const files = buildPresetFiles(presetId);
 		if (files == null) {
 			throw new Error(`Preset ${preset} has no pack`);
 		}
